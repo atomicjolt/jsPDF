@@ -5,10 +5,13 @@
 
   /** @license
    * jsPDF - PDF Document creation from JavaScript
-   * Version 1.5.3 Built on 2018-12-27T14:11:42.696Z
-   *                      CommitID d93d28db14
+   * Version 1.5.3 Built on 2019-03-27T21:13:24.168Z
+   *                      CommitID cf389e836e
    *
-   * Copyright (c) 2010-2016 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
+   * Copyright (c) 2010-2018 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
+   *               2015-2018 yWorks GmbH, http://www.yworks.com
+   *               2015-2018 Lukas Holländer <lukas.hollaender@yworks.com>, https://github.com/HackbrettXXX
+   *               2016-2018 Aras Abbasi <aras.abbasi@gmail.com>
    *               2010 Aaron Spike, https://github.com/acspike
    *               2012 Willow Systems Corporation, willow-systems.com
    *               2012 Pablo Hess, https://github.com/pablohess
@@ -46,339 +49,6 @@
     return _typeof(obj);
   }
 
-  /**
-   * JavaScript Polyfill functions for jsPDF
-   * Collected from public resources by
-   * https://github.com/diegocr
-   */
-  (function (global) {
-    if (_typeof(global.console) !== "object") {
-      // Console-polyfill. MIT license.
-      // https://github.com/paulmillr/console-polyfill
-      // Make it safe to do console.log() always.
-      global.console = {};
-      var con = global.console;
-      var prop, method;
-
-      var dummy = function dummy() {};
-
-      var properties = ['memory'];
-      var methods = ('assert,clear,count,debug,dir,dirxml,error,exception,group,' + 'groupCollapsed,groupEnd,info,log,markTimeline,profile,profiles,profileEnd,' + 'show,table,time,timeEnd,timeline,timelineEnd,timeStamp,trace,warn').split(',');
-
-      while (prop = properties.pop()) {
-        if (!con[prop]) con[prop] = {};
-      }
-
-      while (method = methods.pop()) {
-        if (!con[method]) con[method] = dummy;
-      }
-    }
-
-    var b64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-    if (typeof global.btoa === 'undefined') {
-      global.btoa = function (data) {
-        //  discuss at: http://phpjs.org/functions/base64_encode/
-        // original by: Tyler Akins (http://rumkin.com)
-        // improved by: Bayron Guevara
-        // improved by: Thunder.m
-        // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // improved by: Rafal Kukawski (http://kukawski.pl)
-        // bugfixed by: Pellentesque Malesuada
-        //   example 1: base64_encode('Kevin van Zonneveld');
-        //   returns 1: 'S2V2aW4gdmFuIFpvbm5ldmVsZA=='
-        var o1,
-            o2,
-            o3,
-            h1,
-            h2,
-            h3,
-            h4,
-            bits,
-            i = 0,
-            ac = 0,
-            enc = '',
-            tmp_arr = [];
-
-        if (!data) {
-          return data;
-        }
-
-        do {
-          // pack three octets into four hexets
-          o1 = data.charCodeAt(i++);
-          o2 = data.charCodeAt(i++);
-          o3 = data.charCodeAt(i++);
-          bits = o1 << 16 | o2 << 8 | o3;
-          h1 = bits >> 18 & 0x3f;
-          h2 = bits >> 12 & 0x3f;
-          h3 = bits >> 6 & 0x3f;
-          h4 = bits & 0x3f; // use hexets to index into b64, and append result to encoded string
-
-          tmp_arr[ac++] = b64.charAt(h1) + b64.charAt(h2) + b64.charAt(h3) + b64.charAt(h4);
-        } while (i < data.length);
-
-        enc = tmp_arr.join('');
-        var r = data.length % 3;
-        return (r ? enc.slice(0, r - 3) : enc) + '==='.slice(r || 3);
-      };
-    }
-
-    if (typeof global.atob === 'undefined') {
-      global.atob = function (data) {
-        //  discuss at: http://phpjs.org/functions/base64_decode/
-        // original by: Tyler Akins (http://rumkin.com)
-        // improved by: Thunder.m
-        // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        // improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        //    input by: Aman Gupta
-        //    input by: Brett Zamir (http://brett-zamir.me)
-        // bugfixed by: Onno Marsman
-        // bugfixed by: Pellentesque Malesuada
-        // bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-        //   example 1: base64_decode('S2V2aW4gdmFuIFpvbm5ldmVsZA==');
-        //   returns 1: 'Kevin van Zonneveld'
-        var o1,
-            o2,
-            o3,
-            h1,
-            h2,
-            h3,
-            h4,
-            bits,
-            i = 0,
-            ac = 0,
-            dec = '',
-            tmp_arr = [];
-
-        if (!data) {
-          return data;
-        }
-
-        data += '';
-
-        do {
-          // unpack four hexets into three octets using index points in b64
-          h1 = b64.indexOf(data.charAt(i++));
-          h2 = b64.indexOf(data.charAt(i++));
-          h3 = b64.indexOf(data.charAt(i++));
-          h4 = b64.indexOf(data.charAt(i++));
-          bits = h1 << 18 | h2 << 12 | h3 << 6 | h4;
-          o1 = bits >> 16 & 0xff;
-          o2 = bits >> 8 & 0xff;
-          o3 = bits & 0xff;
-
-          if (h3 == 64) {
-            tmp_arr[ac++] = String.fromCharCode(o1);
-          } else if (h4 == 64) {
-            tmp_arr[ac++] = String.fromCharCode(o1, o2);
-          } else {
-            tmp_arr[ac++] = String.fromCharCode(o1, o2, o3);
-          }
-        } while (i < data.length);
-
-        dec = tmp_arr.join('');
-        return dec;
-      };
-    }
-
-    if (!Array.prototype.map) {
-      Array.prototype.map = function (fun
-      /*, thisArg */
-      ) {
-        if (this === void 0 || this === null || typeof fun !== "function") throw new TypeError();
-        var t = Object(this),
-            len = t.length >>> 0,
-            res = new Array(len);
-        var thisArg = arguments.length > 1 ? arguments[1] : void 0;
-
-        for (var i = 0; i < len; i++) {
-          // NOTE: Absolute correctness would demand Object.defineProperty
-          //       be used.  But this method is fairly new, and failure is
-          //       possible only if Object.prototype or Array.prototype
-          //       has a property |i| (very unlikely), so use a less-correct
-          //       but more portable alternative.
-          if (i in t) res[i] = fun.call(thisArg, t[i], i, t);
-        }
-
-        return res;
-      };
-    }
-
-    if (!Array.isArray) {
-      Array.isArray = function (arg) {
-        return Object.prototype.toString.call(arg) === '[object Array]';
-      };
-    }
-
-    if (!Array.prototype.forEach) {
-      Array.prototype.forEach = function (fun, thisArg) {
-
-        if (this === void 0 || this === null || typeof fun !== "function") throw new TypeError();
-        var t = Object(this),
-            len = t.length >>> 0;
-
-        for (var i = 0; i < len; i++) {
-          if (i in t) fun.call(thisArg, t[i], i, t);
-        }
-      };
-    } // https://tc39.github.io/ecma262/#sec-array.prototype.find
-
-
-    if (!Array.prototype.find) {
-      Object.defineProperty(Array.prototype, 'find', {
-        value: function value(predicate) {
-          // 1. Let O be ? ToObject(this value).
-          if (this == null) {
-            throw new TypeError('"this" is null or not defined');
-          }
-
-          var o = Object(this); // 2. Let len be ? ToLength(? Get(O, "length")).
-
-          var len = o.length >>> 0; // 3. If IsCallable(predicate) is false, throw a TypeError exception.
-
-          if (typeof predicate !== 'function') {
-            throw new TypeError('predicate must be a function');
-          } // 4. If thisArg was supplied, let T be thisArg; else let T be undefined.
-
-
-          var thisArg = arguments[1]; // 5. Let k be 0.
-
-          var k = 0; // 6. Repeat, while k < len
-
-          while (k < len) {
-            // a. Let Pk be ! ToString(k).
-            // b. Let kValue be ? Get(O, Pk).
-            // c. Let testResult be ToBoolean(? Call(predicate, T, « kValue, k, O »)).
-            // d. If testResult is true, return kValue.
-            var kValue = o[k];
-
-            if (predicate.call(thisArg, kValue, k, o)) {
-              return kValue;
-            } // e. Increase k by 1.
-
-
-            k++;
-          } // 7. Return undefined.
-
-
-          return undefined;
-        },
-        configurable: true,
-        writable: true
-      });
-    }
-
-    if (!Object.keys) {
-      Object.keys = function () {
-
-        var hasOwnProperty = Object.prototype.hasOwnProperty,
-            hasDontEnumBug = !{
-          toString: null
-        }.propertyIsEnumerable('toString'),
-            dontEnums = ['toString', 'toLocaleString', 'valueOf', 'hasOwnProperty', 'isPrototypeOf', 'propertyIsEnumerable', 'constructor'],
-            dontEnumsLength = dontEnums.length;
-        return function (obj) {
-          if (_typeof(obj) !== 'object' && (typeof obj !== 'function' || obj === null)) {
-            throw new TypeError();
-          }
-
-          var result = [],
-              prop,
-              i;
-
-          for (prop in obj) {
-            if (hasOwnProperty.call(obj, prop)) {
-              result.push(prop);
-            }
-          }
-
-          if (hasDontEnumBug) {
-            for (i = 0; i < dontEnumsLength; i++) {
-              if (hasOwnProperty.call(obj, dontEnums[i])) {
-                result.push(dontEnums[i]);
-              }
-            }
-          }
-
-          return result;
-        };
-      }();
-    }
-
-    if (typeof Object.assign != 'function') {
-      Object.assign = function (target) {
-
-        if (target == null) {
-          throw new TypeError('Cannot convert undefined or null to object');
-        }
-
-        target = Object(target);
-
-        for (var index = 1; index < arguments.length; index++) {
-          var source = arguments[index];
-
-          if (source != null) {
-            for (var key in source) {
-              if (Object.prototype.hasOwnProperty.call(source, key)) {
-                target[key] = source[key];
-              }
-            }
-          }
-        }
-
-        return target;
-      };
-    }
-
-    if (!String.prototype.trim) {
-      String.prototype.trim = function () {
-        return this.replace(/^\s+|\s+$/g, '');
-      };
-    }
-
-    if (!String.prototype.trimLeft) {
-      String.prototype.trimLeft = function () {
-        return this.replace(/^\s+/g, "");
-      };
-    }
-
-    if (!String.prototype.trimRight) {
-      String.prototype.trimRight = function () {
-        return this.replace(/\s+$/g, "");
-      };
-    }
-
-    Number.isInteger = Number.isInteger || function (value) {
-      return typeof value === 'number' && isFinite(value) && Math.floor(value) === value;
-    };
-  })(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function('return typeof this === "object" && this.content')() || Function('return this')()); // `self` is undefined in Firefox for Android content script context
-  // while `this` is nsIContentFrameMessageManager
-  // with an attribute `content` that corresponds to the window
-
-  /**
-   * Creates new jsPDF document object instance.
-   * @name jsPDF
-   * @class
-   * @param orientation {string/Object} Orientation of the first page. Possible values are "portrait" or "landscape" (or shortcuts "p" (Default), "l").<br />
-   * Can also be an options object.
-   * @param unit {string}  Measurement unit to be used when coordinates are specified.<br />
-   * Possible values are "pt" (points), "mm" (Default), "cm", "in" or "px".
-   * @param format {string/Array} The format of the first page. Can be:<ul><li>a0 - a10</li><li>b0 - b10</li><li>c0 - c10</li><li>dl</li><li>letter</li><li>government-letter</li><li>legal</li><li>junior-legal</li><li>ledger</li><li>tabloid</li><li>credit-card</li></ul><br />
-   * Default is "a4". If you want to use your own format just pass instead of one of the above predefined formats the size as an number-array, e.g. [595.28, 841.89]
-   * @returns {jsPDF} jsPDF-instance
-   * @description
-   * If the first parameter (orientation) is an object, it will be interpreted as an object of named parameters
-   * ```
-   * {
-   *  orientation: 'p',
-   *  unit: 'mm',
-   *  format: 'a4',
-   *  hotfixes: [] // an array of hotfix strings to enable
-   * }
-   * ```
-   */
   var jsPDF = function (global) {
     /**
      * jsPDF's Internal PubSub Implementation.
@@ -445,10 +115,10 @@
               }
             }
 
-            if (sub[1]) tokens.push(token);
+            if (sub[1]) { tokens.push(token); }
           }
 
-          if (tokens.length) tokens.forEach(this.unsubscribe);
+          if (tokens.length) { tokens.forEach(this.unsubscribe); }
         }
       };
 
@@ -457,24 +127,52 @@
       };
     }
     /**
-     * @constructor
-     * @private
-     */
+    * Creates new jsPDF document object instance.
+    * @name jsPDF
+    * @class
+    * @param {Object} [options] - Collection of settings initializing the jsPDF-instance
+    * @param {string} [options.orientation=portrait] - Orientation of the first page. Possible values are "portrait" or "landscape" (or shortcuts "p" or "l").<br />
+    * @param {string} [options.unit=mm] Measurement unit (base unit) to be used when coordinates are specified.<br />
+    * Possible values are "pt" (points), "mm", "cm", "m", "in" or "px".
+    * @param {string/Array} [options.format=a4] The format of the first page. Can be:<ul><li>a0 - a10</li><li>b0 - b10</li><li>c0 - c10</li><li>dl</li><li>letter</li><li>government-letter</li><li>legal</li><li>junior-legal</li><li>ledger</li><li>tabloid</li><li>credit-card</li></ul><br />
+    * Default is "a4". If you want to use your own format just pass instead of one of the above predefined formats the size as an number-array, e.g. [595.28, 841.89]
+    * @param {boolean} [options.putOnlyUsedFonts=true] Only put fonts into the PDF, which were used.
+    * @param {boolean} [options.compress=false] Compress the generated PDF.
+    * @param {number} [options.precision=2] Precision of the element-positions.
+    * @param {number} [options.userUnit=1.0] Not to be confused with the base unit. Please inform yourself before you use it.
+    * @returns {jsPDF} jsPDF-instance
+    * @description
+    * ```
+    * {
+    *  orientation: 'p',
+    *  unit: 'mm',
+    *  format: 'a4',
+    *  putOnlyUsedFonts:true
+    * }
+    * ```
+    *
+    * @constructor
+    */
 
 
-    function jsPDF(orientation, unit, format, compressPdf) {
-      var options = {};
+    function jsPDF(options) {
+      var unit = arguments[1];
+      var format = arguments[2];
+      var compressPdf = arguments[3];
       var filters = [];
       var userUnit = 1.0;
+      var precision;
+      var orientation = typeof options === 'string' ? options : 'p';
+      options = options || {};
 
-      if (_typeof(orientation) === 'object') {
-        options = orientation;
+      if (_typeof(options) === 'object') {
         orientation = options.orientation;
         unit = options.unit || unit;
         format = options.format || format;
         compressPdf = options.compress || options.compressPdf || compressPdf;
         filters = options.filters || (compressPdf === true ? ['FlateEncode'] : filters);
         userUnit = typeof options.userUnit === "number" ? Math.abs(options.userUnit) : 1.0;
+        precision = options.precision;
       }
 
       unit = unit || 'mm';
@@ -549,18 +247,44 @@
         return pageFormats[value];
       };
 
-      if (typeof format === "string") {
-        format = getPageFormat(format);
-      }
+      format = format || 'a4';
 
-      format = format || getPageFormat('a4');
+      var roundToPrecision = API.roundToPrecision = API.__private__.roundToPrecision = function (number, parmPrecision) {
+        var tmpPrecision = precision || parmPrecision;
+
+        if (isNaN(number) || isNaN(tmpPrecision)) {
+          throw new Error('Invalid argument passed to jsPDF.roundToPrecision');
+        }
+
+        if (precision >= 16) {
+          return number.toFixed(precision).replace(/0+$/, "");
+        } else {
+          return number.toFixed(tmpPrecision);
+        }
+      };
+
+      var scale = API.scale = API.__private__.scale = function (number) {
+        if (isNaN(number)) {
+          throw new Error('Invalid argument passed to jsPDF.scale');
+        }
+
+        return number * k;
+      };
+
+      var hpf = API.hpf = API.__private__.hpf = function (number) {
+        if (isNaN(number)) {
+          throw new Error('Invalid argument passed to jsPDF.hpf');
+        }
+
+        return roundToPrecision(number, 16);
+      };
 
       var f2 = API.f2 = API.__private__.f2 = function (number) {
         if (isNaN(number)) {
           throw new Error('Invalid argument passed to jsPDF.f2');
         }
 
-        return number.toFixed(2); // Ie, %.2f
+        return roundToPrecision(number, 2);
       };
 
       var f3 = API.__private__.f3 = function (number) {
@@ -568,7 +292,7 @@
           throw new Error('Invalid argument passed to jsPDF.f3');
         }
 
-        return number.toFixed(3); // Ie, %.3f
+        return roundToPrecision(number, 3);
       };
 
       var fileId = '00000000000000000000000000000000';
@@ -586,7 +310,7 @@
       };
       /**
        * @name setFileId
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function
        * @instance
        * @param {string} value GUID.
@@ -600,7 +324,7 @@
       };
       /**
        * @name getFileId
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function
        * @instance
        *
@@ -669,7 +393,7 @@
       };
       /**
        * @name setCreationDate
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function
        * @instance
        * @param {Object} date
@@ -683,7 +407,7 @@
       };
       /**
        * @name getCreationDate
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function
        * @instance
        * @param {Object} type
@@ -697,6 +421,11 @@
 
       var padd2 = API.__private__.padd2 = function (number) {
         return ('0' + parseInt(number)).slice(-2);
+      };
+
+      var padd2Hex = API.__private__.padd2Hex = function (hexString) {
+        hexString = hexString.toString();
+        return ("00" + hexString).substr(hexString.length);
       };
 
       var outToPages = !1; // switches where out() prints. outToPages true = push to pages obj. outToPages false = doc builder content
@@ -764,7 +493,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setFontSize
        */
 
@@ -778,7 +507,7 @@
        * @function
        * @instance
        * @returns {number}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getFontSize
        */
 
@@ -795,7 +524,7 @@
        * @function
        * @instance
        * @returns {jsPDF} jsPDF-instance
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setR2L
        */
 
@@ -809,7 +538,7 @@
        * @function
        * @instance
        * @returns {boolean} jsPDF-instance
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getR2L
        */
 
@@ -873,7 +602,7 @@
        * Set the display mode options of the page like zoom and layout.
        *
        * @name setDisplayMode
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function 
        * @instance
        * @param {integer|String} zoom   You can pass an integer or percentage as
@@ -929,7 +658,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setDocumentProperties
        */
 
@@ -963,6 +692,17 @@
 
       var activeFontKey; // will be string representing the KEY of the font as combination of fontName + fontStyle
 
+      var fontStateStack = []; //
+
+      var patterns = {}; // collection of pattern objects
+
+      var patternMap = {}; // see fonts
+
+      var gStates = {}; // collection of graphic state objects
+
+      var gStatesMap = {}; // see fonts
+
+      var activeGState = null;
       var k; // Scale factor
 
       var page = 0;
@@ -970,6 +710,414 @@
       var additionalObjects = [];
       var events = new PubSub(API);
       var hotfixes = options.hotfixes || [];
+      var renderTargets = {};
+      var renderTargetMap = {};
+      var renderTargetStack = [];
+      var pageX;
+      var pageY;
+      var pageMatrix; // only used for FormObjects
+
+      /**
+      * A matrix object for 2D homogenous transformations: <br>
+      * | a b 0 | <br>
+      * | c d 0 | <br>
+      * | e f 1 | <br>
+      * pdf multiplies matrices righthand: v' = v x m1 x m2 x ...
+      *
+      * @class
+      * @name Matrix
+      * @param {number} a
+      * @param {number} b
+      * @param {number} c
+      * @param {number} d
+      * @param {number} e
+      * @param {number} f
+      * @constructor
+      */
+
+      var Matrix = function Matrix(sx, shy, shx, sy, tx, ty) {
+        var round = function round(number) {
+          if (precision >= 16) {
+            return number;
+          } else {
+            return Math.round(number * 100000) / 100000;
+          }
+        };
+
+        var _matrix = [];
+        /**
+        * @name sx
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'sx', {
+          get: function get() {
+            return _matrix[0];
+          },
+          set: function set(value) {
+            _matrix[0] = round(value);
+          }
+        });
+        /**
+        * @name shy
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'shy', {
+          get: function get() {
+            return _matrix[1];
+          },
+          set: function set(value) {
+            _matrix[1] = round(value);
+          }
+        });
+        /**
+        * @name shx
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'shx', {
+          get: function get() {
+            return _matrix[2];
+          },
+          set: function set(value) {
+            _matrix[2] = round(value);
+          }
+        });
+        /**
+        * @name sy
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'sy', {
+          get: function get() {
+            return _matrix[3];
+          },
+          set: function set(value) {
+            _matrix[3] = round(value);
+          }
+        });
+        /**
+        * @name tx
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'tx', {
+          get: function get() {
+            return _matrix[4];
+          },
+          set: function set(value) {
+            _matrix[4] = round(value);
+          }
+        });
+        /**
+        * @name ty
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'ty', {
+          get: function get() {
+            return _matrix[5];
+          },
+          set: function set(value) {
+            _matrix[5] = round(value);
+          }
+        });
+        Object.defineProperty(this, 'a', {
+          get: function get() {
+            return _matrix[0];
+          },
+          set: function set(value) {
+            _matrix[0] = round(value);
+          }
+        });
+        Object.defineProperty(this, 'b', {
+          get: function get() {
+            return _matrix[1];
+          },
+          set: function set(value) {
+            _matrix[1] = round(value);
+          }
+        });
+        Object.defineProperty(this, 'c', {
+          get: function get() {
+            return _matrix[2];
+          },
+          set: function set(value) {
+            _matrix[2] = round(value);
+          }
+        });
+        Object.defineProperty(this, 'd', {
+          get: function get() {
+            return _matrix[3];
+          },
+          set: function set(value) {
+            _matrix[3] = round(value);
+          }
+        });
+        Object.defineProperty(this, 'e', {
+          get: function get() {
+            return _matrix[4];
+          },
+          set: function set(value) {
+            _matrix[4] = round(value);
+          }
+        });
+        Object.defineProperty(this, 'f', {
+          get: function get() {
+            return _matrix[5];
+          },
+          set: function set(value) {
+            _matrix[5] = round(value);
+          }
+        });
+        /**
+        * @name rotation
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'rotation', {
+          get: function get() {
+            return Math.atan2(this.shx, this.sx);
+          }
+        });
+        /**
+        * @name scaleX
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'scaleX', {
+          get: function get() {
+            return this.decompose().scale.sx;
+          }
+        });
+        /**
+        * @name scaleY
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'scaleY', {
+          get: function get() {
+            return this.decompose().scale.sy;
+          }
+        });
+        /**
+        * @name isIdentity
+        * @memberof Matrix#
+        */
+
+        Object.defineProperty(this, 'isIdentity', {
+          get: function get() {
+            if (this.sx !== 1) {
+              return false;
+            }
+
+            if (this.shy !== 0) {
+              return false;
+            }
+
+            if (this.shx !== 0) {
+              return false;
+            }
+
+            if (this.sy !== 1) {
+              return false;
+            }
+
+            if (this.tx !== 0) {
+              return false;
+            }
+
+            if (this.ty !== 0) {
+              return false;
+            }
+
+            return true;
+          }
+        });
+        this.sx = !isNaN(sx) ? sx : 1;
+        this.shy = !isNaN(shy) ? shy : 0;
+        this.shx = !isNaN(shx) ? shx : 0;
+        this.sy = !isNaN(sy) ? sy : 1;
+        this.tx = !isNaN(tx) ? tx : 0;
+        this.ty = !isNaN(ty) ? ty : 0;
+        return this;
+      };
+      /**
+      * Multiply the matrix with given Matrix
+      * 
+      * @function join
+      * @param {string} separator Specifies a string to separate each pair of adjacent elements of the array. The separator is converted to a string if necessary. If omitted, the array elements are separated with a comma (","). If separator is an empty string, all elements are joined without any characters in between them.
+      * @returns {string} A string with all array elements joined.
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.join = function (parm1) {
+        return [this.sx, this.shy, this.shx, this.sy, this.tx, this.ty].join(parm1);
+      };
+      /**
+      * Multiply the matrix with given Matrix
+      * 
+      * @function multiply
+      * @param matrix
+      * @returns {Matrix}
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.multiply = function (matrix) {
+        var sx = matrix.sx * this.sx + matrix.shy * this.shx;
+        var shy = matrix.sx * this.shy + matrix.shy * this.sy;
+        var shx = matrix.shx * this.sx + matrix.sy * this.shx;
+        var sy = matrix.shx * this.shy + matrix.sy * this.sy;
+        var tx = matrix.tx * this.sx + matrix.ty * this.shx + this.tx;
+        var ty = matrix.tx * this.shy + matrix.ty * this.sy + this.ty;
+        return new Matrix(sx, shy, shx, sy, tx, ty);
+      };
+      /**
+      * @function decompose
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.decompose = function () {
+        var a = this.sx;
+        var b = this.shy;
+        var c = this.shx;
+        var d = this.sy;
+        var e = this.tx;
+        var f = this.ty;
+        var scaleX = Math.sqrt(a * a + b * b);
+        a /= scaleX;
+        b /= scaleX;
+        var shear = a * c + b * d;
+        c -= a * shear;
+        d -= b * shear;
+        var scaleY = Math.sqrt(c * c + d * d);
+        c /= scaleY;
+        d /= scaleY;
+        shear /= scaleY;
+
+        if (a * d < b * c) {
+          a = -a;
+          b = -b;
+          shear = -shear;
+          scaleX = -scaleX;
+        }
+
+        return {
+          scale: new Matrix(scaleX, 0, 0, scaleY, 0, 0),
+          translate: new Matrix(1, 0, 0, 1, e, f),
+          rotate: new Matrix(a, b, -b, a, 0, 0),
+          skew: new Matrix(1, 0, shear, 1, 0, 0)
+        };
+      };
+      /**
+      * @function toString
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.toString = function (parmPrecision) {
+        var tmpPrecision = precision || parmPrecision || 5;
+
+        var round = function round(number) {
+          if (precision >= 16) {
+            return hpf(number);
+          } else {
+            return Math.round(number * Math.pow(10, tmpPrecision)) / Math.pow(10, tmpPrecision);
+          }
+        };
+
+        return [round(this.sx), round(this.shy), round(this.shx), round(this.sy), round(this.tx), round(this.ty)].join(" ");
+      };
+      /**
+      * @function inversed
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.inversed = function () {
+        var a = this.sx,
+            b = this.shy,
+            c = this.shx,
+            d = this.sy,
+            e = this.tx,
+            f = this.ty;
+        var quot = 1 / (a * d - b * c);
+        var aInv = d * quot;
+        var bInv = -b * quot;
+        var cInv = -c * quot;
+        var dInv = a * quot;
+        var eInv = -aInv * e - cInv * f;
+        var fInv = -bInv * e - dInv * f;
+        return new Matrix(aInv, bInv, cInv, dInv, eInv, fInv);
+      };
+      /**
+      * @function applyToPoint
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.applyToPoint = function (pt) {
+        var x = pt.x * this.sx + pt.y * this.shx + this.tx;
+        var y = pt.x * this.shy + pt.y * this.sy + this.ty;
+        return new Point(x, y);
+      };
+      /**
+      * @function applyToRectangle
+      * @memberof Matrix#
+      */
+
+
+      Matrix.prototype.applyToRectangle = function (rect) {
+        var pt1 = this.applyToPoint(rect);
+        var pt2 = this.applyToPoint(new Point(rect.x + rect.w, rect.y + rect.h));
+        return new Rectangle(pt1.x, pt1.y, pt2.x - pt1.x, pt2.y - pt1.y);
+      };
+      /**
+      * Clone the Matrix
+      *
+      * @function clone
+      * @memberof Matrix#
+      * @name clone
+      * @instance
+      */
+
+
+      Matrix.prototype.clone = function () {
+        var sx = this.sx;
+        var shy = this.shy;
+        var shx = this.shx;
+        var sy = this.sy;
+        var tx = this.tx;
+        var ty = this.ty;
+        return new Matrix(sx, shy, shx, sy, tx, ty);
+      };
+
+      API.Matrix = Matrix;
+      /**
+       * Multiplies two matrices. (see {@link Matrix})
+       * @param {Matrix} m1
+       * @param {Matrix} m2
+       * @memberof jsPDF#
+       * @name matrixMult
+       */
+
+      var matrixMult = API.matrixMult = function (m1, m2) {
+        return m1.multiply(m2);
+      };
+      /**
+       * The identity matrix (equivalent to new Matrix(1, 0, 0, 1, 0, 0)).
+       * @type {Matrix}
+       * @memberof! jsPDF#
+       * @name identityMatrix
+       */
+
+
+      var identityMatrix = new Matrix(1, 0, 0, 1, 0, 0);
+      API.unitMatrix = API.identityMatrix = identityMatrix;
 
       var newObject = API.__private__.newObject = function () {
         var oid = newObjectDeferred();
@@ -1025,6 +1173,12 @@
           // convert grayscale value to rgb so that it can be converted to hex for consistency
           var floatVal = parseFloat(colorEncoded[0]);
           colorEncoded = [floatVal, floatVal, floatVal, 'r'];
+        } else if (colorEncoded.length === 5 && (colorEncoded[4] === 'k' || colorEncoded[4] === 'K')) {
+          // convert CMYK values to rbg so that it can be converted to hex for consistency
+          var red = (1.0 - colorEncoded[0]) * (1.0 - colorEncoded[3]);
+          var green = (1.0 - colorEncoded[1]) * (1.0 - colorEncoded[3]);
+          var blue = (1.0 - colorEncoded[2]) * (1.0 - colorEncoded[3]);
+          colorEncoded = [red, green, blue, 'r'];
         }
 
         var colorAsRGB = '#';
@@ -1121,12 +1275,12 @@
           } else {
             switch (options.precision) {
               case 2:
-                color = [f2(ch1 / 255), f2(ch2 / 255), f2(ch3 / 255), f2(ch4 / 255), letterArray[2]].join(" ");
+                color = [f2(ch1), f2(ch2), f2(ch3), f2(ch4), letterArray[2]].join(" ");
                 break;
 
               case 3:
               default:
-                color = [f3(ch1 / 255), f3(ch2 / 255), f3(ch3 / 255), f3(ch4 / 255), letterArray[2]].join(" ");
+                color = [f3(ch1), f3(ch2), f3(ch3), f3(ch4), letterArray[2]].join(" ");
             }
           }
         }
@@ -1305,18 +1459,24 @@
       };
 
       var putFont = function putFont(font) {
+        var pdfEscapeWithNeededParanthesis = function pdfEscapeWithNeededParanthesis(text, flags) {
+          var addParanthesis = text.indexOf(' ') !== -1;
+          return addParanthesis ? '(' + pdfEscape(text, flags) + ')' : pdfEscape(text, flags);
+        };
+
         events.publish('putFont', {
           font: font,
           out: out,
           newObject: newObject,
-          putStream: putStream
+          putStream: putStream,
+          pdfEscapeWithNeededParanthesis: pdfEscapeWithNeededParanthesis
         });
 
         if (font.isAlreadyPutted !== true) {
           font.objectNumber = newObject();
           out('<<');
           out('/Type /Font');
-          out('/BaseFont /' + font.postScriptName);
+          out('/BaseFont /' + pdfEscapeWithNeededParanthesis(font.postScriptName));
           out('/Subtype /Type1');
 
           if (typeof font.encoding === 'string') {
@@ -1340,8 +1500,217 @@
         }
       };
 
-      var putResourceDictionary = function putResourceDictionary() {
-        out('/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
+      var putXObject = function putXObject(xObject) {
+        xObject.objectNumber = newObject();
+        out("<<");
+        out("/Type /XObject");
+        out("/Subtype /Form");
+        out("/BBox [" + [hpf(xObject.x), hpf(xObject.y), hpf(xObject.x + xObject.width), hpf(xObject.y + xObject.height)].join(" ") + "]");
+        out("/Matrix [" + xObject.matrix.toString() + "]"); // TODO: /Resources
+
+        var p = xObject.pages[1].join("\n");
+        out("/Length " + p.length);
+        out(">>");
+        putStream(p);
+        out("endobj");
+      };
+
+      var putXObjects = function putXObjects() {
+        for (var xObjectKey in renderTargets) {
+          if (renderTargets.hasOwnProperty(xObjectKey)) {
+            putXObject(renderTargets[xObjectKey]);
+          }
+        }
+      };
+
+      var interpolateAndEncodeRGBStream = function interpolateAndEncodeRGBStream(colors, numberSamples) {
+        var tValues = [];
+        var t;
+        var dT = 1.0 / (numberSamples - 1);
+
+        for (t = 0.0; t < 1.0; t += dT) {
+          tValues.push(t);
+        }
+
+        tValues.push(1.0); // add first and last control point if not present
+
+        if (colors[0].offset != 0.0) {
+          var c0 = {
+            offset: 0.0,
+            color: colors[0].color
+          };
+          colors.unshift(c0);
+        }
+
+        if (colors[colors.length - 1].offset != 1.0) {
+          var c1 = {
+            offset: 1.0,
+            color: colors[colors.length - 1].color
+          };
+          colors.push(c1);
+        }
+
+        var out = "";
+        var index = 0;
+
+        for (var i = 0; i < tValues.length; i++) {
+          t = tValues[i];
+
+          while (t > colors[index + 1].offset) {
+            index++;
+          }
+
+          var a = colors[index].offset;
+          var b = colors[index + 1].offset;
+          var d = (t - a) / (b - a);
+          var aColor = colors[index].color;
+          var bColor = colors[index + 1].color;
+          out += padd2Hex(Math.round((1 - d) * aColor[0] + d * bColor[0]).toString(16)) + padd2Hex(Math.round((1 - d) * aColor[1] + d * bColor[1]).toString(16)) + padd2Hex(Math.round((1 - d) * aColor[2] + d * bColor[2]).toString(16));
+        }
+
+        return out.trim();
+      };
+
+      var putShadingPattern = function putShadingPattern(pattern, numberSamples) {
+        /*
+         Axial patterns shade between the two points specified in coords, radial patterns between the inner
+         and outer circle.
+         The user can specify an array (colors) that maps t-Values in [0, 1] to RGB colors. These are now
+         interpolated to equidistant samples and written to pdf as a sample (type 0) function.
+         */
+        out("/Shading <<"); // The number of color samples that should be used to describe the shading.
+        // The higher, the more accurate the gradient will be.
+
+        numberSamples || (numberSamples = 21);
+        var funcObjectNumber = newObject();
+        var stream = interpolateAndEncodeRGBStream(pattern.colors, numberSamples);
+        out("<< /FunctionType 0");
+        out("/Domain [0.0 1.0]");
+        out("/Size [" + numberSamples + "]");
+        out("/BitsPerSample 8");
+        out("/Range [0.0 1.0 0.0 1.0 0.0 1.0]");
+        out("/Decode [0.0 1.0 0.0 1.0 0.0 1.0]");
+        out("/Length " + stream.length); // The stream is Hex encoded
+
+        out("/Filter /ASCIIHexDecode");
+        out(">>");
+        putStream(stream);
+        out("endobj");
+        pattern.objectNumber = newObject();
+        out("<< /ShadingType " + pattern.type);
+        out("/ColorSpace /DeviceRGB");
+        var coords = "/Coords [" + hpf(parseFloat(pattern.coords[0])) + " " + // x1
+        hpf(parseFloat(pattern.coords[1])) + " "; // y1
+
+        if (pattern.type === 2) {
+          // axial
+          coords += hpf(parseFloat(pattern.coords[2])) + " " + // x2
+          hpf(parseFloat(pattern.coords[3])); // y2
+        } else {
+          // radial
+          coords += hpf(parseFloat(pattern.coords[2])) + " " + // r1
+          hpf(parseFloat(pattern.coords[3])) + " " + // x2
+          hpf(parseFloat(pattern.coords[4])) + " " + // y2
+          hpf(parseFloat(pattern.coords[5])); // r2
+        }
+
+        coords += "]";
+        out(coords);
+
+        if (pattern.matrix) {
+          out("/Matrix [" + pattern.matrix.toString() + "]");
+        }
+
+        out("/Function " + funcObjectNumber + " 0 R");
+        out("/Extend [true true]");
+        out(">>");
+        out("endobj");
+        out(">>");
+      };
+
+      var putTilingPattern = function putTilingPattern(pattern) {
+        var resourcesObjectNumber = newObject();
+        putResourceDictionary();
+        out("endobj");
+        pattern.objectNumber = newObject();
+        out("<< /Type /Pattern");
+        out("/PatternType 1"); // tiling pattern
+
+        out("/PaintType 1"); // colored tiling pattern
+
+        out("/TilingType 1"); // constant spacing
+
+        out("/BBox [" + pattern.boundingBox.map(hpf).join(" ") + "]");
+        out("/XStep " + hpf(pattern.xStep));
+        out("/YStep " + hpf(pattern.yStep));
+        out("/Length " + pattern.stream.length);
+        out("/Resources " + resourcesObjectNumber + " 0 R"); // TODO: resources
+
+        pattern.matrix && out("/Matrix [" + pattern.matrix.toString() + "]");
+        out(">>");
+        putStream(pattern.stream);
+        out("endobj");
+      };
+
+      var putPatterns = function putPatterns() {
+        var patternKey;
+
+        for (patternKey in patterns) {
+          if (patterns.hasOwnProperty(patternKey)) {
+            if (patterns[patternKey] instanceof API.ShadingPattern) {
+              putShadingPattern(patterns[patternKey]);
+            } else if (patterns[patternKey] instanceof API.TilingPattern) {
+              putTilingPattern(patterns[patternKey]);
+            }
+          }
+        }
+      };
+
+      var putGState = function putGState(gState) {
+        gState.objectNumber = newObject();
+        out("<<");
+
+        for (var p in gState) {
+          switch (p) {
+            case "opacity":
+              out("/ca " + f2(gState[p]));
+              break;
+
+            case "stroke-opacity":
+              out("/CA " + f2(gState[p]));
+              break;
+          }
+        }
+
+        out(">>");
+        out("endobj");
+      };
+
+      var putGStates = function putGStates() {
+        var gStateKey;
+
+        for (gStateKey in gStates) {
+          if (gStates.hasOwnProperty(gStateKey)) {
+            putGState(gStates[gStateKey]);
+          }
+        }
+      };
+
+      var putXobjectDict = function putXobjectDict() {
+        out("/XObject <<");
+
+        for (var xObjectKey in renderTargets) {
+          if (renderTargets.hasOwnProperty(xObjectKey) && renderTargets[xObjectKey].objectNumber >= 0) {
+            out("/" + xObjectKey + " " + renderTargets[xObjectKey].objectNumber + " 0 R");
+          }
+        } // Loop through images, or other data objects
+
+
+        events.publish("putXobjectDict");
+        out(">>");
+      };
+
+      var putFontDict = function putFontDict() {
         out('/Font <<'); // Do this for each font, the '1' bit is the index of the font
 
         for (var fontKey in fonts) {
@@ -1353,18 +1722,72 @@
         }
 
         out('>>');
-        out('/XObject <<');
-        events.publish('putXobjectDict');
+      };
+
+      var putShadingPatternDict = function putShadingPatternDict() {
+        if (Object.keys(patterns).length > 0) {
+          out("/Shading <<");
+
+          for (var patternKey in patterns) {
+            if (patterns.hasOwnProperty(patternKey) && patterns[patternKey] instanceof API.ShadingPattern && patterns[patternKey].objectNumber >= 0) {
+              out("/" + patternKey + " " + patterns[patternKey].objectNumber + " 0 R");
+            }
+          }
+
+          events.publish("putShadingPatternDict");
+          out(">>");
+        }
+      };
+
+      var putTilingPatternDict = function putTilingPatternDict() {
+        if (Object.keys(patterns).length > 0) {
+          out("/Pattern <<");
+
+          for (var patternKey in patterns) {
+            if (patterns.hasOwnProperty(patternKey) && patterns[patternKey] instanceof API.TilingPattern && patterns[patternKey].objectNumber >= 0) {
+              out("/" + patternKey + " " + patterns[patternKey].objectNumber + " 0 R");
+            }
+          }
+
+          events.publish("putTilingPatternDict");
+        }
+      };
+
+      var putGStatesDict = function putGStatesDict() {
+        if (Object.keys(gStates).length > 0) {
+          var gStateKey;
+          out("/ExtGState <<");
+
+          for (gStateKey in gStates) {
+            if (gStates.hasOwnProperty(gStateKey) && gStates[gStateKey].objectNumber >= 0) {
+              out("/" + gStateKey + " " + gStates[gStateKey].objectNumber + " 0 R");
+            }
+          }
+
+          events.publish("putGStateDict");
+          out(">>");
+        }
+      };
+
+      var putResourceDictionary = function putResourceDictionary() {
+        out('<<');
+        out('/ProcSet [/PDF /Text /ImageB /ImageC /ImageI]');
+        putFontDict();
+        putShadingPatternDict();
+        putTilingPatternDict();
+        putGStatesDict();
+        putXobjectDict();
         out('>>');
       };
 
       var putResources = function putResources() {
         putFonts();
+        putGStates();
+        putXObjects();
+        putPatterns();
         events.publish('putResources');
         newObjectDeferredBegin(resourceDictionaryObjId, true);
-        out('<<');
         putResourceDictionary();
-        out('>>');
         out('endobj');
         events.publish('postPutResources');
       };
@@ -1441,12 +1864,12 @@
             return fn.apply(this, arguments);
           } catch (e) {
             var stack = e.stack || '';
-            if (~stack.indexOf(' at ')) stack = stack.split(" at ")[1];
+            if (~stack.indexOf(' at ')) { stack = stack.split(" at ")[1]; }
             var m = "Error in function " + stack.split("\n")[0].split('<')[0] + ": " + e.message;
 
             if (global.console) {
               global.console.error(m, e);
-              if (global.alert) alert(m);
+              if (global.alert) { alert(m); }
             } else {
               throw new Error(m);
             }
@@ -1612,36 +2035,34 @@
         return to8bitStream(text, flags).replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
       };
 
-      var beginPage = API.__private__.beginPage = function (width, height) {
-        var tmp; // Dimensions are stored as user units and converted to points on output
+      var beginPage = API.__private__.beginPage = function (parmFormat, parmOrientation) {
+        var tmp, width, height;
 
-        var orientation = typeof height === 'string' && height.toLowerCase();
-
-        if (typeof width === 'string') {
-          if (tmp = getPageFormat(width.toLowerCase())) {
+        if (typeof parmFormat === 'string') {
+          if (tmp = getPageFormat(parmFormat.toLowerCase())) {
             width = tmp[0];
             height = tmp[1];
           }
         }
 
-        if (Array.isArray(width)) {
-          height = width[1];
-          width = width[0];
+        if (Array.isArray(parmFormat)) {
+          width = parmFormat[0] * k;
+          height = parmFormat[1] * k;
         }
 
-        if (isNaN(width) || isNaN(height)) {
+        if (isNaN(width)) {
           width = format[0];
           height = format[1];
         }
 
-        if (orientation) {
-          switch (orientation.substr(0, 1)) {
+        if (parmOrientation) {
+          switch (parmOrientation.substr(0, 1)) {
             case 'l':
-              if (height > width) orientation = 's';
+              if (height > width) { orientation = 's'; }
               break;
 
             case 'p':
-              if (width > height) orientation = 's';
+              if (width > height) { orientation = 's'; }
               break;
           }
 
@@ -1703,6 +2124,7 @@
       var _deletePage = function _deletePage(n) {
         if (n > 0 && n <= page) {
           pages.splice(n, 1);
+          pagesContext.splice(n, 1);
           page--;
 
           if (currentPage > page) {
@@ -1738,7 +2160,7 @@
        */
 
 
-      var _getFont = function getFont(fontName, fontStyle, options) {
+      var getFont = function getFont(fontName, fontStyle, options) {
         var key = undefined,
             fontNameLowerCase;
         options = options || {};
@@ -1791,7 +2213,7 @@
         out('/Type /Catalog');
         out('/Pages ' + tmpRootDictionaryObjId + ' 0 R'); // PDF13ref Section 7.2.1
 
-        if (!zoomMode) zoomMode = 'fullwidth';
+        if (!zoomMode) { zoomMode = 'fullwidth'; }
 
         switch (zoomMode) {
           case 'fullwidth':
@@ -1812,7 +2234,7 @@
 
           default:
             var pcn = '' + zoomMode;
-            if (pcn.substr(pcn.length - 1) === '%') zoomMode = parseInt(zoomMode) / 100;
+            if (pcn.substr(pcn.length - 1) === '%') { zoomMode = parseInt(zoomMode) / 100; }
 
             if (typeof zoomMode === 'number') {
               out('/OpenAction [3 0 R /XYZ null null ' + f2(zoomMode) + ']');
@@ -1820,7 +2242,7 @@
 
         }
 
-        if (!layoutMode) layoutMode = 'continuous';
+        if (!layoutMode) { layoutMode = 'continuous'; }
 
         switch (layoutMode) {
           case 'continuous':
@@ -1932,20 +2354,19 @@
        *
        * If `type` argument is undefined, output is raw body of resulting PDF returned as a string.
        *
-       * @param {string} type A string identifying one of the possible output types. Possible values are 'arraybuffer', 'blob', 'bloburi'/'bloburl', 'datauristring'/'dataurlstring', 'datauri'/'dataurl', 'dataurlnewwindow'.
+       * @param {string} type A string identifying one of the possible output types. Possible values are 'arraybuffer', 'blob', 'bloburi'/'bloburl', 'datauristring'/'dataurlstring', 'datauri'/'dataurl', 'dataurlnewwindow', 'pdfobjectnewwindow', 'pdfjsnewwindow'.
        * @param {Object} options An object providing some additional signalling to PDF generator. Possible options are 'filename'.
        *
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name output
        */
 
 
       var output = API.output = API.__private__.output = SAFE(function output(type, options) {
         options = options || {};
-        var pdfDocument = buildDocument();
 
         if (typeof options === "string") {
           options = {
@@ -1957,23 +2378,23 @@
 
         switch (type) {
           case undefined:
-            return pdfDocument;
+            return buildDocument();
 
           case 'save':
             API.save(options.filename);
             break;
 
           case 'arraybuffer':
-            return getArrayBuffer(pdfDocument);
+            return getArrayBuffer(buildDocument());
 
           case 'blob':
-            return getBlob(pdfDocument);
+            return getBlob(buildDocument());
 
           case 'bloburi':
           case 'bloburl':
             // Developer is responsible of calling revokeObjectURL
             if (typeof global.URL !== "undefined" && typeof global.URL.createObjectURL === "function") {
-              return global.URL && global.URL.createObjectURL(getBlob(pdfDocument)) || void 0;
+              return global.URL && global.URL.createObjectURL(getBlob(buildDocument())) || void 0;
             } else {
               console.warn('bloburl is not supported by your system, because URL.createObjectURL is not supported by your browser.');
             }
@@ -1982,23 +2403,62 @@
 
           case 'datauristring':
           case 'dataurlstring':
-            return 'data:application/pdf;filename=' + options.filename + ';base64,' + btoa(pdfDocument);
+            var dataURI = '';
+            var pdfDocument = buildDocument();
 
-          case 'dataurlnewwindow':
-            var htmlForNewWindow = '<html>' + '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' + '<body>' + '<iframe src="' + this.output('datauristring') + '"></iframe>' + '</body></html>';
+            try {
+              dataURI = btoa(pdfDocument);
+            } catch (e) {
+              dataURI = btoa(unescape(encodeURIComponent(pdfDocument)));
+            }
+
+            return 'data:application/pdf;filename=' + options.filename + ';base64,' + dataURI;
+            break;
+
+          case 'pdfobjectnewwindow':
+            var pdfObjectUrl = options.pdfObjectUrl || 'https://cdnjs.cloudflare.com/ajax/libs/pdfobject/2.1.1/pdfobject.min.js';
+            var htmlForNewWindow = '<html>' + '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' + '<body>' + '<script src="' + pdfObjectUrl + '"></script>' + '<script >PDFObject.embed("' + this.output('dataurlstring') + '", ' + JSON.stringify(options) + ');</script>' + '</body></html>';
             var nW = global.open();
 
             if (nW !== null) {
               nW.document.write(htmlForNewWindow);
             }
 
-            if (nW || typeof safari === "undefined") return nW;
+            return nW;
+            break;
+
+          case 'pdfjsnewwindow':
+            var pdfJsUrl = options.pdfJsUrl || 'examples/PDF.js/web/viewer.html';
+            var htmlForNewWindow = '<html>' + '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' + '<body><iframe id="pdfViewer" src="' + pdfJsUrl + '?file=" width="500px" height="400px" />' + '</body></html>';
+            var nW = global.open();
+
+            if (nW !== null) {
+              nW.document.write(htmlForNewWindow);
+              var scope = this;
+
+              nW.document.documentElement.querySelector('#pdfViewer').onload = function () {
+                nW.document.documentElement.querySelector('#pdfViewer').contentWindow.PDFViewerApplication.open(scope.output('bloburl'));
+              };
+            }
+
+            return nW;
+            break;
+
+          case 'dataurlnewwindow':
+            var htmlForNewWindow = '<html>' + '<style>html, body { padding: 0; margin: 0; } iframe { width: 100%; height: 100%; border: 0;}  </style>' + '<body>' + '<iframe src="' + this.output('datauristring', options) + '"></iframe>' + '</body></html>';
+            var nW = global.open();
+
+            if (nW !== null) {
+              nW.document.write(htmlForNewWindow);
+            }
+
+            if (nW || typeof safari === "undefined") { return nW; }
 
           /* pass through */
 
           case 'datauri':
           case 'dataurl':
-            return global.document.location.href = 'data:application/pdf;filename=' + options.filename + ';base64,' + btoa(pdfDocument);
+            return global.document.location.href = this.output('datauristring', options);
 
           default:
             return null;
@@ -2060,7 +2520,7 @@
       setFileId(); //---------------------------------------
       // Public API
 
-      var getPageInfo = API.__private__.getPageInfo = function (pageNumberOneBased) {
+      var getPageInfo = API.__private__.getPageInfo = API.getPageInfo = function (pageNumberOneBased) {
         if (isNaN(pageNumberOneBased) || pageNumberOneBased % 1 !== 0) {
           throw new Error('Invalid argument passed to jsPDF.getPageInfo');
         }
@@ -2088,7 +2548,7 @@
         return getPageInfo(pageNumber);
       };
 
-      var getCurrentPageInfo = API.__private__.getCurrentPageInfo = function () {
+      var getCurrentPageInfo = API.__private__.getCurrentPageInfo = API.getCurrentPageInfo = function () {
         return {
           objId: pagesContext[currentPage].objId,
           pageNumber: currentPage,
@@ -2104,7 +2564,7 @@
        * @instance
        * @returns {jsPDF}
        *
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name addPage
        */
 
@@ -2120,7 +2580,7 @@
        * @instance
        * @returns {jsPDF}
        *
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setPage
        * @param {number} page Switch the active page to the page number specified.
        * @example
@@ -2140,7 +2600,7 @@
       };
       /**
        * @name insertPage
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * 
        * @function 
        * @instance
@@ -2156,11 +2616,11 @@
       };
       /**
        * @name movePage
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function
        * @instance
-       * @param {Object} targetPage
-       * @param {Object} beforePage
+       * @param {number} targetPage
+       * @param {number} beforePage
        * @returns {jsPDF}
        */
 
@@ -2197,8 +2657,9 @@
       /**
        * Deletes a page from the PDF.
        * @name deletePage
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @function
+       * @param {number} targetPage
        * @instance
        * @returns {jsPDF}
        */
@@ -2219,8 +2680,9 @@
        * @param {number} y Coordinate (in units declared at inception of PDF document) against upper edge of the page.
        * @param {Object} [options] - Collection of settings signaling how the text must be encoded.
        * @param {string} [options.align=left] - The alignment of the text, possible values: left, center, right, justify.
-       * @param {string} [options.baseline=alphabetic] - Sets text baseline used when drawing the text, possible values: alphabetic, ideographic, bottom, top, middle.
-       * @param {string} [options.angle=0] - Rotate the text counterclockwise. Expects the angle in degree.
+       * @param {string} [options.baseline=alphabetic] - Sets text baseline used when drawing the text, possible values: alphabetic, ideographic, bottom, top, middle, hanging
+       * @param {string} [options.angle=0] - Rotate the text clockwise or counterclockwise. Expects the angle in degree.
+       * @param {string} [options.rotationDirection=1] - Direction of the rotation. 0 = clockwise, 1 = counterclockwise.
        * @param {string} [options.charSpace=0] - The space between each letter.
        * @param {string} [options.lineHeightFactor=1.15] - The lineheight of each line.
        * @param {string} [options.flags] - Flags for to8bitStream.
@@ -2228,14 +2690,20 @@
        * @param {string} [options.flags.autoencode=true] - Autoencode the Text.
        * @param {string} [options.maxWidth=0] - Split the text by given width, 0 = no split.
        * @param {string} [options.renderingMode=fill] - Set how the text should be rendered, possible values: fill, stroke, fillThenStroke, invisible, fillAndAddForClipping, strokeAndAddPathForClipping, fillThenStrokeAndAddToPathForClipping, addToPathForClipping.
+       * @param {number|Matrix} transform If transform is a number the text will be rotated by this value around the anchor set by x and y.
+       *
+       * If it is a Matrix, this matrix gets directly applied to the text, which allows shearing
+       * effects etc.; the x and y offsets are then applied AFTER the coordinate system has been established by this
+       * matrix. This means passing a rotation matrix that is equivalent to some rotation angle will in general yield a
+       * DIFFERENT result. A matrix is only allowed in "advanced" API mode.
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name text
        */
 
 
-      var text = API.__private__.text = API.text = function (text, x, y, options) {
-        /**
+      var text = API.__private__.text = API.text = function (text, x, y, options, transform) {
+        /*
          * Inserts something like this into PDF
          *   BT
          *    /F1 16 Tf  % Font name + size
@@ -2261,36 +2729,38 @@
           text = tmp;
         }
 
-        var flags = arguments[3];
-        var angle = arguments[4];
-        var align = arguments[5];
+        var transformationMatrix;
 
-        if (_typeof(flags) !== "object" || flags === null) {
-          if (typeof angle === 'string') {
-            align = angle;
-            angle = null;
+        if (arguments[3] instanceof Matrix === false) {
+          var flags = arguments[3];
+          var angle = arguments[4];
+          var align = arguments[5];
+
+          if (_typeof(flags) !== "object" || flags === null) {
+            if (typeof angle === 'string') {
+              align = angle;
+              angle = null;
+            }
+
+            if (typeof flags === 'string') {
+              align = flags;
+              flags = null;
+            }
+
+            if (typeof flags === 'number') {
+              angle = flags;
+              flags = null;
+            }
+
+            options = {
+              flags: flags,
+              angle: angle,
+              align: align
+            };
           }
-
-          if (typeof flags === 'string') {
-            align = flags;
-            flags = null;
-          }
-
-          if (typeof flags === 'number') {
-            angle = flags;
-            flags = null;
-          }
-
-          options = {
-            flags: flags,
-            angle: angle,
-            align: align
-          };
+        } else {
+          transformationMatrix = arguments[3];
         }
-
-        flags = flags || {};
-        flags.noBOM = flags.noBOM || true;
-        flags.autoencode = flags.autoencode || true;
 
         if (isNaN(x) || isNaN(y) || typeof text === "undefined" || text === null) {
           throw new Error('Invalid arguments passed to jsPDF.text');
@@ -2324,7 +2794,7 @@
             if (typeof curDa === "string") {
               da.push(curDa);
             } else {
-              if (Array.isArray(text) && curDa.length === 1) {
+              if (Array.isArray(text) && (curDa.length === 1 || curDa[1] === undefined && curDa[2] === undefined)) {
                 da.push(curDa[0]);
               } else {
                 da.push([curDa[0], curDa[1], curDa[2]]);
@@ -2354,7 +2824,7 @@
 
               if (typeof curDa === "string") {
                 da.push(processingFunction(curDa)[0]);
-              } else if (Array.isArray(curDa) && curDa[0] === "string") {
+              } else if (Array.isArray(curDa) && typeof curDa[0] === "string") {
                 tmpResult = processingFunction(curDa[0], curDa[1], curDa[2]);
                 da.push([tmpResult[0], tmpResult[1], tmpResult[2]]);
               }
@@ -2393,15 +2863,6 @@
 
         if (textIsOfTypeString === false) {
           throw new Error('Type of text must be string or Array. "' + text + '" is not recognized.');
-        } //Escaping 
-
-
-        var activeFontEncoding = fonts[activeFontKey].encoding;
-
-        if (activeFontEncoding === "WinAnsiEncoding" || activeFontEncoding === "StandardEncoding") {
-          text = processTextByFunction(text, function (text, posX, posY) {
-            return [ESC(text), posX, posY];
-          });
         } //If there are any newlines in text, we assume
         //the user wanted to print multiple lines, so break the
         //text up into an array. If the text is already an array,
@@ -2476,20 +2937,27 @@
 
         var angle = options.angle;
         var k = scope.internal.scaleFactor;
-        var transformationMatrix = [];
 
-        if (angle) {
+        if (transformationMatrix instanceof Matrix === false && angle && typeof angle === "number") {
           angle *= Math.PI / 180;
-          var c = Math.cos(angle),
-              s = Math.sin(angle);
-          transformationMatrix = [f2(c), f2(s), f2(s * -1), f2(c)];
+
+          if (options.rotationDirection === 0) {
+            angle = -angle;
+          }
+
+          var c = Math.cos(angle);
+          var s = Math.sin(angle);
+          transformationMatrix = new Matrix(f2(c), f2(s), f2(s * -1), f2(c), 0, 0);
+        } else if (angle && angle instanceof Matrix) {
+          transformationMatrix = angle;
         } //charSpace
 
 
-        var charSpace = options.charSpace;
+        var charSpace = options.charSpace || activeCharSpace;
 
         if (typeof charSpace !== 'undefined') {
           xtra += f3(charSpace * k) + " Tc\n";
+          this.setCharSpace(this.getCharSpace() || 0);
         } //lang
 
 
@@ -2646,7 +3114,7 @@
               newX = i === 0 ? getHorizontalCoordinate(x) : 0;
 
               if (i < len - 1) {
-                wordSpacingPerLine.push(((maxWidth - lineWidths[i]) / (da[i].split(" ").length - 1) * k).toFixed(2));
+                wordSpacingPerLine.push(f2((maxWidth - lineWidths[i]) / (da[i].split(" ").length - 1) * k));
               }
 
               text.push([da[i], newX, newY]);
@@ -2680,53 +3148,78 @@
         };
         events.publish('postProcessText', payload);
         text = payload.text;
-        isHex = payload.mutex.isHex;
+        isHex = payload.mutex.isHex || false; //Escaping 
+
+        var activeFontEncoding = fonts[activeFontKey].encoding;
+
+        if (activeFontEncoding === "WinAnsiEncoding" || activeFontEncoding === "StandardEncoding") {
+          text = processTextByFunction(text, function (text, posX, posY) {
+            return [ESC(text), posX, posY];
+          });
+        }
+
         var da = transformTextToSpecialArray(text);
         text = [];
-        var variant = 0;
-        var len = da.length;
+        var STRING = 0;
+        var ARRAY = 1;
+        var variant = Array.isArray(da[0]) ? ARRAY : STRING;
         var posX;
         var posY;
         var content;
         var wordSpacing = '';
 
-        for (var i = 0; i < len; i++) {
+        var generatePosition = function generatePosition(parmPosX, parmPosY, parmTransformationMatrix) {
+          var position = '';
+
+          if (parmTransformationMatrix instanceof Matrix) {
+            parmTransformationMatrix.tx = parseFloat(f2(parmPosX));
+            parmTransformationMatrix.ty = parseFloat(f2(parmPosY));
+            position = parmTransformationMatrix.join(" ") + " Tm\n";
+          } else {
+            position = f2(parmPosX) + " " + f2(parmPosY) + " Td\n";
+          }
+
+          return position;
+        };
+
+        for (var lineIndex = 0; lineIndex < da.length; lineIndex++) {
           wordSpacing = '';
 
-          if (!Array.isArray(da[i])) {
-            posX = getHorizontalCoordinate(x);
-            posY = getVerticalCoordinate(y);
-            content = (isHex ? "<" : "(") + da[i] + (isHex ? ">" : ")");
-          } else {
-            posX = parseFloat(da[i][1]);
-            posY = parseFloat(da[i][2]);
-            content = (isHex ? "<" : "(") + da[i][0] + (isHex ? ">" : ")");
-            variant = 1;
+          switch (variant) {
+            case ARRAY:
+              content = (isHex ? "<" : "(") + da[lineIndex][0] + (isHex ? ">" : ")");
+              posX = parseFloat(da[lineIndex][1]);
+              posY = parseFloat(da[lineIndex][2]);
+              break;
+
+            case STRING:
+              content = (isHex ? "<" : "(") + da[lineIndex] + (isHex ? ">" : ")");
+              posX = getHorizontalCoordinate(x);
+              posY = getVerticalCoordinate(y);
+              break;
           }
 
-          if (wordSpacingPerLine !== undefined && wordSpacingPerLine[i] !== undefined) {
-            wordSpacing = wordSpacingPerLine[i] + " Tw\n";
+          if (wordSpacingPerLine !== undefined && wordSpacingPerLine[lineIndex] !== undefined) {
+            wordSpacing = wordSpacingPerLine[lineIndex] + " Tw\n";
           }
 
-          if (transformationMatrix.length !== 0 && i === 0) {
-            text.push(wordSpacing + transformationMatrix.join(" ") + " " + posX.toFixed(2) + " " + posY.toFixed(2) + " Tm\n" + content);
-          } else if (variant === 1 || variant === 0 && i === 0) {
-            text.push(wordSpacing + posX.toFixed(2) + " " + posY.toFixed(2) + " Td\n" + content);
-          } else {
+          if (lineIndex === 0) {
+            text.push(wordSpacing + generatePosition(posX, posY, transformationMatrix) + content);
+          } else if (variant === STRING) {
             text.push(wordSpacing + content);
+          } else if (variant === ARRAY) {
+            text.push(wordSpacing + generatePosition(posX, posY) + content);
           }
         }
 
-        if (variant === 0) {
-          text = text.join(" Tj\nT* ");
-        } else {
-          text = text.join(" Tj\n");
-        }
-
+        text = variant === STRING ? text.join(" Tj\nT* ") : text.join(" Tj\n");
         text += " Tj\n";
-        var result = 'BT\n/' + activeFontKey + ' ' + activeFontSize + ' Tf\n' + // font face, style, size
-        (activeFontSize * lineHeight).toFixed(2) + ' TL\n' + // line spacing
-        textColor + '\n';
+        var result = 'BT\n/';
+        result += activeFontKey + ' ' + activeFontSize + ' Tf\n'; // font face, style, size
+
+        result += f2(activeFontSize * lineHeight) + ' TL\n'; // line spacing
+
+        result += textColor + '\n';
         result += xtra;
         result += text;
         result += "ET";
@@ -2744,7 +3237,7 @@
        * @param {number} y Coordinate (in units declared at inception of PDF document) against upper edge of the page
        * @param {number} spacing Spacing (in units declared at inception)
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name lstext
        * @deprecated We'll be removing this function. It doesn't take character width into account.
        */
@@ -2755,7 +3248,23 @@
         return this.text(text, x, y, {
           charSpace: charSpace
         });
-      };
+      }; // PDF supports these path painting and clip path operators:
+      //
+      // S - stroke
+      // s - close/stroke
+      // f (F) - fill non-zero
+      // f* - fill evenodd
+      // B - fill stroke nonzero
+      // B* - fill stroke evenodd
+      // b - close fill stroke nonzero
+      // b* - close fill stroke evenodd
+      // n - nothing (consume path)
+      // W - clip nonzero
+      // W* - clip evenodd
+      //
+      // In order to keep the API small, we omit the close-and-fill/stroke operators and provide a separate close()
+      // method.
+
       /**
        * 
        * @name clip
@@ -2763,7 +3272,7 @@
        * @instance
        * @param {string} rule 
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @description All .clip() after calling drawing ops with a style argument of null.
        */
 
@@ -2775,12 +3284,22 @@
           out('W*');
         } else {
           out('W');
-        } // End the path object without filling or stroking it.
-        // This operator is a path-painting no-op, used primarily for the side effect of changing the current clipping path
-        // (see Section 4.4.3, “Clipping Path Operators”)
+        }
+      };
+      /**
+       * Modify the current clip path by intersecting it with the current path using the even-odd rule. Note
+       * that this will NOT consume the current path. In order to only use this path for clipping call
+       * {@link API.discardPath} afterwards.
+       *
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name clipEvenOdd
+       */
 
 
-        out('n');
+      var clipEvenOdd = API.clipEvenOdd = function () {
+        clip('evenodd');
+        return this;
       };
       /**
        * This fixes the previous function clip(). Perhaps the 'stroke path' hack was due to the missing 'n' instruction?
@@ -2794,6 +3313,19 @@
         console.log("clip_fixed is deprecated");
         API.clip(rule);
       };
+      /**
+       * Consumes the current path without any effect. Mainly used in combination with {@link clip} or
+       * {@link clipEvenOdd}. The PDF "n" operator.
+       * @return {jsPDF}
+       * @memberof jsPDF#
+       * @name discardPath
+       */
+
+
+      var discardPath = API.__private__.discardPath = API.discardPath = function () {
+        out("n");
+        return this;
+      };
 
       var isValidStyle = API.__private__.isValidStyle = function (style) {
         var validStyleVariants = [undefined, null, 'S', 'F', 'DF', 'FD', 'f', 'f*', 'B', 'B*'];
@@ -2806,7 +3338,7 @@
         return result;
       };
 
-      var getStyle = API.__private__.getStyle = function (style) {
+      var getStyle = API.__private__.getStyle = API.getStyle = function (style) {
         // see path-painting operators in PDF spec
         var op = 'S'; // stroke
 
@@ -2828,6 +3360,212 @@
         return op;
       };
       /**
+       * Close the current path. The PDF "h" operator.
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name close
+       */
+
+
+      var close = API.close = function () {
+        out("h");
+        return this;
+      };
+      /**
+       * Stroke the path. The PDF "S" operator.
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name stroke
+       */
+
+
+      var stroke = API.stroke = function () {
+        out("S");
+        return this;
+      };
+      /**
+       * Fill the current path using the nonzero winding number rule. If a pattern is provided, the path will be filled
+       * with this pattern, otherwise with the current fill color. Equivalent to the PDF "f" operator.
+       * @param {PatternData=} pattern If provided the path will be filled with this pattern
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name fill
+       */
+
+
+      var fill = API.fill = function (pattern) {
+        fillWithOptionalPattern("f", pattern);
+        return this;
+      };
+      /**
+       * Fill the current path using the even-odd rule. The PDF f* operator.
+       * @see API.fill
+       * @param {PatternData=} pattern Optional pattern
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name fillEvenOdd
+       */
+
+
+      var fillEvenOdd = API.fillEvenOdd = function (pattern) {
+        fillWithOptionalPattern("f*", pattern);
+        return this;
+      };
+      /**
+       * Fill using the nonzero winding number rule and then stroke the current Path. The PDF "B" operator.
+       * @see API.fill
+       * @param {PatternData=} pattern Optional pattern
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name fillStroke
+       */
+
+
+      var fillStroke = API.fillStroke = function (pattern) {
+        fillWithOptionalPattern("B", pattern);
+        return this;
+      };
+      /**
+       * Fill using the even-odd rule and then stroke the current Path. The PDF "B" operator.
+       * @see API.fill
+       * @param {PatternData=} pattern Optional pattern
+       * @return jsPDF
+       * @memberof jsPDF#
+       * @name fillStrokeEvenOdd
+       */
+
+
+      var fillStrokeEvenOdd = API.fillStrokeEvenOdd = function (pattern) {
+        fillWithOptionalPattern("B*", pattern);
+        return this;
+      };
+
+      var fillWithOptionalPattern = function fillWithOptionalPattern(style, pattern) {
+        if (_typeof(pattern) === "object") {
+          fillWithPattern(pattern, style);
+        } else {
+          out(style);
+        }
+      };
+
+      var putStyle = function putStyle(style, patternKey, patternData) {
+        if (style === null || apiMode === ApiMode.ADVANCED && style === undefined) {
+          return;
+        }
+
+        style = getStyle(style); // stroking / filling / both the path
+
+        if (!patternKey) {
+          out(style);
+          return;
+        }
+
+        if (!patternData) {
+          patternData = {
+            matrix: identityMatrix
+          };
+        }
+
+        if (patternData instanceof Matrix) {
+          patternData = {
+            matrix: patternData
+          };
+        }
+
+        patternData.key = patternKey;
+        patternData || (patternData = identityMatrix);
+        fillWithPattern(patternData, style);
+      };
+
+      var fillWithPattern = function fillWithPattern(patternData, style) {
+        var patternId = patternMap[patternData.key];
+        var pattern = patterns[patternId];
+
+        if (pattern instanceof API.ShadingPattern) {
+          out("q");
+          out(clipRuleFromStyle(style));
+
+          if (pattern.gState) {
+            API.setGState(pattern.gState);
+          }
+
+          out(patternData.matrix.toString() + " cm");
+          out("/" + patternId + " sh");
+          out("Q");
+        } else if (pattern instanceof API.TilingPattern) {
+          // pdf draws patterns starting at the bottom left corner and they are not affected by the global transformation,
+          // so we must flip them
+          var matrix = new Matrix(1, 0, 0, -1, 0, pageHeight);
+
+          if (patternData.matrix) {
+            matrix = (patternData.matrix || identityMatrix).multiply(matrix); // we cannot apply a matrix to the pattern on use so we must abuse the pattern matrix and create new instances
+            // for each use
+
+            patternId = pattern.createClone(patternData.key, patternData.boundingBox, patternData.xStep, patternData.yStep, matrix).id;
+          }
+
+          out("q");
+          out("/Pattern cs");
+          out("/" + patternId + " scn");
+
+          if (pattern.gState) {
+            API.setGState(pattern.gState);
+          }
+
+          out(style);
+          out("Q");
+        }
+      };
+
+      var clipRuleFromStyle = function clipRuleFromStyle(style) {
+        switch (style) {
+          case "f":
+          case "F":
+            return "W n";
+
+          case "f*":
+            return "W* n";
+
+          case "B":
+            return "W S";
+
+          case "B*":
+            return "W* S";
+          // these two are for compatibility reasons (in the past, calling any primitive method with a shading pattern
+          // and "n"/"S" as style would still fill/fill and stroke the path)
+
+          case "S":
+            return "W S";
+
+          case "n":
+            return "W n";
+        }
+      };
+      /**
+       * Begin a new subpath by moving the current point to coordinates (x, y). The PDF "m" operator.
+       * @param {number} x
+       * @param {number} y
+       * @memberof jsPDF#
+       * @name moveTo
+       */
+
+
+      var moveTo = API.moveTo = function (x, y) {
+        out(hpf(scale(x)) + " " + hpf(transformScaleY(y)) + " m");
+      };
+      /**
+       * Append a straight line segment from the current point to the point (x, y). The PDF "l" operator.
+       * @param {number} x
+       * @param {number} y
+       * @memberof jsPDF#
+       * @name lineTo
+       */
+
+
+      var lineTo = API.lineTo = function (x, y) {
+        out(hpf(scale(x)) + " " + hpf(transformScaleY(y)) + " l");
+      };
+      /**
        * Draw a line on the current page.
        *
        * @name line
@@ -2837,13 +3575,16 @@
        * @param {number} y1
        * @param {number} x2
        * @param {number} y2
+       * @param {string} style A string specifying the painting style or null.  Valid styles include: 'S' [default] - stroke, 'F' - fill,  and 'DF' (or 'FD') -  fill then stroke. A null value postpones setting the style so that a shape may be composed using multiple method calls. The last drawing method call used to define the shape should not have a null style argument. default: 'S'
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        */
 
 
-      var line = API.__private__.line = API.line = function (x1, y1, x2, y2) {
-        if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2)) {
+      var line = API.__private__.line = API.line = function (x1, y1, x2, y2, style) {
+        style = style || 'S';
+
+        if (isNaN(x1) || isNaN(y1) || isNaN(x2) || isNaN(y2) || !isValidStyle(style)) {
           throw new Error('Invalid arguments passed to jsPDF.line');
         }
 
@@ -2866,7 +3607,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name lines
        */
 
@@ -2944,6 +3685,49 @@
         return this;
       };
       /**
+       * Similar to {@link API.lines} but all coordinates are interpreted as absolute coordinates instead of relative.
+       * @param {Array<Object>} lines An array of {op: operator, c: coordinates} object, where op is one of "m" (move to), "l" (line to)
+       * "c" (cubic bezier curve) and "h" (close (sub)path)). c is an array of coordinates. "m" and "l" expect two, "c"
+       * six and "h" an empty array (or undefined).
+       * @param {String=} style  The style. Deprecated!
+       * @param {String=} patternKey The pattern key for the pattern that should be used to fill the path. Deprecated!
+       * @param {(Matrix|PatternData)=} patternData The matrix that transforms the pattern into user space, or an object that
+       * will modify the pattern on use. Deprecated!
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name path
+       */
+
+
+      API.path = function (lines, style, patternKey, patternData) {
+        for (var i = 0; i < lines.length; i++) {
+          var leg = lines[i];
+          var coords = leg.c;
+
+          switch (leg.op) {
+            case "m":
+              this.moveTo(coords[0], coords[1]);
+              break;
+
+            case "l":
+              this.lineTo(coords[0], coords[1]);
+              break;
+
+            case "c":
+              this.curveTo.apply(this, coords);
+              break;
+
+            case "h":
+              this.close();
+              break;
+          }
+        }
+
+        putStyle(style, patternKey, patternData);
+        return this;
+      };
+      /**
        * Adds a rectangle to PDF.
        *
        * @param {number} x Coordinate (in units declared at inception of PDF document) against left edge of the page.
@@ -2954,7 +3738,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name rect
        */
 
@@ -2985,7 +3769,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name triangle
        */
 
@@ -3015,7 +3799,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name roundedRect
        */
 
@@ -3041,7 +3825,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name ellipse
        */
 
@@ -3074,7 +3858,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name circle
        */
 
@@ -3095,16 +3879,30 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setFont
        */
 
 
       API.setFont = function (fontName, fontStyle) {
-        activeFontKey = _getFont(fontName, fontStyle, {
+        activeFontKey = getFont(fontName, fontStyle, {
           disableWarning: false
         });
         return this;
+      };
+      /**
+       * Gets text font face, variant for upcoming text elements.
+       *
+       * @function
+       * @instance
+       * @returns {Object}
+       * @memberof jsPDF#
+       * @name getFont
+       */
+
+
+      var getFontEntry = API.__private__.getFont = API.getFont = function () {
+        return fonts[getFont.apply(API, arguments)];
       };
       /**
        * Switches font style or variant for upcoming text elements,
@@ -3115,13 +3913,14 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
+       * @deprecated
        * @name setFontStyle
        */
 
 
       API.setFontStyle = API.setFontType = function (style) {
-        activeFontKey = _getFont(undefined, style); // if font is not found, the above line blows up and we never go further
+        activeFontKey = getFont(undefined, style); // if font is not found, the above line blows up and we never go further
 
         return this;
       };
@@ -3133,7 +3932,7 @@
        * @function
        * @instance
        * @returns {Object} Like {'times':['normal', 'italic', ... ], 'arial':['normal', 'bold', ... ], ... }
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getFontList
        */
 
@@ -3168,7 +3967,7 @@
        * @property {Object} encoding Encoding_name-to-Font_metrics_object mapping.
        * @function
        * @instance
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name addFont
        */
 
@@ -3187,25 +3986,27 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setLineWidth
        */
 
       var setLineWidth = API.__private__.setLineWidth = API.setLineWidth = function (width) {
-        out((width * k).toFixed(2) + ' w');
+        out(f2(width * k) + ' w');
         return this;
       };
       /**
        * Sets the dash pattern for upcoming lines.
        * 
        * To reset the settings simply call the method without any parameters.
-       * @param {array} dashArray The pattern of the line, expects numbers. 
-       * @param {number} dashPhase The phase at which the dash pattern starts.
+       * @param {Array<number>} dashArray An array containing 0-2 numbers. The first number sets the length of the
+       * dashes, the second number the length of the gaps. If the second number is missing, the gaps are considered
+       * to be as long as the dashes. An empty array means solid, unbroken lines.
+       * @param {number} dashPhase The phase lines start with.
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
-       * @name setLineDash
+       * @memberof jsPDF#
+       * @name setLineDashPattern
        */
 
 
@@ -3218,9 +4019,9 @@
         }
 
         dashArray = dashArray.map(function (x) {
-          return (x * k).toFixed(3);
+          return f3(x * k);
         }).join(' ');
-        dashPhase = parseFloat((dashPhase * k).toFixed(3));
+        dashPhase = f3(dashPhase * k);
         out('[' + dashArray + '] ' + dashPhase + ' d');
         return this;
       };
@@ -3243,7 +4044,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setLineHeightFactor
        */
 
@@ -3263,7 +4064,7 @@
        * @function
        * @instance
        * @returns {number} lineHeightFactor
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getLineHeightFactor
        */
 
@@ -3275,19 +4076,19 @@
       setLineHeightFactor(options.lineHeight);
 
       var getHorizontalCoordinate = API.__private__.getHorizontalCoordinate = function (value) {
-        return value * k;
+        return scale(value);
       };
 
       var getVerticalCoordinate = API.__private__.getVerticalCoordinate = function (value) {
-        return pagesContext[currentPage].mediaBox.topRightY - pagesContext[currentPage].mediaBox.bottomLeftY - value * k;
+        return pagesContext[currentPage].mediaBox.topRightY - pagesContext[currentPage].mediaBox.bottomLeftY - scale(value);
       };
 
-      var getHorizontalCoordinateString = API.__private__.getHorizontalCoordinateString = function (value) {
-        return f2(value * k);
+      var getHorizontalCoordinateString = API.__private__.getHorizontalCoordinateString = API.getHorizontalCoordinateString = function (value) {
+        return f2(scale(value));
       };
 
-      var getVerticalCoordinateString = API.__private__.getVerticalCoordinateString = function (value) {
-        return f2(pagesContext[currentPage].mediaBox.topRightY - pagesContext[currentPage].mediaBox.bottomLeftY - value * k);
+      var getVerticalCoordinateString = API.__private__.getVerticalCoordinateString = API.getVerticalCoordinateString = function (value) {
+        return f2(pagesContext[currentPage].mediaBox.topRightY - pagesContext[currentPage].mediaBox.bottomLeftY - scale(value));
       };
 
       var strokeColor = options.strokeColor || '0 G';
@@ -3297,7 +4098,7 @@
        * @function
        * @instance
        * @returns {string} colorAsHex
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getDrawColor
        */
 
@@ -3332,14 +4133,14 @@
        * communicate the fractional numbers as String types, not JavaScript Number type.
        *
        * @param {Number|String} ch1 Color channel value or {string} ch1 color value in hexadecimal, example: '#FFFFFF'.
-       * @param {Number|String} ch2 Color channel value.
-       * @param {Number|String} ch3 Color channel value.
-       * @param {Number|String} ch4 Color channel value.
+       * @param {Number} ch2 Color channel value.
+       * @param {Number} ch3 Color channel value.
+       * @param {Number} ch4 Color channel value.
        *
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setDrawColor
        */
 
@@ -3365,7 +4166,7 @@
        * @function
        * @instance
        * @returns {string} colorAsHex
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getFillColor
        */
 
@@ -3400,14 +4201,14 @@
        * communicate the fractional numbers as String types, not JavaScript Number type.
        *
        * @param {Number|String} ch1 Color channel value or {string} ch1 color value in hexadecimal, example: '#FFFFFF'.
-       * @param {Number|String} ch2 Color channel value.
-       * @param {Number|String} ch3 Color channel value.
-       * @param {Number|String} ch4 Color channel value.
+       * @param {Number} ch2 Color channel value.
+       * @param {Number} ch3 Color channel value.
+       * @param {Number} ch4 Color channel value.
        *
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setFillColor
        */
 
@@ -3433,7 +4234,7 @@
        * @function
        * @instance
        * @returns {string} colorAsHex
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getTextColor
        */
 
@@ -3468,14 +4269,14 @@
        * communicate the fractional numbers as String types, not JavaScript Number type.
        *
        * @param {Number|String} ch1 Color channel value or {string} ch1 color value in hexadecimal, example: '#FFFFFF'.
-       * @param {Number|String} ch2 Color channel value.
-       * @param {Number|String} ch3 Color channel value.
-       * @param {Number|String} ch4 Color channel value.
+       * @param {Number} ch2 Color channel value.
+       * @param {Number} ch3 Color channel value.
+       * @param {Number} ch4 Color channel value.
        *
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setTextColor
        */
 
@@ -3493,19 +4294,19 @@
         return this;
       };
 
-      var activeCharSpace = options.charSpace || 0;
+      var activeCharSpace = options.charSpace;
       /**
        * Get global value of CharSpace.
        *
        * @function
        * @instance
        * @returns {number} charSpace
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name getCharSpace
        */
 
       var getCharSpace = API.__private__.getCharSpace = API.getCharSpace = function () {
-        return activeCharSpace;
+        return parseFloat(activeCharSpace || 0);
       };
       /**
        * Set global value of CharSpace.
@@ -3514,7 +4315,7 @@
        * @function
        * @instance
        * @returns {jsPDF} jsPDF-instance
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setCharSpace
        */
 
@@ -3534,7 +4335,7 @@
        * integer flag values designating the varieties of line cap
        * and join styles.
        *
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name CapJoinStyles
        */
 
@@ -3561,7 +4362,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setLineCap
        */
 
@@ -3586,7 +4387,7 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name setLineJoin
        */
 
@@ -3610,15 +4411,15 @@
        * @function
        * @instance
        * @returns {jsPDF}
-       * @memberOf jsPDF
-       * @name setMiterLimit
+       * @memberof jsPDF#
+       * @name setLineMiterLimit
        */
 
-      var setMiterLimit = API.__private__.setMiterLimit = API.setMiterLimit = function (length) {
+      var setLineMiterLimit = API.__private__.setLineMiterLimit = API.__private__.setMiterLimit = API.setLineMiterLimit = API.setMiterLimit = function (length) {
         length = length || 0;
 
         if (isNaN(length)) {
-          throw new Error('Invalid argument passed to jsPDF.setMiterLimit');
+          throw new Error('Invalid argument passed to jsPDF.setLineMiterLimit');
         }
 
         miterLimit = parseFloat(f2(length * k));
@@ -3626,10 +4427,423 @@
         return this;
       };
       /**
+      * GState
+      */
+
+      /**
+       * An object representing a pdf graphics state.
+       * @param parameters A parameter object that contains all properties this graphics state wants to set.
+       * Supported are: opacity, stroke-opacity
+       * @constructor
+       */
+
+
+      API.GState = function (parameters) {
+        var supported = "opacity,stroke-opacity".split(",");
+
+        for (var p in parameters) {
+          if (parameters.hasOwnProperty(p) && supported.indexOf(p) >= 0) {
+            this[p] = parameters[p];
+          }
+        }
+
+        this.id = ""; // set by addGState()
+
+        this.objectNumber = -1; // will be set by putGState()
+      };
+
+      API.GState.prototype.equals = function equals(other) {
+        var ignore = "id,objectNumber,equals";
+        if (!other || _typeof(other) !== _typeof(this)) { return false; }
+        var count = 0;
+
+        for (var p in this) {
+          if (ignore.indexOf(p) >= 0) { continue; }
+          if (this.hasOwnProperty(p) && !other.hasOwnProperty(p)) { return false; }
+          if (this[p] !== other[p]) { return false; }
+          count++;
+        }
+
+        for (var p in other) {
+          if (other.hasOwnProperty(p) && ignore.indexOf(p) < 0) { count--; }
+        }
+
+        return count === 0;
+      };
+      /**
+       * Sets a either previously added {@link GState} (via {@link addGState}) or a new {@link GState}.
+       * @param {String|GState} gState If type is string, a previously added GState is used, if type is GState
+       * it will be added before use.
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name setGState
+       */
+
+
+      API.setGState = function (gState) {
+        if (typeof gState === "string") {
+          gState = gStates[gStatesMap[gState]];
+        } else {
+          gState = addGState(null, gState);
+        }
+
+        if (!gState.equals(activeGState)) {
+          out("/" + gState.id + " gs");
+          activeGState = gState;
+        }
+      };
+      /**
+       * Adds a new Graphics State. Duplicates are automatically eliminated.
+       * @param {String} key Might also be null, if no later reference to this gState is needed
+       * @param {Object} gState The gState object
+       */
+
+
+      var addGState = function addGState(key, gState) {
+        // only add it if it is not already present (the keys provided by the user must be unique!)
+        if (key && gStatesMap[key]) { return; }
+        var duplicate = false;
+
+        for (var s in gStates) {
+          if (gStates.hasOwnProperty(s)) {
+            if (gStates[s].equals(gState)) {
+              duplicate = true;
+              break;
+            }
+          }
+        }
+
+        if (duplicate) {
+          gState = gStates[s];
+        } else {
+          var gStateKey = "GS" + (Object.keys(gStates).length + 1).toString(10);
+          gStates[gStateKey] = gState;
+          gState.id = gStateKey;
+        } // several user keys may point to the same GState object
+
+
+        key && (gStatesMap[key] = gState.id);
+        events.publish("addGState", gState);
+        return gState;
+      };
+      /**
+       * Adds a new {@link GState} for later use. See {@link setGState}.
+       * @param {String} key
+       * @param {GState} gState
+       * @function
+       * @instance
+       * @returns {jsPDF}
+       *
+       * @memberof jsPDF#
+       * @name addGState
+       */
+
+
+      API.addGState = function (key, gState) {
+        addGState(key, gState);
+        return this;
+      };
+      /**
+       * Saves the current graphics state ("pushes it on the stack"). It can be restored by {@link restoreGraphicsState}
+       * later. Here, the general pdf graphics state is meant, also including the current transformation matrix,
+       * fill and stroke colors etc.
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name saveGraphicsState
+       */
+
+
+      API.saveGraphicsState = function () {
+        out("q"); // as we cannot set font key and size independently we must keep track of both
+
+        fontStateStack.push({
+          key: activeFontKey,
+          size: activeFontSize,
+          color: textColor
+        });
+        return this;
+      };
+      /**
+       * Restores a previously saved graphics state saved by {@link saveGraphicsState} ("pops the stack").
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name restoreGraphicsState
+       */
+
+
+      API.restoreGraphicsState = function () {
+        out("Q"); // restore previous font state
+
+        var fontState = fontStateStack.pop();
+        activeFontKey = fontState.key;
+        activeFontSize = fontState.size;
+        textColor = fontState.color;
+        activeGState = null;
+        return this;
+      };
+      /**
+       * Appends this matrix to the left of all previously applied matrices.
+       *
+       * @param {Matrix} matrix
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name setCurrentTransformationMatrix
+       */
+
+
+      API.setCurrentTransformationMatrix = function (matrix) {
+        out(matrix.toString() + " cm");
+        return this;
+      };
+      /**
+       * Inserts a debug comment into the pdf.
+       * @param {String} text
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name comment
+       */
+
+
+      API.comment = function (text) {
+        out("#" + text);
+        return this;
+      };
+      /**
+      * Matrix
+      */
+
+
+      var Point = function Point(x, y) {
+        var _x = x || 0;
+
+        Object.defineProperty(this, 'x', {
+          enumerable: true,
+          get: function get() {
+            return _x;
+          },
+          set: function set(value) {
+            if (!isNaN(value)) {
+              _x = parseFloat(value);
+            }
+          }
+        });
+
+        var _y = y || 0;
+
+        Object.defineProperty(this, 'y', {
+          enumerable: true,
+          get: function get() {
+            return _y;
+          },
+          set: function set(value) {
+            if (!isNaN(value)) {
+              _y = parseFloat(value);
+            }
+          }
+        });
+        var _type = 'pt';
+        Object.defineProperty(this, 'type', {
+          enumerable: true,
+          get: function get() {
+            return _type;
+          },
+          set: function set(value) {
+            _type = value.toString();
+          }
+        });
+        return this;
+      };
+
+      var Rectangle = function Rectangle(x, y, w, h) {
+        Point.call(this, x, y);
+        this.type = 'rect';
+
+        var _w = w || 0;
+
+        Object.defineProperty(this, 'w', {
+          enumerable: true,
+          get: function get() {
+            return _w;
+          },
+          set: function set(value) {
+            if (!isNaN(value)) {
+              _w = parseFloat(value);
+            }
+          }
+        });
+
+        var _h = h || 0;
+
+        Object.defineProperty(this, 'h', {
+          enumerable: true,
+          get: function get() {
+            return _h;
+          },
+          set: function set(value) {
+            if (!isNaN(value)) {
+              _h = parseFloat(value);
+            }
+          }
+        });
+        return this;
+      };
+      /**
+      * FormObject/RenderTarget
+      */
+
+
+      var RenderTarget = function RenderTarget() {
+        this.page = page;
+        this.currentPage = currentPage;
+        this.pages = pages.slice(0);
+        this.pagedim = pagedim.slice(0);
+        this.pagesContext = pagesContext.slice(0);
+        this.x = pageX;
+        this.y = pageY;
+        this.matrix = pageMatrix;
+        this.width = pageWidth;
+        this.height = pageHeight;
+        this.id = ""; // set by endFormObject()
+
+        this.objectNumber = -1; // will be set by putXObject()
+      };
+
+      RenderTarget.prototype = {
+        restore: function restore() {
+          page = this.page;
+          currentPage = this.currentPage;
+          pagesContext = this.pagesContext;
+          pagedim = this.pagedim;
+          pages = this.pages;
+          pageX = this.x;
+          pageY = this.y;
+          pageMatrix = this.matrix;
+          pageWidth = this.width;
+          pageHeight = this.height;
+        }
+      };
+
+      var beginNewRenderTarget = function beginNewRenderTarget(x, y, width, height, matrix) {
+        // save current state
+        renderTargetStack.push(new RenderTarget()); // clear pages
+
+        page = currentPage = 0;
+        pages = [];
+        pageX = x;
+        pageY = y;
+        pageMatrix = matrix;
+        beginPage(width, height);
+      };
+
+      var endFormObject = function endFormObject(key) {
+        // only add it if it is not already present (the keys provided by the user must be unique!)
+        if (renderTargetMap[key]) { return; } // save the created xObject
+
+        var newXObject = new RenderTarget();
+        var xObjectId = "Xo" + (Object.keys(renderTargets).length + 1).toString(10);
+        newXObject.id = xObjectId;
+        renderTargetMap[key] = xObjectId;
+        renderTargets[xObjectId] = newXObject;
+        events.publish("addFormObject", newXObject); // restore state from stack
+
+        renderTargetStack.pop().restore();
+      };
+      /**
+       * Starts a new pdf form object, which means that all consequent draw calls target a new independent object
+       * until {@link endFormObject} is called. The created object can be referenced and drawn later using
+       * {@link doFormObject}. Nested form objects are possible.
+       * x, y, width, height set the bounding box that is used to clip the content.
+       *
+       * @param {number} x
+       * @param {number} y
+       * @param {number} width
+       * @param {number} height
+       * @param {Matrix} matrix The matrix that will be applied to convert the form objects coordinate system to
+       * the parent's.
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name beginFormObject
+       */
+
+
+      API.beginFormObject = function (x, y, width, height, matrix) {
+        // The user can set the output target to a new form object. Nested form objects are possible.
+        // Currently, they use the resource dictionary of the surrounding stream. This should be changed, as
+        // the PDF-Spec states:
+        // "In PDF 1.2 and later versions, form XObjects may be independent of the content streams in which
+        // they appear, and this is strongly recommended although not requiredIn PDF 1.2 and later versions,
+        // form XObjects may be independent of the content streams in which they appear, and this is strongly
+        // recommended although not required"
+        beginNewRenderTarget(x, y, width, height, matrix);
+        return this;
+      };
+      /**
+       * Completes and saves the form object. 
+       * @param {String} key The key by which this form object can be referenced.
+       * @function
+       * @returns {jsPDF}
+       * @memberof jsPDF#
+       * @name endFormObject
+       */
+
+
+      API.endFormObject = function (key) {
+        endFormObject(key);
+        return this;
+      };
+      /**
+      * Draws the specified form object by referencing to the respective pdf XObject created with
+      * {@link API.beginFormObject} and {@link endFormObject}.
+      * The location is determined by matrix.
+      *
+      * @param {String} key The key to the form object.
+      * @param {Matrix} matrix The matrix applied before drawing the form object.
+      * @function
+      * @returns {jsPDF}
+      * @memberof jsPDF#
+      * @name doFormObject
+      */
+
+
+      API.doFormObject = function (key, matrix) {
+        var xObject = renderTargets[renderTargetMap[key]];
+        out("q");
+        out(matrix.toString() + " cm");
+        out("/" + xObject.id + " Do");
+        out("Q");
+        return this;
+      };
+      /**
+      * Returns the form object specified by key.
+      * @param key {String}
+      * @returns {{x: number, y: number, width: number, height: number, matrix: Matrix}}
+      * @function
+      * @returns {jsPDF}
+      * @memberof jsPDF#
+      * @name getFormObject
+      */
+
+
+      API.getFormObject = function (key) {
+        var xObject = renderTargets[renderTargetMap[key]];
+        return {
+          x: xObject.x,
+          y: xObject.y,
+          width: xObject.width,
+          height: xObject.height,
+          matrix: xObject.matrix
+        };
+      };
+      /**
        * Saves as PDF document. An alias of jsPDF.output('save', 'filename.pdf').
        * Uses FileSaver.js-method saveAs.
        *
-       * @memberOf jsPDF
+       * @memberof jsPDF#
        * @name save
        * @function
        * @instance
@@ -3701,6 +4915,15 @@
           }
         }
       }
+
+      API.advancedAPI = function (body) {
+        if (typeof body !== "function") {
+          return this;
+        }
+
+        body(this);
+        return this;
+      };
       /**
        * Object exposing internal API to plugins
        * @public
@@ -3711,9 +4934,7 @@
       API.internal = {
         'pdfEscape': pdfEscape,
         'getStyle': getStyle,
-        'getFont': function getFont() {
-          return fonts[_getFont.apply(API, arguments)];
-        },
+        'getFont': getFontEntry,
         'getFontSize': getFontSize,
         'getCharSpace': getCharSpace,
         'getTextColor': getTextColor,
@@ -3763,6 +4984,9 @@
         'getPageInfoByObjId': getPageInfoByObjId,
         'getCurrentPageInfo': getCurrentPageInfo,
         'getPDFVersion': getPdfVersion,
+        'Point': Point,
+        'Rectangle': Rectangle,
+        'Matrix': Matrix,
         'hasHotfix': hasHotfix //Expose the hasHotfix check so plugins can also check them.
 
       };
@@ -3808,7 +5032,7 @@
      *
      * @static
      * @public
-     * @memberOf jsPDF
+     * @memberof jsPDF#
      * @name API
      *
      * @example
@@ -3830,7 +5054,7 @@
      * The version of jsPDF.
      * @name version
      * @type {string}
-     * @memberOf jsPDF
+     * @memberof jsPDF#
      */
 
     jsPDF.version = '1.5.3';
@@ -3856,2886 +5080,6 @@
 
   window.tmp = jsPDF;
   /*rollup-keeper-end*/
-
-  /**
-   * @license
-   * Copyright (c) 2016 Alexander Weidt,
-   * https://github.com/BiggA94
-   * 
-   * Licensed under the MIT License. http://opensource.org/licenses/mit-license
-   */
-
-  /** 
-  * jsPDF AcroForm Plugin
-  * @module AcroForm
-  */
-  (function (jsPDFAPI, globalObj) {
-
-    var scope;
-    var scaleFactor = 1;
-
-    var pdfEscape = function pdfEscape(value) {
-      return value.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-    };
-
-    var pdfUnescape = function pdfUnescape(value) {
-      return value.replace(/\\\\/g, '\\').replace(/\\\(/g, '(').replace(/\\\)/g, ')');
-    };
-
-    var f2 = function f2(number) {
-      if (isNaN(number)) {
-        throw new Error('Invalid argument passed to jsPDF.f2');
-      }
-
-      return number.toFixed(2); // Ie, %.2f
-    };
-
-    var f5 = function f5(number) {
-      if (isNaN(number)) {
-        throw new Error('Invalid argument passed to jsPDF.f2');
-      }
-
-      return number.toFixed(5); // Ie, %.2f
-    };
-
-    jsPDFAPI.__acroform__ = {};
-
-    var inherit = function inherit(child, parent) {
-
-      child.prototype = Object.create(parent.prototype);
-      child.prototype.constructor = child;
-    };
-
-    var scale = function scale(x) {
-      return x * scaleFactor;
-    };
-
-    var antiScale = function antiScale(x) {
-      return x / scaleFactor;
-    };
-
-    var createFormXObject = function createFormXObject(formObject) {
-      var xobj = new AcroFormXObject();
-      var height = AcroFormAppearance.internal.getHeight(formObject) || 0;
-      var width = AcroFormAppearance.internal.getWidth(formObject) || 0;
-      xobj.BBox = [0, 0, Number(f2(width)), Number(f2(height))];
-      return xobj;
-    };
-    /**
-    * Bit-Operations
-    */
-
-
-    var setBit = jsPDFAPI.__acroform__.setBit = function (number, bitPosition) {
-      number = number || 0;
-      bitPosition = bitPosition || 0;
-
-      if (isNaN(number) || isNaN(bitPosition)) {
-        throw new Error('Invalid arguments passed to jsPDF.API.__acroform__.setBit');
-      }
-
-      var bitMask = 1 << bitPosition;
-      number |= bitMask;
-      return number;
-    };
-
-    var clearBit = jsPDFAPI.__acroform__.clearBit = function (number, bitPosition) {
-      number = number || 0;
-      bitPosition = bitPosition || 0;
-
-      if (isNaN(number) || isNaN(bitPosition)) {
-        throw new Error('Invalid arguments passed to jsPDF.API.__acroform__.clearBit');
-      }
-
-      var bitMask = 1 << bitPosition;
-      number &= ~bitMask;
-      return number;
-    };
-
-    var getBit = jsPDFAPI.__acroform__.getBit = function (number, bitPosition) {
-      if (isNaN(number) || isNaN(bitPosition)) {
-        throw new Error('Invalid arguments passed to jsPDF.API.__acroform__.getBit');
-      }
-
-      return (number & 1 << bitPosition) === 0 ? 0 : 1;
-    };
-    /*
-    * Ff starts counting the bit position at 1 and not like javascript at 0
-    */
-
-
-    var getBitForPdf = jsPDFAPI.__acroform__.getBitForPdf = function (number, bitPosition) {
-      if (isNaN(number) || isNaN(bitPosition)) {
-        throw new Error('Invalid arguments passed to jsPDF.API.__acroform__.getBitForPdf');
-      }
-
-      return getBit(number, bitPosition - 1);
-    };
-
-    var setBitForPdf = jsPDFAPI.__acroform__.setBitForPdf = function (number, bitPosition) {
-      if (isNaN(number) || isNaN(bitPosition)) {
-        throw new Error('Invalid arguments passed to jsPDF.API.__acroform__.setBitForPdf');
-      }
-
-      return setBit(number, bitPosition - 1);
-    };
-
-    var clearBitForPdf = jsPDFAPI.__acroform__.clearBitForPdf = function (number, bitPosition, value) {
-      if (isNaN(number) || isNaN(bitPosition)) {
-        throw new Error('Invalid arguments passed to jsPDF.API.__acroform__.clearBitForPdf');
-      }
-
-      return clearBit(number, bitPosition - 1);
-    };
-
-    var calculateCoordinates = jsPDFAPI.__acroform__.calculateCoordinates = function (args) {
-      var getHorizontalCoordinate = this.internal.getHorizontalCoordinate;
-      var getVerticalCoordinate = this.internal.getVerticalCoordinate;
-      var x = args[0];
-      var y = args[1];
-      var w = args[2];
-      var h = args[3];
-      var coordinates = {};
-      coordinates.lowerLeft_X = getHorizontalCoordinate(x) || 0;
-      coordinates.lowerLeft_Y = getVerticalCoordinate(y + h) || 0;
-      coordinates.upperRight_X = getHorizontalCoordinate(x + w) || 0;
-      coordinates.upperRight_Y = getVerticalCoordinate(y) || 0;
-      return [Number(f2(coordinates.lowerLeft_X)), Number(f2(coordinates.lowerLeft_Y)), Number(f2(coordinates.upperRight_X)), Number(f2(coordinates.upperRight_Y))];
-    };
-
-    var calculateAppearanceStream = function calculateAppearanceStream(formObject) {
-      if (formObject.appearanceStreamContent) {
-        return formObject.appearanceStreamContent;
-      }
-
-      if (!formObject.V && !formObject.DV) {
-        return;
-      } // else calculate it
-
-
-      var stream = [];
-      var text = formObject.V || formObject.DV;
-      var calcRes = calculateX(formObject, text);
-      var fontKey = scope.internal.getFont(formObject.fontName, formObject.fontStyle).id; //PDF 32000-1:2008, page 444
-
-      stream.push('/Tx BMC');
-      stream.push('q');
-      stream.push('BT'); // Begin Text
-
-      stream.push(scope.__private__.encodeColorString(formObject.color));
-      stream.push('/' + fontKey + ' ' + f2(calcRes.fontSize) + ' Tf');
-      stream.push('1 0 0 1 0 0 Tm'); // Transformation Matrix
-
-      stream.push(calcRes.text);
-      stream.push('ET'); // End Text    
-
-      stream.push('Q');
-      stream.push('EMC');
-      var appearanceStreamContent = new createFormXObject(formObject);
-      appearanceStreamContent.stream = stream.join("\n");
-      return appearanceStreamContent;
-    };
-
-    var calculateX = function calculateX(formObject, text) {
-      var maxFontSize = formObject.maxFontSize || 12;
-      var font = formObject.fontName;
-      var returnValue = {
-        text: "",
-        fontSize: ""
-      }; // Remove Brackets
-
-      text = text.substr(0, 1) == '(' ? text.substr(1) : text;
-      text = text.substr(text.length - 1) == ')' ? text.substr(0, text.length - 1) : text; // split into array of words
-
-      var textSplit = text.split(' ');
-
-      var color = scope.__private__.encodeColorString(formObject.color);
-
-      var fontSize = maxFontSize; // The Starting fontSize (The Maximum)
-
-      var lineSpacing = 2;
-      var borderPadding = 2;
-      var height = AcroFormAppearance.internal.getHeight(formObject) || 0;
-      height = height < 0 ? -height : height;
-      var width = AcroFormAppearance.internal.getWidth(formObject) || 0;
-      width = width < 0 ? -width : width;
-
-      var isSmallerThanWidth = function isSmallerThanWidth(i, lastLine, fontSize) {
-        if (i + 1 < textSplit.length) {
-          var tmp = lastLine + " " + textSplit[i + 1];
-          var TextWidth = calculateFontSpace(tmp, formObject, fontSize).width;
-          var FieldWidth = width - 2 * borderPadding;
-          return TextWidth <= FieldWidth;
-        } else {
-          return false;
-        }
-      };
-
-      fontSize++;
-
-      FontSize: while (true) {
-        var text = "";
-        fontSize--;
-        var textHeight = calculateFontSpace("3", formObject, fontSize).height;
-        var startY = formObject.multiline ? height - fontSize : (height - textHeight) / 2;
-        startY += lineSpacing;
-        var startX = -borderPadding;
-        var lastY = startY;
-        var firstWordInLine = 0,
-            lastWordInLine = 0;
-        var lastLength = 0;
-
-        if (fontSize <= 0) {
-          // In case, the Text doesn't fit at all
-          fontSize = 12;
-          text = "(...) Tj\n";
-          text += "% Width of Text: " + calculateFontSpace(text, formObject, fontSize).width + ", FieldWidth:" + width + "\n";
-          break;
-        }
-
-        lastLength = calculateFontSpace(textSplit[0] + " ", formObject, fontSize).width;
-        var lastLine = "";
-        var lineCount = 0;
-
-        Line: for (var i in textSplit) {
-          if (textSplit.hasOwnProperty(i)) {
-            lastLine += textSplit[i] + " "; // Remove last blank
-
-            lastLine = lastLine.substr(lastLine.length - 1) == " " ? lastLine.substr(0, lastLine.length - 1) : lastLine;
-            var key = parseInt(i);
-            lastLength = calculateFontSpace(lastLine + " ", formObject, fontSize).width;
-            var nextLineIsSmaller = isSmallerThanWidth(key, lastLine, fontSize);
-            var isLastWord = i >= textSplit.length - 1;
-
-            if (nextLineIsSmaller && !isLastWord) {
-              lastLine += " ";
-              continue; // Line
-            } else if (!nextLineIsSmaller && !isLastWord) {
-              if (!formObject.multiline) {
-                continue FontSize;
-              } else {
-                if ((textHeight + lineSpacing) * (lineCount + 2) + lineSpacing > height) {
-                  // If the Text is higher than the
-                  // FieldObject
-                  continue FontSize;
-                }
-
-                lastWordInLine = key; // go on
-              }
-            } else if (isLastWord) {
-              lastWordInLine = key;
-            } else {
-              if (formObject.multiline && (textHeight + lineSpacing) * (lineCount + 2) + lineSpacing > height) {
-                // If the Text is higher than the FieldObject
-                continue FontSize;
-              }
-            }
-
-            var line = '';
-
-            for (var x = firstWordInLine; x <= lastWordInLine; x++) {
-              line += textSplit[x] + ' ';
-            } // Remove last blank
-
-
-            line = line.substr(line.length - 1) == " " ? line.substr(0, line.length - 1) : line; // lastLength -= blankSpace.width;
-
-            lastLength = calculateFontSpace(line, formObject, fontSize).width; // Calculate startX
-
-            switch (formObject.textAlign) {
-              case 'right':
-                startX = width - lastLength - borderPadding;
-                break;
-
-              case 'center':
-                startX = (width - lastLength) / 2;
-                break;
-
-              case 'left':
-              default:
-                startX = borderPadding;
-                break;
-            }
-
-            text += f2(startX) + ' ' + f2(lastY) + ' Td\n';
-            text += '(' + pdfEscape(line) + ') Tj\n'; // reset X in PDF
-
-            text += -f2(startX) + ' 0 Td\n'; // After a Line, adjust y position
-
-            lastY = -(fontSize + lineSpacing);
-
-            lastLength = 0;
-            firstWordInLine = lastWordInLine + 1;
-            lineCount++;
-            lastLine = "";
-            continue Line;
-          }
-        }
-
-        break;
-      }
-
-      returnValue.text = text;
-      returnValue.fontSize = fontSize;
-      return returnValue;
-    };
-    /**
-    * Small workaround for calculating the TextMetric approximately.
-    * 
-    * @param text
-    * @param fontsize
-    * @returns {TextMetrics} (Has Height and Width)
-    */
-
-
-    var calculateFontSpace = function calculateFontSpace(text, formObject, fontSize) {
-      var font = scope.internal.getFont(formObject.fontName, formObject.fontStyle);
-      var width = scope.getStringUnitWidth(text, {
-        font: font,
-        fontSize: parseFloat(fontSize),
-        charSpace: 0
-      }) * parseFloat(fontSize);
-      var height = scope.getStringUnitWidth("3", {
-        font: font,
-        fontSize: parseFloat(fontSize),
-        charSpace: 0
-      }) * parseFloat(fontSize) * 1.5;
-      return {
-        height: height,
-        width: width
-      };
-    };
-
-    var acroformPluginTemplate = {
-      fields: [],
-      xForms: [],
-
-      /**
-      * acroFormDictionaryRoot contains information about the AcroForm
-      * Dictionary 0: The Event-Token, the AcroFormDictionaryCallback has
-      * 1: The Object ID of the Root
-      */
-      acroFormDictionaryRoot: null,
-
-      /**
-      * After the PDF gets evaluated, the reference to the root has to be
-      * reset, this indicates, whether the root has already been printed
-      * out
-      */
-      printedOut: false,
-      internal: null,
-      isInitialized: false
-    };
-
-    var annotReferenceCallback = function annotReferenceCallback() {
-      //set objId to undefined and force it to get a new objId on buildDocument
-      scope.internal.acroformPlugin.acroFormDictionaryRoot.objId = undefined;
-      var fields = scope.internal.acroformPlugin.acroFormDictionaryRoot.Fields;
-
-      for (var i in fields) {
-        if (fields.hasOwnProperty(i)) {
-          var formObject = fields[i]; //set objId to undefined and force it to get a new objId on buildDocument
-
-          formObject.objId = undefined; // add Annot Reference!
-
-          if (formObject.hasAnnotation) {
-            // If theres an Annotation Widget in the Form Object, put the
-            // Reference in the /Annot array
-            createAnnotationReference.call(scope, formObject);
-          }
-        }
-      }
-    };
-
-    var putForm = function putForm(formObject) {
-      if (scope.internal.acroformPlugin.printedOut) {
-        scope.internal.acroformPlugin.printedOut = false;
-        scope.internal.acroformPlugin.acroFormDictionaryRoot = null;
-      }
-
-      if (!scope.internal.acroformPlugin.acroFormDictionaryRoot) {
-        initializeAcroForm.call(scope);
-      }
-
-      scope.internal.acroformPlugin.acroFormDictionaryRoot.Fields.push(formObject);
-    };
-    /**
-    * Create the Reference to the widgetAnnotation, so that it gets referenced
-    * in the Annot[] int the+ (Requires the Annotation Plugin)
-    */
-
-
-    var createAnnotationReference = function createAnnotationReference(object) {
-      var options = {
-        type: 'reference',
-        object: object
-      };
-
-      var findEntry = function findEntry(entry) {
-        return entry.type === options.type && entry.object === options.object;
-      };
-
-      if (scope.internal.getPageInfo(object.page).pageContext.annotations.find(findEntry) === undefined) {
-        scope.internal.getPageInfo(object.page).pageContext.annotations.push(options);
-      }
-    }; // Callbacks
-
-
-    var putCatalogCallback = function putCatalogCallback() {
-      // Put reference to AcroForm to DocumentCatalog
-      if (typeof scope.internal.acroformPlugin.acroFormDictionaryRoot != 'undefined') {
-        // for safety, shouldn't normally be the case
-        scope.internal.write('/AcroForm ' + scope.internal.acroformPlugin.acroFormDictionaryRoot.objId + ' ' + 0 + ' R');
-      } else {
-        throw new Error('putCatalogCallback: Root missing.');
-      }
-    };
-    /**
-    * Adds /Acroform X 0 R to Document Catalog, and creates the AcroForm
-    * Dictionary
-    */
-
-
-    var AcroFormDictionaryCallback = function AcroFormDictionaryCallback() {
-      // Remove event
-      scope.internal.events.unsubscribe(scope.internal.acroformPlugin.acroFormDictionaryRoot._eventID);
-      delete scope.internal.acroformPlugin.acroFormDictionaryRoot._eventID;
-      scope.internal.acroformPlugin.printedOut = true;
-    };
-    /**
-    * Creates the single Fields and writes them into the Document
-    * 
-    * If fieldArray is set, use the fields that are inside it instead of the
-    * fields from the AcroRoot (for the FormXObjects...)
-    */
-
-
-    var createFieldCallback = function createFieldCallback(fieldArray) {
-      var standardFields = !fieldArray;
-
-      if (!fieldArray) {
-        // in case there is no fieldArray specified, we want to print out
-        // the Fields of the AcroForm
-        // Print out Root
-        scope.internal.newObjectDeferredBegin(scope.internal.acroformPlugin.acroFormDictionaryRoot.objId, true);
-        scope.internal.acroformPlugin.acroFormDictionaryRoot.putStream();
-      }
-
-      var fieldArray = fieldArray || scope.internal.acroformPlugin.acroFormDictionaryRoot.Kids;
-
-      for (var i in fieldArray) {
-        if (fieldArray.hasOwnProperty(i)) {
-          var fieldObject = fieldArray[i];
-          var keyValueList = [];
-          var oldRect = fieldObject.Rect;
-
-          if (fieldObject.Rect) {
-            fieldObject.Rect = calculateCoordinates.call(this, fieldObject.Rect);
-          } // Start Writing the Object
-
-
-          scope.internal.newObjectDeferredBegin(fieldObject.objId, true);
-          fieldObject.DA = AcroFormAppearance.createDefaultAppearanceStream(fieldObject);
-
-          if (_typeof(fieldObject) === "object" && typeof fieldObject.getKeyValueListForStream === "function") {
-            keyValueList = fieldObject.getKeyValueListForStream();
-          }
-
-          fieldObject.Rect = oldRect;
-
-          if (fieldObject.hasAppearanceStream && !fieldObject.appearanceStreamContent) {
-            // Calculate Appearance
-            var appearance = calculateAppearanceStream.call(this, fieldObject);
-            keyValueList.push({
-              key: 'AP',
-              value: "<</N " + appearance + ">>"
-            });
-            scope.internal.acroformPlugin.xForms.push(appearance);
-          } // Assume AppearanceStreamContent is a Array with N,R,D (at least
-          // one of them!)
-
-
-          if (fieldObject.appearanceStreamContent) {
-            var appearanceStreamString = ""; // Iterate over N,R and D
-
-            for (var k in fieldObject.appearanceStreamContent) {
-              if (fieldObject.appearanceStreamContent.hasOwnProperty(k)) {
-                var value = fieldObject.appearanceStreamContent[k];
-                appearanceStreamString += "/" + k + " ";
-                appearanceStreamString += "<<";
-
-                if (Object.keys(value).length >= 1 || Array.isArray(value)) {
-                  // appearanceStream is an Array or Object!
-                  for (var i in value) {
-                    if (value.hasOwnProperty(i)) {
-                      var obj = value[i];
-
-                      if (typeof obj === 'function') {
-                        // if Function is referenced, call it in order
-                        // to get the FormXObject
-                        obj = obj.call(this, fieldObject);
-                      }
-
-                      appearanceStreamString += "/" + i + " " + obj + " "; // In case the XForm is already used, e.g. OffState
-                      // of CheckBoxes, don't add it
-
-                      if (!(scope.internal.acroformPlugin.xForms.indexOf(obj) >= 0)) scope.internal.acroformPlugin.xForms.push(obj);
-                    }
-                  }
-                } else {
-                  var obj = value;
-
-                  if (typeof obj === 'function') {
-                    // if Function is referenced, call it in order to
-                    // get the FormXObject
-                    obj = obj.call(this, fieldObject);
-                  }
-
-                  appearanceStreamString += "/" + i + " " + obj;
-                  if (!(scope.internal.acroformPlugin.xForms.indexOf(obj) >= 0)) scope.internal.acroformPlugin.xForms.push(obj);
-                }
-
-                appearanceStreamString += ">>";
-              }
-            } // appearance stream is a normal Object..
-
-
-            keyValueList.push({
-              key: 'AP',
-              value: "<<\n" + appearanceStreamString + ">>"
-            });
-          }
-
-          scope.internal.putStream({
-            additionalKeyValues: keyValueList
-          });
-          scope.internal.out("endobj");
-        }
-      }
-
-      if (standardFields) {
-        createXFormObjectCallback.call(this, scope.internal.acroformPlugin.xForms);
-      }
-    };
-
-    var createXFormObjectCallback = function createXFormObjectCallback(fieldArray) {
-      for (var i in fieldArray) {
-        if (fieldArray.hasOwnProperty(i)) {
-          var key = i;
-          var fieldObject = fieldArray[i]; // Start Writing the Object
-
-          scope.internal.newObjectDeferredBegin(fieldObject && fieldObject.objId, true);
-
-          if (_typeof(fieldObject) === "object" && typeof fieldObject.putStream === "function") {
-            fieldObject.putStream();
-          }
-
-          delete fieldArray[key];
-        }
-      }
-    };
-
-    var initializeAcroForm = function initializeAcroForm() {
-      if (this.internal !== undefined && (this.internal.acroformPlugin === undefined || this.internal.acroformPlugin.isInitialized === false)) {
-        scope = this;
-        AcroFormField.FieldNum = 0;
-        this.internal.acroformPlugin = JSON.parse(JSON.stringify(acroformPluginTemplate));
-
-        if (this.internal.acroformPlugin.acroFormDictionaryRoot) {
-          throw new Error("Exception while creating AcroformDictionary");
-        }
-
-        scaleFactor = scope.internal.scaleFactor; // The Object Number of the AcroForm Dictionary
-
-        scope.internal.acroformPlugin.acroFormDictionaryRoot = new AcroFormDictionary(); // add Callback for creating the AcroForm Dictionary
-
-        scope.internal.acroformPlugin.acroFormDictionaryRoot._eventID = scope.internal.events.subscribe('postPutResources', AcroFormDictionaryCallback);
-        scope.internal.events.subscribe('buildDocument', annotReferenceCallback); // buildDocument
-        // Register event, that is triggered when the DocumentCatalog is
-        // written, in order to add /AcroForm
-
-        scope.internal.events.subscribe('putCatalog', putCatalogCallback); // Register event, that creates all Fields
-
-        scope.internal.events.subscribe('postPutPages', createFieldCallback);
-        scope.internal.acroformPlugin.isInitialized = true;
-      }
-    }; //PDF 32000-1:2008, page 26, 7.3.6
-
-
-    var arrayToPdfArray = jsPDFAPI.__acroform__.arrayToPdfArray = function (array) {
-      if (Array.isArray(array)) {
-        var content = '[';
-
-        for (var i = 0; i < array.length; i++) {
-          if (i !== 0) {
-            content += ' ';
-          }
-
-          switch (_typeof(array[i])) {
-            case 'boolean':
-            case 'number':
-            case 'object':
-              content += array[i].toString();
-              break;
-
-            case 'string':
-              if (array[i].substr(0, 1) !== '/') {
-                content += '(' + pdfEscape(array[i].toString()) + ')';
-              } else {
-                content += array[i].toString();
-              }
-
-              break;
-          }
-        }
-
-        content += ']';
-        return content;
-      }
-
-      throw new Error('Invalid argument passed to jsPDF.__acroform__.arrayToPdfArray');
-    };
-
-    function getMatches(string, regex, index) {
-      index || (index = 1); // default to the first capturing group
-
-      var matches = [];
-      var match;
-
-      while (match = regex.exec(string)) {
-        matches.push(match[index]);
-      }
-
-      return matches;
-    }
-
-    var pdfArrayToStringArray = function pdfArrayToStringArray(array) {
-      var result = [];
-
-      if (typeof array === "string") {
-        result = getMatches(array, /\((.*?)\)/g);
-      }
-
-      return result;
-    };
-
-    var toPdfString = function toPdfString(string) {
-      string = string || "";
-      string.toString();
-      string = '(' + pdfEscape(string) + ')';
-      return string;
-    }; // ##########################
-    // Classes
-    // ##########################
-
-    /**
-    * @class AcroFormPDFObject
-    * @classdesc A AcroFormPDFObject
-    */
-
-
-    var AcroFormPDFObject = function AcroFormPDFObject() {
-      var _objId;
-      /**    *
-      * @name AcroFormPDFObject#objId
-      * @type {any}
-      */
-
-
-      Object.defineProperty(this, 'objId', {
-        configurable: true,
-        get: function get() {
-          if (!_objId) {
-            _objId = scope.internal.newObjectDeferred();
-          }
-
-          if (!_objId) {
-            throw new Error("AcroFormPDFObject: Couldn't create Object ID");
-          }
-
-          return _objId;
-        },
-        set: function set(value) {
-          _objId = value;
-        }
-      });
-    };
-    /**
-    * @function AcroFormPDFObject.toString
-    */
-
-
-    AcroFormPDFObject.prototype.toString = function () {
-      return this.objId + " 0 R";
-    };
-
-    AcroFormPDFObject.prototype.putStream = function () {
-      var keyValueList = this.getKeyValueListForStream();
-      scope.internal.putStream({
-        data: this.stream,
-        additionalKeyValues: keyValueList
-      });
-      scope.internal.out("endobj");
-    };
-    /**
-    * Returns an key-value-List of all non-configurable Variables from the Object
-    * 
-    * @name getKeyValueListForStream
-    * @returns {string}
-    */
-
-
-    AcroFormPDFObject.prototype.getKeyValueListForStream = function () {
-      var createKeyValueListFromFieldObject = function createKeyValueListFromFieldObject(fieldObject) {
-        var keyValueList = [];
-        var keys = Object.getOwnPropertyNames(fieldObject).filter(function (key) {
-          return key != 'content' && key != 'appearanceStreamContent' && key.substring(0, 1) != "_";
-        });
-
-        for (var i in keys) {
-          if (Object.getOwnPropertyDescriptor(fieldObject, keys[i]).configurable === false) {
-            var key = keys[i];
-            var value = fieldObject[key];
-
-            if (value) {
-              if (Array.isArray(value)) {
-                keyValueList.push({
-                  key: key,
-                  value: arrayToPdfArray(value)
-                });
-              } else if (value instanceof AcroFormPDFObject) {
-                // In case it is a reference to another PDFObject,
-                // take the reference number
-                keyValueList.push({
-                  key: key,
-                  value: value.objId + " 0 R"
-                });
-              } else if (typeof value !== "function") {
-                keyValueList.push({
-                  key: key,
-                  value: value
-                });
-              }
-            }
-          }
-        }
-
-        return keyValueList;
-      };
-
-      return createKeyValueListFromFieldObject(this);
-    };
-
-    var AcroFormXObject = function AcroFormXObject() {
-      AcroFormPDFObject.call(this);
-      Object.defineProperty(this, 'Type', {
-        value: "/XObject",
-        configurable: false,
-        writeable: true
-      });
-      Object.defineProperty(this, 'Subtype', {
-        value: "/Form",
-        configurable: false,
-        writeable: true
-      });
-      Object.defineProperty(this, 'FormType', {
-        value: 1,
-        configurable: false,
-        writeable: true
-      });
-      var _BBox = [];
-      Object.defineProperty(this, 'BBox', {
-        configurable: false,
-        writeable: true,
-        get: function get() {
-          return _BBox;
-        },
-        set: function set(value) {
-          _BBox = value;
-        }
-      });
-      Object.defineProperty(this, 'Resources', {
-        value: "2 0 R",
-        configurable: false,
-        writeable: true
-      });
-
-      var _stream;
-
-      Object.defineProperty(this, 'stream', {
-        enumerable: false,
-        configurable: true,
-        set: function set(value) {
-          _stream = value.trim();
-        },
-        get: function get() {
-          if (_stream) {
-            return _stream;
-          } else {
-            return null;
-          }
-        }
-      });
-    };
-
-    inherit(AcroFormXObject, AcroFormPDFObject);
-
-    var AcroFormDictionary = function AcroFormDictionary() {
-      AcroFormPDFObject.call(this);
-      var _Kids = [];
-      Object.defineProperty(this, 'Kids', {
-        enumerable: false,
-        configurable: true,
-        get: function get() {
-          if (_Kids.length > 0) {
-            return _Kids;
-          } else {
-            return;
-          }
-        }
-      });
-      Object.defineProperty(this, 'Fields', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          return _Kids;
-        }
-      }); // Default Appearance
-
-      var _DA;
-
-      Object.defineProperty(this, 'DA', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          if (!_DA) {
-            return;
-          }
-
-          return '(' + _DA + ')';
-        },
-        set: function set(value) {
-          _DA = value;
-        }
-      });
-    };
-
-    inherit(AcroFormDictionary, AcroFormPDFObject);
-    /**
-    * The Field Object contains the Variables, that every Field needs
-    * 
-    * @class AcroFormField
-    * @classdesc An AcroForm FieldObject
-    */
-
-    var AcroFormField = function AcroFormField() {
-      AcroFormPDFObject.call(this); //Annotation-Flag See Table 165
-
-      var _F = 4;
-      Object.defineProperty(this, 'F', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          return _F;
-        },
-        set: function set(value) {
-          if (!isNaN(value)) {
-            _F = value;
-          } else {
-            throw new Error('Invalid value "' + value + '" for attribute F supplied.');
-          }
-        }
-      });
-      /**
-      * (PDF 1.2) If set, print the annotation when the page is printed. If clear, never print the annotation, regardless of wether is is displayed on the screen. 
-      * NOTE 2 This can be useful for annotations representing interactive pushbuttons, which would serve no meaningful purpose on the printed page.
-      *
-      * @name AcroFormField#showWhenPrinted
-      * @default true
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'showWhenPrinted', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(_F, 3));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.F = setBitForPdf(_F, 3);
-          } else {
-            this.F = clearBitForPdf(_F, 3);
-          }
-        }
-      });
-      var _Ff = 0;
-      Object.defineProperty(this, 'Ff', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          return _Ff;
-        },
-        set: function set(value) {
-          if (!isNaN(value)) {
-            _Ff = value;
-          } else {
-            throw new Error('Invalid value "' + value + '" for attribute Ff supplied.');
-          }
-        }
-      });
-      var _Rect = [];
-      Object.defineProperty(this, 'Rect', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          if (_Rect.length === 0) {
-            return;
-          }
-
-          return _Rect;
-        },
-        set: function set(value) {
-          if (typeof value !== "undefined") {
-            _Rect = value;
-          } else {
-            _Rect = [];
-          }
-        }
-      });
-      /**
-      * The x-position of the field.
-      *
-      * @name AcroFormField#x
-      * @default null
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'x', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          if (!_Rect || isNaN(_Rect[0])) {
-            return 0;
-          }
-
-          return antiScale(_Rect[0]);
-        },
-        set: function set(value) {
-          _Rect[0] = scale(value);
-        }
-      });
-      /**
-      * The y-position of the field.
-      *
-      * @name AcroFormField#y
-      * @default null
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'y', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          if (!_Rect || isNaN(_Rect[1])) {
-            return 0;
-          }
-
-          return antiScale(_Rect[1]);
-        },
-        set: function set(value) {
-          _Rect[1] = scale(value);
-        }
-      });
-      /**
-      * The width of the field.
-      *
-      * @name AcroFormField#width
-      * @default null
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'width', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          if (!_Rect || isNaN(_Rect[2])) {
-            return 0;
-          }
-
-          return antiScale(_Rect[2]);
-        },
-        set: function set(value) {
-          _Rect[2] = scale(value);
-        }
-      });
-      /**
-      * The height of the field.
-      *
-      * @name AcroFormField#height
-      * @default null
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'height', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          if (!_Rect || isNaN(_Rect[3])) {
-            return 0;
-          }
-
-          return antiScale(_Rect[3]);
-        },
-        set: function set(value) {
-          _Rect[3] = scale(value);
-        }
-      });
-      var _FT = "";
-      Object.defineProperty(this, 'FT', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return _FT;
-        },
-        set: function set(value) {
-          switch (value) {
-            case '/Btn':
-            case '/Tx':
-            case '/Ch':
-            case '/Sig':
-              _FT = value;
-              break;
-
-            default:
-              throw new Error('Invalid value "' + value + '" for attribute FT supplied.');
-          }
-        }
-      });
-      var _T = null;
-      Object.defineProperty(this, 'T', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          if (!_T || _T.length < 1) {
-            // In case of a Child from a Radio´Group, you don't need a FieldName
-            if (this instanceof AcroFormChildClass) {
-              return;
-            }
-
-            _T = "FieldObject" + AcroFormField.FieldNum++;
-          }
-
-          return '(' + pdfEscape(_T) + ')';
-        },
-        set: function set(value) {
-          _T = value.toString();
-        }
-      });
-      /**
-      * (Optional) The partial field name (see 12.7.3.2, “Field Names”).
-      *
-      * @name AcroFormField#fieldName
-      * @default null
-      * @type {string}
-      */
-
-      Object.defineProperty(this, 'fieldName', {
-        configurable: true,
-        enumerable: true,
-        get: function get() {
-          return _T;
-        },
-        set: function set(value) {
-          _T = value;
-        }
-      });
-      var _fontName = 'helvetica';
-      /**
-      * The fontName of the font to be used.
-      *
-      * @name AcroFormField#fontName
-      * @default 'helvetica'
-      * @type {string}
-      */
-
-      Object.defineProperty(this, 'fontName', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _fontName;
-        },
-        set: function set(value) {
-          _fontName = value;
-        }
-      });
-      var _fontStyle = 'normal';
-      /**
-      * The fontStyle of the font to be used.
-      *
-      * @name AcroFormField#fontStyle
-      * @default 'normal'
-      * @type {string}
-      */
-
-      Object.defineProperty(this, 'fontStyle', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _fontStyle;
-        },
-        set: function set(value) {
-          _fontStyle = value;
-        }
-      });
-      var _fontSize = 0;
-      /**
-      * The fontSize of the font to be used.
-      *
-      * @name AcroFormField#fontSize
-      * @default 0 (for auto)
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'fontSize', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return antiScale(_fontSize);
-        },
-        set: function set(value) {
-          _fontSize = scale(value);
-        }
-      });
-      var _maxFontSize = 50;
-      /**
-      * The maximum fontSize of the font to be used.
-      *
-      * @name AcroFormField#maxFontSize
-      * @default 0 (for auto)
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'maxFontSize', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return antiScale(_maxFontSize);
-        },
-        set: function set(value) {
-          _maxFontSize = scale(value);
-        }
-      });
-      var _color = 'black';
-      /**
-      * The color of the text
-      *
-      * @name AcroFormField#color
-      * @default 'black'
-      * @type {string|rgba}
-      */
-
-      Object.defineProperty(this, 'color', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _color;
-        },
-        set: function set(value) {
-          _color = value;
-        }
-      });
-      var _DA = '/F1 0 Tf 0 g'; // Defines the default appearance (Needed for variable Text)
-
-      Object.defineProperty(this, 'DA', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          if (!_DA || this instanceof AcroFormChildClass || this instanceof AcroFormTextField) {
-            return;
-          }
-
-          return toPdfString(_DA);
-        },
-        set: function set(value) {
-          value = value.toString();
-          _DA = value;
-        }
-      });
-      var _DV = null;
-      Object.defineProperty(this, 'DV', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          if (!_DV) {
-            return;
-          }
-
-          if (this instanceof AcroFormButton === false) {
-            return toPdfString(_DV);
-          }
-
-          return _DV;
-        },
-        set: function set(value) {
-          value = value.toString();
-
-          if (this instanceof AcroFormButton === false) {
-            if (value.substr(0, 1) === '(') {
-              _DV = pdfUnescape(value.substr(1, value.length - 2));
-            } else {
-              _DV = pdfUnescape(value);
-            }
-          } else {
-            _DV = value;
-          }
-        }
-      });
-      /**
-      * (Optional; inheritable) The default value to which the field reverts when a reset-form action is executed (see 12.7.5.3, “Reset-Form Action”). The format of this value is the same as that of value. 
-      *
-      * @name AcroFormField#defaultValue
-      * @default null
-      * @type {any}
-      */
-
-      Object.defineProperty(this, 'defaultValue', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          if (this instanceof AcroFormButton === true) {
-            return pdfUnescape(_DV.substr(1, _DV.length - 1));
-          } else {
-            return _DV;
-          }
-        },
-        set: function set(value) {
-          value = value.toString();
-
-          if (this instanceof AcroFormButton === true) {
-            _DV = '/' + value;
-          } else {
-            _DV = value;
-          }
-        }
-      });
-      var _V = null;
-      Object.defineProperty(this, 'V', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          if (!_V) {
-            return;
-          }
-
-          if (this instanceof AcroFormButton === false) {
-            return toPdfString(_V);
-          }
-
-          return _V;
-        },
-        set: function set(value) {
-          value = value.toString();
-
-          if (this instanceof AcroFormButton === false) {
-            if (value.substr(0, 1) === '(') {
-              _V = pdfUnescape(value.substr(1, value.length - 2));
-            } else {
-              _V = pdfUnescape(value);
-            }
-          } else {
-            _V = value;
-          }
-        }
-      });
-      /**
-      * (Optional; inheritable) The field’s value, whose format varies depending on the field type. See the descriptions of individual field types for further information. 
-      *
-      * @name AcroFormField#value
-      * @default null
-      * @type {any}
-      */
-
-      Object.defineProperty(this, 'value', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          if (this instanceof AcroFormButton === true) {
-            return pdfUnescape(_V.substr(1, _V.length - 1));
-          } else {
-            return _V;
-          }
-        },
-        set: function set(value) {
-          value = value.toString();
-
-          if (this instanceof AcroFormButton === true) {
-            _V = '/' + value;
-          } else {
-            _V = value;
-          }
-        }
-      });
-      /**
-      * Check if field has annotations
-      *
-      * @name AcroFormField#hasAnnotation
-      * @readonly
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'hasAnnotation', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return this.Rect;
-        }
-      });
-      Object.defineProperty(this, 'Type', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return this.hasAnnotation ? "/Annot" : null;
-        }
-      });
-      Object.defineProperty(this, 'Subtype', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return this.hasAnnotation ? "/Widget" : null;
-        }
-      });
-      var _hasAppearanceStream = false;
-      /**
-      * true if field has an appearanceStream
-      *
-      * @name AcroFormField#hasAppearanceStream
-      * @readonly
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'hasAppearanceStream', {
-        enumerable: true,
-        configurable: true,
-        writeable: true,
-        get: function get() {
-          return _hasAppearanceStream;
-        },
-        set: function set(value) {
-          value = Boolean(value);
-          _hasAppearanceStream = value;
-        }
-      });
-      /**
-      * The page on which the AcroFormField is placed
-      *
-      * @name AcroFormField#page
-      * @type {number}
-      */
-
-      var _page;
-
-      Object.defineProperty(this, 'page', {
-        enumerable: true,
-        configurable: true,
-        writeable: true,
-        get: function get() {
-          if (!_page) {
-            return;
-          }
-
-          return _page;
-        },
-        set: function set(value) {
-          _page = value;
-        }
-      });
-      /**
-      * If set, the user may not change the value of the field. Any associated widget annotations will not interact with the user; that is, they will not respond to mouse clicks or change their appearance in response to mouse motions. This flag is useful for fields whose values are computed or imported from a database. 
-      *
-      * @name AcroFormField#readOnly
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'readOnly', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 1));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 1);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 1);
-          }
-        }
-      });
-      /**
-      * If set, the field shall have a value at the time it is exported by a submitform action (see 12.7.5.2, “Submit-Form Action”). 
-      *
-      * @name AcroFormField#required
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'required', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 2));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 2);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 2);
-          }
-        }
-      });
-      /**
-      * If set, the field shall not be exported by a submit-form action (see 12.7.5.2, “Submit-Form Action”)
-      *
-      * @name AcroFormField#noExport
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'noExport', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 3));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 3);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 3);
-          }
-        }
-      });
-      var _Q = null;
-      Object.defineProperty(this, 'Q', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          if (_Q === null) {
-            return;
-          }
-
-          return _Q;
-        },
-        set: function set(value) {
-          if ([0, 1, 2].indexOf(value) !== -1) {
-            _Q = value;
-          } else {
-            throw new Error('Invalid value "' + value + '" for attribute Q supplied.');
-          }
-        }
-      });
-      /**
-      * (Optional; inheritable) A code specifying the form of quadding (justification) that shall be used in displaying the text:
-      * 'left', 'center', 'right'
-      *
-      * @name AcroFormField#textAlign
-      * @default 'left'
-      * @type {string}
-      */
-
-      Object.defineProperty(this, 'textAlign', {
-        get: function get() {
-          var result = 'left';
-
-          switch (_Q) {
-            case 0:
-            default:
-              result = 'left';
-              break;
-
-            case 1:
-              result = 'center';
-              break;
-
-            case 2:
-              result = 'right';
-              break;
-          }
-
-          return result;
-        },
-        configurable: true,
-        enumerable: true,
-        set: function set(value) {
-          switch (value) {
-            case 'right':
-            case 2:
-              _Q = 2;
-              break;
-
-            case 'center':
-            case 1:
-              _Q = 1;
-              break;
-
-            case 'left':
-            case 0:
-            default:
-              _Q = 0;
-          }
-        }
-      });
-    };
-
-    inherit(AcroFormField, AcroFormPDFObject);
-    /**
-    * @class AcroFormChoiceField
-    * @extends AcroFormField
-    */
-
-    var AcroFormChoiceField = function AcroFormChoiceField() {
-      AcroFormField.call(this); // Field Type = Choice Field
-
-      this.FT = "/Ch"; // options
-
-      this.V = '()';
-      this.fontName = 'zapfdingbats'; // Top Index
-
-      var _TI = 0;
-      Object.defineProperty(this, 'TI', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return _TI;
-        },
-        set: function set(value) {
-          _TI = value;
-        }
-      });
-      /**
-      * (Optional) For scrollable list boxes, the top index (the index in the Opt array of the first option visible in the list). Default value: 0.
-      * 
-      * @name AcroFormChoiceField#topIndex
-      * @default 0
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'topIndex', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _TI;
-        },
-        set: function set(value) {
-          _TI = value;
-        }
-      });
-      var _Opt = [];
-      Object.defineProperty(this, 'Opt', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return arrayToPdfArray(_Opt);
-        },
-        set: function set(value) {
-          _Opt = pdfArrayToStringArray(value);
-        }
-      });
-      /**
-      * @memberof AcroFormChoiceField
-      * @name getOptions
-      * @function
-      * @instance
-      * @returns {array} array of Options
-      */
-
-      this.getOptions = function () {
-        return _Opt;
-      };
-      /**
-      * @memberof AcroFormChoiceField
-      * @name setOptions
-      * @function
-      * @instance
-      * @param {array} value
-      */
-
-
-      this.setOptions = function (value) {
-        _Opt = value;
-
-        if (this.sort) {
-          _Opt.sort();
-        }
-      };
-      /**
-      * @memberof AcroFormChoiceField
-      * @name addOption
-      * @function
-      * @instance
-      * @param {string} value
-      */
-
-
-      this.addOption = function (value) {
-        value = value || "";
-        value = value.toString();
-
-        _Opt.push(value);
-
-        if (this.sort) {
-          _Opt.sort();
-        }
-      };
-      /**
-      * @memberof AcroFormChoiceField
-      * @name removeOption
-      * @function
-      * @instance
-      * @param {string} value
-      * @param {boolean} allEntries (default: false)
-      */
-
-
-      this.removeOption = function (value, allEntries) {
-        allEntries = allEntries || false;
-        value = value || "";
-        value = value.toString();
-
-        while (_Opt.indexOf(value) !== -1) {
-          _Opt.splice(_Opt.indexOf(value), 1);
-
-          if (allEntries === false) {
-            break;
-          }
-        }
-      };
-      /**
-      * If set, the field is a combo box; if clear, the field is a list box. 
-      *
-      * @name AcroFormChoiceField#combo
-      * @default false
-      * @type {boolean}
-      */
-
-
-      Object.defineProperty(this, 'combo', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 18));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 18);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 18);
-          }
-        }
-      });
-      /**
-      * If set, the combo box shall include an editable text box as well as a drop-down list; if clear, it shall include only a drop-down list. This flag shall be used only if the Combo flag is set. 
-      *
-      * @name AcroFormChoiceField#edit
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'edit', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 19));
-        },
-        set: function set(value) {
-          //PDF 32000-1:2008, page 444
-          if (this.combo === true) {
-            if (Boolean(value) === true) {
-              this.Ff = setBitForPdf(this.Ff, 19);
-            } else {
-              this.Ff = clearBitForPdf(this.Ff, 19);
-            }
-          }
-        }
-      });
-      /**
-      * If set, the field’s option items shall be sorted alphabetically. This flag is intended for use by writers, not by readers. Conforming readers shall display the options in the order in which they occur in the Opt array (see Table 231). 
-      *
-      * @name AcroFormChoiceField#sort
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'sort', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 20));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 20);
-
-            _Opt.sort();
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 20);
-          }
-        }
-      });
-      /**
-      * (PDF 1.4) If set, more than one of the field’s option items may be selected simultaneously; if clear, at most one item shall be selected 
-      *
-      * @name AcroFormChoiceField#multiSelect
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'multiSelect', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 22));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 22);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 22);
-          }
-        }
-      });
-      /**
-      * (PDF 1.4) If set, text entered in the field shall not be spellchecked. This flag shall not be used unless the Combo and Edit flags are both set. 
-      *
-      * @name AcroFormChoiceField#doNotSpellCheck
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'doNotSpellCheck', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 23));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 23);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 23);
-          }
-        }
-      });
-      /**
-      * (PDF 1.5) If set, the new value shall be committed as soon as a selection is made (commonly with the pointing device). In this case, supplying a value for a field involves three actions: selecting the field for fill-in, selecting a choice for the fill-in value, and leaving that field, which finalizes or “commits” the data choice and triggers any actions associated with the entry or changing of this data. If this flag is on, then processing does not wait for leaving the field action to occur, but immediately proceeds to the third step.
-      * This option enables applications to perform an action once a selection is made, without requiring the user to exit the field. If clear, the new value is not committed until the user exits the field.
-      *
-      * @name AcroFormChoiceField#commitOnSelChange
-      * @default false
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'commitOnSelChange', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 27));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 27);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 27);
-          }
-        }
-      });
-      this.hasAppearanceStream = false;
-    };
-
-    inherit(AcroFormChoiceField, AcroFormField);
-    /**
-    * @class AcroFormListBox
-    * @extends AcroFormChoiceField
-    * @extends AcroFormField
-    */
-
-    var AcroFormListBox = function AcroFormListBox() {
-      AcroFormChoiceField.call(this);
-      this.fontName = 'helvetica'; //PDF 32000-1:2008, page 444
-
-      this.combo = false;
-    };
-
-    inherit(AcroFormListBox, AcroFormChoiceField);
-    /**
-    * @class AcroFormComboBox 
-    * @extends AcroFormListBox
-    * @extends AcroFormChoiceField
-    * @extends AcroFormField
-    */
-
-    var AcroFormComboBox = function AcroFormComboBox() {
-      AcroFormListBox.call(this);
-      this.combo = true;
-    };
-
-    inherit(AcroFormComboBox, AcroFormListBox);
-    /**
-    * @class AcroFormEditBox 
-    * @extends AcroFormComboBox
-    * @extends AcroFormListBox
-    * @extends AcroFormChoiceField
-    * @extends AcroFormField
-    */
-
-    var AcroFormEditBox = function AcroFormEditBox() {
-      AcroFormComboBox.call(this);
-      this.edit = true;
-    };
-
-    inherit(AcroFormEditBox, AcroFormComboBox);
-    /**
-    * @class AcroFormButton
-    * @extends AcroFormField
-    */
-
-    var AcroFormButton = function AcroFormButton() {
-      AcroFormField.call(this);
-      this.FT = "/Btn";
-      /**
-      * (Radio buttons only) If set, exactly one radio button shall be selected at all times; selecting the currently selected button has no effect. If clear, clicking the selected button deselects it, leaving no button selected.
-      * 
-      * @name AcroFormButton#noToggleToOff
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'noToggleToOff', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 15));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 15);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 15);
-          }
-        }
-      });
-      /**
-      * If set, the field is a set of radio buttons; if clear, the field is a checkbox. This flag may be set only if the Pushbutton flag is clear. 
-      * 
-      * @name AcroFormButton#radio
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'radio', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 16));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 16);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 16);
-          }
-        }
-      });
-      /**
-      * If set, the field is a pushbutton that does not retain a permanent value. 
-      *
-      * @name AcroFormButton#pushButton
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'pushButton', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 17));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 17);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 17);
-          }
-        }
-      });
-      /**
-      * (PDF 1.5) If set, a group of radio buttons within a radio button field that use the same value for the on state will turn on and off in unison; that is if one is checked, they are all checked. If clear, the buttons are mutually exclusive (the same behavior as HTML radio buttons).
-      *
-      * @name AcroFormButton#radioIsUnison
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'radioIsUnison', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 26));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 26);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 26);
-          }
-        }
-      });
-      var _MK = {};
-      Object.defineProperty(this, 'MK', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          if (Object.keys(_MK).length !== 0) {
-            var result = [];
-            result.push('<<');
-            var key;
-
-            for (key in _MK) {
-              result.push('/' + key + ' (' + _MK[key] + ')');
-            }
-
-            result.push('>>');
-            return result.join('\n');
-          }
-
-          return;
-        },
-        set: function set(value) {
-          if (_typeof(value) === "object") {
-            _MK = value;
-          }
-        }
-      });
-      /**
-      * From the PDF reference:
-      * (Optional, button fields only) The widget annotation's normal caption which shall be displayed when it is not interacting with the user. 
-      * Unlike the remaining entries listed in this Table which apply only to widget annotations associated with pushbutton fields (see Pushbuttons in 12.7.4.2, "Button Fields"), the CA entry may be used with any type of button field, including check boxes (see Check Boxes in 12.7.4.2, "Button Fields") and radio buttons (Radio Buttons in 12.7.4.2, "Button Fields").
-      *
-      * - '8' = Cross, 
-      * - 'l' =  Circle,
-      * - '' = nothing
-      * @name AcroFormButton#caption
-      * @type {string}
-      */
-
-      Object.defineProperty(this, 'caption', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _MK.CA || '';
-        },
-        set: function set(value) {
-          if (typeof value === "string") {
-            _MK.CA = value;
-          }
-        }
-      });
-
-      var _AS;
-
-      Object.defineProperty(this, 'AS', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          return _AS;
-        },
-        set: function set(value) {
-          _AS = value;
-        }
-      });
-      /**
-      * (Required if the appearance dictionary AP contains one or more subdictionaries; PDF 1.2) The annotation's appearance state, which selects the applicable appearance stream from an appearance subdictionary (see Section 12.5.5, "Appearance Streams")
-      *
-      * @name AcroFormButton#appearanceState
-      * @type {any}
-      */
-
-      Object.defineProperty(this, 'appearanceState', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _AS.substr(1, _AS.length - 1);
-        },
-        set: function set(value) {
-          _AS = '/' + value;
-        }
-      });
-    };
-
-    inherit(AcroFormButton, AcroFormField);
-    /**
-    * @class AcroFormPushButton
-    * @extends AcroFormButton
-    * @extends AcroFormField
-    */
-
-    var AcroFormPushButton = function AcroFormPushButton() {
-      AcroFormButton.call(this);
-      this.pushButton = true;
-    };
-
-    inherit(AcroFormPushButton, AcroFormButton);
-    /**
-    * @class AcroFormRadioButton
-    * @extends AcroFormButton
-    * @extends AcroFormField
-    */
-
-    var AcroFormRadioButton = function AcroFormRadioButton() {
-      AcroFormButton.call(this);
-      this.radio = true;
-      this.pushButton = false;
-      var _Kids = [];
-      Object.defineProperty(this, 'Kids', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return _Kids;
-        },
-        set: function set(value) {
-          if (typeof value !== "undefined") {
-            _Kids = value;
-          } else {
-            _Kids = [];
-          }
-        }
-      });
-    };
-
-    inherit(AcroFormRadioButton, AcroFormButton);
-    /**
-    * The Child class of a RadioButton (the radioGroup) -> The single Buttons
-    * 
-    * @class AcroFormChildClass
-    * @extends AcroFormField
-    * @ignore
-    */
-
-    var AcroFormChildClass = function AcroFormChildClass() {
-      AcroFormField.call(this);
-
-      var _parent;
-
-      Object.defineProperty(this, 'Parent', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          return _parent;
-        },
-        set: function set(value) {
-          _parent = value;
-        }
-      });
-
-      var _optionName;
-
-      Object.defineProperty(this, 'optionName', {
-        enumerable: false,
-        configurable: true,
-        get: function get() {
-          return _optionName;
-        },
-        set: function set(value) {
-          _optionName = value;
-        }
-      });
-      var _MK = {};
-      Object.defineProperty(this, 'MK', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          var result = [];
-          result.push('<<');
-          var key;
-
-          for (key in _MK) {
-            result.push('/' + key + ' (' + _MK[key] + ')');
-          }
-
-          result.push('>>');
-          return result.join('\n');
-        },
-        set: function set(value) {
-          if (_typeof(value) === "object") {
-            _MK = value;
-          }
-        }
-      });
-      /**
-      * From the PDF reference:
-      * (Optional, button fields only) The widget annotation's normal caption which shall be displayed when it is not interacting with the user. 
-      * Unlike the remaining entries listed in this Table which apply only to widget annotations associated with pushbutton fields (see Pushbuttons in 12.7.4.2, "Button Fields"), the CA entry may be used with any type of button field, including check boxes (see Check Boxes in 12.7.4.2, "Button Fields") and radio buttons (Radio Buttons in 12.7.4.2, "Button Fields").
-      *
-      * - '8' = Cross, 
-      * - 'l' =  Circle,
-      * - '' = nothing
-      * @name AcroFormButton#caption
-      * @type {string}
-      */
-
-      Object.defineProperty(this, 'caption', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _MK.CA || '';
-        },
-        set: function set(value) {
-          if (typeof value === "string") {
-            _MK.CA = value;
-          }
-        }
-      });
-
-      var _AS;
-
-      Object.defineProperty(this, 'AS', {
-        enumerable: false,
-        configurable: false,
-        get: function get() {
-          return _AS;
-        },
-        set: function set(value) {
-          _AS = value;
-        }
-      });
-      /**
-      * (Required if the appearance dictionary AP contains one or more subdictionaries; PDF 1.2) The annotation's appearance state, which selects the applicable appearance stream from an appearance subdictionary (see Section 12.5.5, "Appearance Streams")
-      *
-      * @name AcroFormButton#appearanceState
-      * @type {any}
-      */
-
-      Object.defineProperty(this, 'appearanceState', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _AS.substr(1, _AS.length - 1);
-        },
-        set: function set(value) {
-          _AS = '/' + value;
-        }
-      });
-      this.optionName = name;
-      this.caption = 'l';
-      this.appearanceState = 'Off'; // todo: set AppearanceType as variable that can be set from the
-      // outside...
-
-      this._AppearanceType = AcroFormAppearance.RadioButton.Circle; // The Default appearanceType is the Circle
-
-      this.appearanceStreamContent = this._AppearanceType.createAppearanceStream(name);
-    };
-
-    inherit(AcroFormChildClass, AcroFormField);
-
-    AcroFormRadioButton.prototype.setAppearance = function (appearance) {
-      if (!('createAppearanceStream' in appearance && 'getCA' in appearance)) {
-        throw new Error("Couldn't assign Appearance to RadioButton. Appearance was Invalid!");
-        return;
-      }
-
-      for (var objId in this.Kids) {
-        if (this.Kids.hasOwnProperty(objId)) {
-          var child = this.Kids[objId];
-          child.appearanceStreamContent = appearance.createAppearanceStream(child.optionName);
-          child.caption = appearance.getCA();
-        }
-      }
-    };
-
-    AcroFormRadioButton.prototype.createOption = function (name) {
-      var kidCount = this.Kids.length; // Create new Child for RadioGroup
-
-      var child = new AcroFormChildClass();
-      child.Parent = this;
-      child.optionName = name; // Add to Parent
-
-      this.Kids.push(child);
-      addField.call(this, child);
-      return child;
-    };
-    /**
-    * @class AcroFormCheckBox
-    * @extends AcroFormButton
-    * @extends AcroFormField
-    */
-
-
-    var AcroFormCheckBox = function AcroFormCheckBox() {
-      AcroFormButton.call(this);
-      this.fontName = 'zapfdingbats';
-      this.caption = '3';
-      this.appearanceState = 'On';
-      this.value = "On";
-      this.textAlign = 'center';
-      this.appearanceStreamContent = AcroFormAppearance.CheckBox.createAppearanceStream();
-    };
-
-    inherit(AcroFormCheckBox, AcroFormButton);
-    /**
-    * @class AcroFormTextField
-    * @extends AcroFormField
-    */
-
-    var AcroFormTextField = function AcroFormTextField() {
-      AcroFormField.call(this);
-      this.FT = '/Tx';
-      /**
-      * If set, the field may contain multiple lines of text; if clear, the field’s text shall be restricted to a single line. 
-      *
-      * @name AcroFormTextField#multiline
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'multiline', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 13));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 13);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 13);
-          }
-        }
-      });
-      /**
-      * (PDF 1.4) If set, the text entered in the field represents the pathname of a file whose contents shall be submitted as the value of the field. 
-      * 
-      * @name AcroFormTextField#fileSelect
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'fileSelect', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 21));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 21);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 21);
-          }
-        }
-      });
-      /**
-      * (PDF 1.4) If set, text entered in the field shall not be spell-checked. 
-      *
-      * @name AcroFormTextField#doNotSpellCheck
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'doNotSpellCheck', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 23));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 23);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 23);
-          }
-        }
-      });
-      /**
-      * (PDF 1.4) If set, the field shall not scroll (horizontally for single-line fields, vertically for multiple-line fields) to accommodate more text than fits within its annotation rectangle. Once the field is full, no further text shall be accepted for interactive form filling; for noninteractive form filling, the filler should take care not to add more character than will visibly fit in the defined area. 
-      * 
-      * @name AcroFormTextField#doNotScroll
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'doNotScroll', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 24));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 24);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 24);
-          }
-        }
-      });
-      /**
-      * (PDF 1.5) May be set only if the MaxLen entry is present in the text field dictionary (see Table 229) and if the Multiline, Password, and FileSelect flags are clear. If set, the field shall be automatically divided into as many equally spaced positions, or combs, as the value of MaxLen, and the text is laid out into those combs.
-      * 
-      * @name AcroFormTextField#comb
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'comb', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 25));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 25);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 25);
-          }
-        }
-      });
-      /**
-      * (PDF 1.5) If set, the value of this field shall be a rich text string (see 12.7.3.4, “Rich Text Strings”). If the field has a value, the RV entry of the field dictionary (Table 222) shall specify the rich text string.
-      * 
-      * @name AcroFormTextField#richText
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'richText', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 26));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 26);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 26);
-          }
-        }
-      });
-      var _MaxLen = null;
-      Object.defineProperty(this, 'MaxLen', {
-        enumerable: true,
-        configurable: false,
-        get: function get() {
-          return _MaxLen;
-        },
-        set: function set(value) {
-          _MaxLen = value;
-        }
-      });
-      /**
-      * (Optional; inheritable) The maximum length of the field’s text, in characters. 
-      *
-      * @name AcroFormTextField#maxLength
-      * @type {number}
-      */
-
-      Object.defineProperty(this, 'maxLength', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return _MaxLen;
-        },
-        set: function set(value) {
-          if (Number.isInteger(value)) {
-            _MaxLen = value;
-          }
-        }
-      });
-      Object.defineProperty(this, 'hasAppearanceStream', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return this.V || this.DV;
-        }
-      });
-    };
-
-    inherit(AcroFormTextField, AcroFormField);
-    /**
-    * @class AcroFormPasswordField
-    * @extends AcroFormTextField
-    * @extends AcroFormField
-    */
-
-    var AcroFormPasswordField = function AcroFormPasswordField() {
-      AcroFormTextField.call(this);
-      /**
-      * If set, the field is intended for entering a secure password that should not be echoed visibly to the screen. Characters typed from the keyboard shall instead be echoed in some unreadable form, such as asterisks or bullet characters.
-      * NOTE To protect password confidentiality, readers should never store the value of the text field in the PDF file if this flag is set. 
-      *
-      * @name AcroFormTextField#password
-      * @type {boolean}
-      */
-
-      Object.defineProperty(this, 'password', {
-        enumerable: true,
-        configurable: true,
-        get: function get() {
-          return Boolean(getBitForPdf(this.Ff, 14));
-        },
-        set: function set(value) {
-          if (Boolean(value) === true) {
-            this.Ff = setBitForPdf(this.Ff, 14);
-          } else {
-            this.Ff = clearBitForPdf(this.Ff, 14);
-          }
-        }
-      });
-      this.password = true;
-    };
-
-    inherit(AcroFormPasswordField, AcroFormTextField); // Contains Methods for creating standard appearances
-
-    var AcroFormAppearance = {
-      CheckBox: {
-        createAppearanceStream: function createAppearanceStream() {
-          var appearance = {
-            N: {
-              On: AcroFormAppearance.CheckBox.YesNormal
-            },
-            D: {
-              On: AcroFormAppearance.CheckBox.YesPushDown,
-              Off: AcroFormAppearance.CheckBox.OffPushDown
-            }
-          };
-          return appearance;
-        },
-
-        /**
-          * Returns the standard On Appearance for a CheckBox
-          * 
-          * @returns {AcroFormXObject}
-          */
-        YesPushDown: function YesPushDown(formObject) {
-          var xobj = createFormXObject(formObject);
-          var stream = [];
-          var fontKey = scope.internal.getFont(formObject.fontName, formObject.fontStyle).id;
-
-          var encodedColor = scope.__private__.encodeColorString(formObject.color);
-
-          var calcRes = calculateX(formObject, formObject.caption);
-          stream.push("0.749023 g");
-          stream.push("0 0 " + f2(AcroFormAppearance.internal.getWidth(formObject)) + " " + f2(AcroFormAppearance.internal.getHeight(formObject)) + " re");
-          stream.push("f");
-          stream.push("BMC");
-          stream.push("q");
-          stream.push("0 0 1 rg");
-          stream.push("/" + fontKey + " " + f2(calcRes.fontSize) + " Tf " + encodedColor);
-          stream.push("BT");
-          stream.push(calcRes.text);
-          stream.push("ET");
-          stream.push("Q");
-          stream.push("EMC");
-          xobj.stream = stream.join("\n");
-          return xobj;
-        },
-        YesNormal: function YesNormal(formObject) {
-          var xobj = createFormXObject(formObject);
-          var fontKey = scope.internal.getFont(formObject.fontName, formObject.fontStyle).id;
-
-          var encodedColor = scope.__private__.encodeColorString(formObject.color);
-
-          var stream = [];
-          var height = AcroFormAppearance.internal.getHeight(formObject);
-          var width = AcroFormAppearance.internal.getWidth(formObject);
-          var calcRes = calculateX(formObject, formObject.caption);
-          stream.push("1 g");
-          stream.push("0 0 " + f2(width) + " " + f2(height) + " re");
-          stream.push("f");
-          stream.push("q");
-          stream.push("0 0 1 rg");
-          stream.push("0 0 " + f2(width - 1) + " " + f2(height - 1) + " re");
-          stream.push("W");
-          stream.push("n");
-          stream.push("0 g");
-          stream.push("BT");
-          stream.push("/" + fontKey + " " + f2(calcRes.fontSize) + " Tf " + encodedColor);
-          stream.push(calcRes.text);
-          stream.push("ET");
-          stream.push("Q");
-          xobj.stream = stream.join("\n");
-          return xobj;
-        },
-
-        /**
-          * Returns the standard Off Appearance for a CheckBox
-          * 
-          * @returns {AcroFormXObject}
-          */
-        OffPushDown: function OffPushDown(formObject) {
-          var xobj = createFormXObject(formObject);
-          var stream = [];
-          stream.push("0.749023 g");
-          stream.push("0 0 " + f2(AcroFormAppearance.internal.getWidth(formObject)) + " " + f2(AcroFormAppearance.internal.getHeight(formObject)) + " re");
-          stream.push("f");
-          xobj.stream = stream.join("\n");
-          return xobj;
-        }
-      },
-      RadioButton: {
-        Circle: {
-          createAppearanceStream: function createAppearanceStream(name) {
-            var appearanceStreamContent = {
-              D: {
-                'Off': AcroFormAppearance.RadioButton.Circle.OffPushDown
-              },
-              N: {}
-            };
-            appearanceStreamContent.N[name] = AcroFormAppearance.RadioButton.Circle.YesNormal;
-            appearanceStreamContent.D[name] = AcroFormAppearance.RadioButton.Circle.YesPushDown;
-            return appearanceStreamContent;
-          },
-          getCA: function getCA() {
-            return 'l';
-          },
-          YesNormal: function YesNormal(formObject) {
-            var xobj = createFormXObject(formObject);
-            var stream = []; // Make the Radius of the Circle relative to min(height, width) of formObject
-
-            var DotRadius = AcroFormAppearance.internal.getWidth(formObject) <= AcroFormAppearance.internal.getHeight(formObject) ? AcroFormAppearance.internal.getWidth(formObject) / 4 : AcroFormAppearance.internal.getHeight(formObject) / 4; // The Borderpadding...
-
-            DotRadius = Number((DotRadius * 0.9).toFixed(5));
-            var c = AcroFormAppearance.internal.Bezier_C;
-            var DotRadiusBezier = Number((DotRadius * c).toFixed(5));
-            /*
-              * The Following is a Circle created with Bezier-Curves.
-              */
-
-            stream.push("q");
-            stream.push("1 0 0 1 " + f5(AcroFormAppearance.internal.getWidth(formObject) / 2) + " " + f5(AcroFormAppearance.internal.getHeight(formObject) / 2) + " cm");
-            stream.push(DotRadius + " 0 m");
-            stream.push(DotRadius + " " + DotRadiusBezier + " " + DotRadiusBezier + " " + DotRadius + " 0 " + DotRadius + " c");
-            stream.push("-" + DotRadiusBezier + " " + DotRadius + " -" + DotRadius + " " + DotRadiusBezier + " -" + DotRadius + " 0 c");
-            stream.push("-" + DotRadius + " -" + DotRadiusBezier + " -" + DotRadiusBezier + " -" + DotRadius + " 0 -" + DotRadius + " c");
-            stream.push(DotRadiusBezier + " -" + DotRadius + " " + DotRadius + " -" + DotRadiusBezier + " " + DotRadius + " 0 c");
-            stream.push("f");
-            stream.push("Q");
-            xobj.stream = stream.join("\n");
-            return xobj;
-          },
-          YesPushDown: function YesPushDown(formObject) {
-            var xobj = createFormXObject(formObject);
-            var stream = [];
-            var DotRadius = AcroFormAppearance.internal.getWidth(formObject) <= AcroFormAppearance.internal.getHeight(formObject) ? AcroFormAppearance.internal.getWidth(formObject) / 4 : AcroFormAppearance.internal.getHeight(formObject) / 4; // The Borderpadding...
-
-            var DotRadius = Number((DotRadius * 0.9).toFixed(5)); // Save results for later use; no need to waste
-            // processor ticks on doing math
-
-            var k = Number((DotRadius * 2).toFixed(5));
-            var kc = Number((k * AcroFormAppearance.internal.Bezier_C).toFixed(5));
-            var dc = Number((DotRadius * AcroFormAppearance.internal.Bezier_C).toFixed(5));
-            stream.push("0.749023 g");
-            stream.push("q");
-            stream.push("1 0 0 1 " + f5(AcroFormAppearance.internal.getWidth(formObject) / 2) + " " + f5(AcroFormAppearance.internal.getHeight(formObject) / 2) + " cm");
-            stream.push(k + " 0 m");
-            stream.push(k + " " + kc + " " + kc + " " + k + " 0 " + k + " c");
-            stream.push("-" + kc + " " + k + " -" + k + " " + kc + " -" + k + " 0 c");
-            stream.push("-" + k + " -" + kc + " -" + kc + " -" + k + " 0 -" + k + " c");
-            stream.push(kc + " -" + k + " " + k + " -" + kc + " " + k + " 0 c");
-            stream.push("f");
-            stream.push("Q");
-            stream.push("0 g");
-            stream.push("q");
-            stream.push("1 0 0 1 " + f5(AcroFormAppearance.internal.getWidth(formObject) / 2) + " " + f5(AcroFormAppearance.internal.getHeight(formObject) / 2) + " cm");
-            stream.push(DotRadius + " 0 m");
-            stream.push("" + DotRadius + " " + dc + " " + dc + " " + DotRadius + " 0 " + DotRadius + " c");
-            stream.push("-" + dc + " " + DotRadius + " -" + DotRadius + " " + dc + " -" + DotRadius + " 0 c");
-            stream.push("-" + DotRadius + " -" + dc + " -" + dc + " -" + DotRadius + " 0 -" + DotRadius + " c");
-            stream.push(dc + " -" + DotRadius + " " + DotRadius + " -" + dc + " " + DotRadius + " 0 c");
-            stream.push("f");
-            stream.push("Q");
-            xobj.stream = stream.join("\n");
-            return xobj;
-          },
-          OffPushDown: function OffPushDown(formObject) {
-            var xobj = createFormXObject(formObject);
-            var stream = [];
-            var DotRadius = AcroFormAppearance.internal.getWidth(formObject) <= AcroFormAppearance.internal.getHeight(formObject) ? AcroFormAppearance.internal.getWidth(formObject) / 4 : AcroFormAppearance.internal.getHeight(formObject) / 4; // The Borderpadding...
-
-            var DotRadius = Number((DotRadius * 0.9).toFixed(5)); // Save results for later use; no need to waste
-            // processor ticks on doing math
-
-            var k = Number((DotRadius * 2).toFixed(5));
-            var kc = Number((k * AcroFormAppearance.internal.Bezier_C).toFixed(5));
-            stream.push("0.749023 g");
-            stream.push("q");
-            stream.push("1 0 0 1 " + f5(AcroFormAppearance.internal.getWidth(formObject) / 2) + " " + f5(AcroFormAppearance.internal.getHeight(formObject) / 2) + " cm");
-            stream.push(k + " 0 m");
-            stream.push(k + " " + kc + " " + kc + " " + k + " 0 " + k + " c");
-            stream.push("-" + kc + " " + k + " -" + k + " " + kc + " -" + k + " 0 c");
-            stream.push("-" + k + " -" + kc + " -" + kc + " -" + k + " 0 -" + k + " c");
-            stream.push(kc + " -" + k + " " + k + " -" + kc + " " + k + " 0 c");
-            stream.push("f");
-            stream.push("Q");
-            xobj.stream = stream.join("\n");
-            return xobj;
-          }
-        },
-        Cross: {
-          /**
-            * Creates the Actual AppearanceDictionary-References
-            * 
-            * @param {string} name
-            * @returns {Object}
-            * @ignore
-            */
-          createAppearanceStream: function createAppearanceStream(name) {
-            var appearanceStreamContent = {
-              D: {
-                'Off': AcroFormAppearance.RadioButton.Cross.OffPushDown
-              },
-              N: {}
-            };
-            appearanceStreamContent.N[name] = AcroFormAppearance.RadioButton.Cross.YesNormal;
-            appearanceStreamContent.D[name] = AcroFormAppearance.RadioButton.Cross.YesPushDown;
-            return appearanceStreamContent;
-          },
-          getCA: function getCA() {
-            return '8';
-          },
-          YesNormal: function YesNormal(formObject) {
-            var xobj = createFormXObject(formObject);
-            var stream = [];
-            var cross = AcroFormAppearance.internal.calculateCross(formObject);
-            stream.push("q");
-            stream.push("1 1 " + f2(AcroFormAppearance.internal.getWidth(formObject) - 2) + " " + f2(AcroFormAppearance.internal.getHeight(formObject) - 2) + " re");
-            stream.push("W");
-            stream.push("n");
-            stream.push(f2(cross.x1.x) + " " + f2(cross.x1.y) + " m");
-            stream.push(f2(cross.x2.x) + " " + f2(cross.x2.y) + " l");
-            stream.push(f2(cross.x4.x) + " " + f2(cross.x4.y) + " m");
-            stream.push(f2(cross.x3.x) + " " + f2(cross.x3.y) + " l");
-            stream.push("s");
-            stream.push("Q");
-            xobj.stream = stream.join("\n");
-            return xobj;
-          },
-          YesPushDown: function YesPushDown(formObject) {
-            var xobj = createFormXObject(formObject);
-            var cross = AcroFormAppearance.internal.calculateCross(formObject);
-            var stream = [];
-            stream.push("0.749023 g");
-            stream.push("0 0 " + f2(AcroFormAppearance.internal.getWidth(formObject)) + " " + f2(AcroFormAppearance.internal.getHeight(formObject)) + " re");
-            stream.push("f");
-            stream.push("q");
-            stream.push("1 1 " + f2(AcroFormAppearance.internal.getWidth(formObject) - 2) + " " + f2(AcroFormAppearance.internal.getHeight(formObject) - 2) + " re");
-            stream.push("W");
-            stream.push("n");
-            stream.push(f2(cross.x1.x) + " " + f2(cross.x1.y) + " m");
-            stream.push(f2(cross.x2.x) + " " + f2(cross.x2.y) + " l");
-            stream.push(f2(cross.x4.x) + " " + f2(cross.x4.y) + " m");
-            stream.push(f2(cross.x3.x) + " " + f2(cross.x3.y) + " l");
-            stream.push("s");
-            stream.push("Q");
-            xobj.stream = stream.join("\n");
-            return xobj;
-          },
-          OffPushDown: function OffPushDown(formObject) {
-            var xobj = createFormXObject(formObject);
-            var stream = [];
-            stream.push("0.749023 g");
-            stream.push("0 0 " + f2(AcroFormAppearance.internal.getWidth(formObject)) + " " + f2(AcroFormAppearance.internal.getHeight(formObject)) + " re");
-            stream.push("f");
-            xobj.stream = stream.join("\n");
-            return xobj;
-          }
-        }
-      },
-
-      /**
-        * Returns the standard Appearance
-        * 
-        * @returns {AcroFormXObject}
-        */
-      createDefaultAppearanceStream: function createDefaultAppearanceStream(formObject) {
-        // Set Helvetica to Standard Font (size: auto)
-        // Color: Black
-        var fontKey = scope.internal.getFont(formObject.fontName, formObject.fontStyle).id;
-
-        var encodedColor = scope.__private__.encodeColorString(formObject.color);
-
-        var fontSize = formObject.fontSize;
-        var result = '/' + fontKey + ' ' + fontSize + ' Tf ' + encodedColor;
-        return result;
-      }
-    };
-    AcroFormAppearance.internal = {
-      Bezier_C: 0.551915024494,
-      calculateCross: function calculateCross(formObject) {
-        var width = AcroFormAppearance.internal.getWidth(formObject);
-        var height = AcroFormAppearance.internal.getHeight(formObject);
-        var a = Math.min(width, height);
-
-        var cross = {
-          x1: {
-            // upperLeft
-            x: (width - a) / 2,
-            y: (height - a) / 2 + a // height - borderPadding
-
-          },
-          x2: {
-            // lowerRight
-            x: (width - a) / 2 + a,
-            y: (height - a) / 2 // borderPadding
-
-          },
-          x3: {
-            // lowerLeft
-            x: (width - a) / 2,
-            y: (height - a) / 2 // borderPadding
-
-          },
-          x4: {
-            // upperRight
-            x: (width - a) / 2 + a,
-            y: (height - a) / 2 + a // height - borderPadding
-
-          }
-        };
-        return cross;
-      }
-    };
-
-    AcroFormAppearance.internal.getWidth = function (formObject) {
-      var result = 0;
-
-      if (_typeof(formObject) === "object") {
-        result = scale(formObject.Rect[2]);
-      }
-
-      return result;
-    };
-
-    AcroFormAppearance.internal.getHeight = function (formObject) {
-      var result = 0;
-
-      if (_typeof(formObject) === "object") {
-        result = scale(formObject.Rect[3]);
-      }
-
-      return result;
-    }; // Public:
-
-    /**
-    * Add an AcroForm-Field to the jsPDF-instance
-    *
-    * @name addField
-    * @function 
-    * @instance
-    * @param {Object} fieldObject
-    * @returns {jsPDF}
-    */
-
-
-    var addField = jsPDFAPI.addField = function (fieldObject) {
-      initializeAcroForm.call(this);
-
-      if (fieldObject instanceof AcroFormField) {
-        putForm.call(this, fieldObject);
-      } else {
-        throw new Error('Invalid argument passed to jsPDF.addField.');
-      }
-
-      fieldObject.page = scope.internal.getCurrentPageInfo().pageNumber;
-      return this;
-    };
-    /**
-    * @name addButton
-    * @function
-    * @instance
-    * @param {AcroFormButton} options
-    * @returns {jsPDF}
-    * @deprecated
-    */
-
-
-    var addButton = jsPDFAPI.addButton = function (button) {
-      if (button instanceof AcroFormButton === false) {
-        throw new Error('Invalid argument passed to jsPDF.addButton.');
-      }
-
-      return addField.call(this, button);
-    };
-    /**
-    * @name addTextField
-    * @function
-    * @instance
-    * @param {AcroFormTextField} textField
-    * @returns {jsPDF}
-    * @deprecated
-    */
-
-
-    var addTextField = jsPDFAPI.addTextField = function (textField) {
-      if (textField instanceof AcroFormTextField === false) {
-        throw new Error('Invalid argument passed to jsPDF.addTextField.');
-      }
-
-      return addField.call(this, textField);
-    };
-    /**
-    * @name addChoiceField
-    * @function
-    * @instance
-    * @param {AcroFormChoiceField} 
-    * @returns {jsPDF}
-    * @deprecated
-    */
-
-
-    var addChoiceField = jsPDFAPI.addChoiceField = function (choiceField) {
-      if (choiceField instanceof AcroFormChoiceField === false) {
-        throw new Error('Invalid argument passed to jsPDF.addChoiceField.');
-      }
-
-      return addField.call(this, choiceField);
-    };
-
-    if (_typeof(globalObj) == "object" && typeof globalObj["ChoiceField"] === "undefined" && typeof globalObj["ListBox"] === "undefined" && typeof globalObj["ComboBox"] === "undefined" && typeof globalObj["EditBox"] === "undefined" && typeof globalObj["Button"] === "undefined" && typeof globalObj["PushButton"] === "undefined" && typeof globalObj["RadioButton"] === "undefined" && typeof globalObj["CheckBox"] === "undefined" && typeof globalObj["TextField"] === "undefined" && typeof globalObj["PasswordField"] === "undefined") {
-      globalObj["ChoiceField"] = AcroFormChoiceField;
-      globalObj["ListBox"] = AcroFormListBox;
-      globalObj["ComboBox"] = AcroFormComboBox;
-      globalObj["EditBox"] = AcroFormEditBox;
-      globalObj["Button"] = AcroFormButton;
-      globalObj["PushButton"] = AcroFormPushButton;
-      globalObj["RadioButton"] = AcroFormRadioButton;
-      globalObj["CheckBox"] = AcroFormCheckBox;
-      globalObj["TextField"] = AcroFormTextField;
-      globalObj["PasswordField"] = AcroFormPasswordField; // backwardsCompatibility
-
-      globalObj["AcroForm"] = {
-        Appearance: AcroFormAppearance
-      };
-    } else {
-      console.warn("AcroForm-Classes are not populated into global-namespace, because the class-Names exist already.");
-    }
-
-    jsPDFAPI.AcroFormChoiceField = AcroFormChoiceField;
-    jsPDFAPI.AcroFormListBox = AcroFormListBox;
-    jsPDFAPI.AcroFormComboBox = AcroFormComboBox;
-    jsPDFAPI.AcroFormEditBox = AcroFormEditBox;
-    jsPDFAPI.AcroFormButton = AcroFormButton;
-    jsPDFAPI.AcroFormPushButton = AcroFormPushButton;
-    jsPDFAPI.AcroFormRadioButton = AcroFormRadioButton;
-    jsPDFAPI.AcroFormCheckBox = AcroFormCheckBox;
-    jsPDFAPI.AcroFormTextField = AcroFormTextField;
-    jsPDFAPI.AcroFormPasswordField = AcroFormPasswordField;
-    jsPDFAPI.AcroFormAppearance = AcroFormAppearance;
-    jsPDFAPI.AcroForm = {
-      ChoiceField: AcroFormChoiceField,
-      ListBox: AcroFormListBox,
-      ComboBox: AcroFormComboBox,
-      EditBox: AcroFormEditBox,
-      Button: AcroFormButton,
-      PushButton: AcroFormPushButton,
-      RadioButton: AcroFormRadioButton,
-      CheckBox: AcroFormCheckBox,
-      TextField: AcroFormTextField,
-      PasswordField: AcroFormPasswordField,
-      Appearance: AcroFormAppearance
-    };
-  })(jsPDF.API, typeof window !== "undefined" && window || typeof global !== "undefined" && global);
 
   /** @license
    * jsPDF addImage plugin
@@ -6763,11 +5107,14 @@
       [0x49, 0x49, 0x2A, 0x00] //Intel
       ],
       JPEG: [[0xFF, 0xD8, 0xFF, 0xE0, undefined, undefined, 0x4A, 0x46, 0x49, 0x46, 0x00], //JFIF
-      [0xFF, 0xD8, 0xFF, 0xE1, undefined, undefined, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00] //Exif
+      [0xFF, 0xD8, 0xFF, 0xE1, undefined, undefined, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00], //Exif
+      [0xFF, 0xD8, 0xFF, 0xDB], //JPEG RAW
+      [0xFF, 0xD8, 0xFF, 0xEE] //EXIF RAW
       ],
       JPEG2000: [[0x00, 0x00, 0x00, 0x0C, 0x6A, 0x50, 0x20, 0x20]],
       GIF87a: [[0x47, 0x49, 0x46, 0x38, 0x37, 0x61]],
       GIF89a: [[0x47, 0x49, 0x46, 0x38, 0x39, 0x61]],
+      WEBP: [[0x52, 0x49, 0x46, 0x46, undefined, undefined, undefined, undefined, 0x57, 0x45, 0x42, 0x50]],
       BMP: [[0x42, 0x4D], //BM - Windows 3.1x, 95, NT, ... etc.
       [0x42, 0x41], //BA - OS/2 struct bitmap array
       [0x43, 0x49], //CI - OS/2 struct color icon
@@ -6938,7 +5285,7 @@
           'dp': dp,
           'data': img['smask']
         };
-        if ('f' in img) smask.f = img['f'];
+        if ('f' in img) { smask.f = img['f']; }
         putImage.call(this, smask);
       } //Palette
 
@@ -6971,7 +5318,7 @@
       }
     },
         checkCompressValue = function checkCompressValue(value) {
-      if (value && typeof value === 'string') value = value.toUpperCase();
+      if (value && typeof value === 'string') { value = value.toUpperCase(); }
       return value in jsPDFAPI.image_compression ? value : jsPDFAPI.image_compression.NONE;
     },
         getImages = function getImages() {
@@ -7189,7 +5536,7 @@
       var hash = 0,
           i,
           chr;
-      if (str.length === 0) return hash;
+      if (str.length === 0) { return hash; }
 
       for (i = 0; i < str.length; i++) {
         chr = str.charCodeAt(i);
@@ -7198,17 +5545,6 @@
       }
 
       return hash;
-    };
-    /**
-    * @name isString
-    * @function
-    * @param {any} object
-    * @returns {boolean} 
-    */
-
-
-    jsPDFAPI.isString = function (object) {
-      return typeof object === 'string';
     };
     /**
     * Validates if given String is a valid Base64-String
@@ -7319,8 +5655,7 @@
 
 
     jsPDFAPI.isArrayBuffer = function (object) {
-      if (!this.supportsArrayBuffer()) return false;
-      return object instanceof ArrayBuffer;
+      return this.supportsArrayBuffer() && object instanceof ArrayBuffer;
     };
     /**
      * Tests supplied object to determine if it implements the ArrayBufferView (TypedArray) interface
@@ -7333,9 +5668,7 @@
 
 
     jsPDFAPI.isArrayBufferView = function (object) {
-      if (!this.supportsArrayBuffer()) return false;
-      if (typeof Uint32Array === 'undefined') return false;
-      return object instanceof Int8Array || object instanceof Uint8Array || typeof Uint8ClampedArray !== 'undefined' && object instanceof Uint8ClampedArray || object instanceof Int16Array || object instanceof Uint16Array || object instanceof Int32Array || object instanceof Uint32Array || object instanceof Float32Array || object instanceof Float64Array;
+      return this.supportsArrayBuffer() && typeof Uint32Array !== 'undefined' && (object instanceof Int8Array || object instanceof Uint8Array || typeof Uint8ClampedArray !== 'undefined' && object instanceof Uint8ClampedArray || object instanceof Int16Array || object instanceof Uint16Array || object instanceof Int32Array || object instanceof Uint32Array || object instanceof Float32Array || object instanceof Float64Array);
     };
     /**
     * Convert the Buffer to a Binary String
@@ -7483,12 +5816,12 @@
         data: data // n: objectNumber will be added by putImage code
 
       };
-      if (f) info.f = f;
-      if (dp) info.dp = dp;
-      if (trns) info.trns = trns;
-      if (pal) info.pal = pal;
-      if (smask) info.smask = smask;
-      if (p) info.p = p; // predictor parameter for PNG compression
+      if (f) { info.f = f; }
+      if (dp) { info.dp = dp; }
+      if (trns) { info.trns = trns; }
+      if (pal) { info.pal = pal; }
+      if (smask) { info.smask = smask; }
+      if (p) { info.p = p; } // predictor parameter for PNG compression
 
       return info;
     };
@@ -7559,12 +5892,12 @@
           dataAsBinaryString;
 
       if (!(info = checkImagesForAlias(imageData, images))) {
-        if (isDOMElement(imageData)) imageData = createDataURIFromElement(imageData, format);
-        if (notDefined(alias)) alias = generateAliasFromImageData(imageData);
+        if (isDOMElement(imageData)) { imageData = createDataURIFromElement(imageData, format); }
+        if (notDefined(alias)) { alias = generateAliasFromImageData(imageData); }
 
         if (!(info = checkImagesForAlias(alias, images))) {
-          if (this.isString(imageData)) {
-            tmpImageData = this.convertStringToImageData(imageData);
+          if (typeof imageData === 'string') {
+            tmpImageData = this.convertStringToImageData(imageData, false);
 
             if (tmpImageData !== '') {
               imageData = tmpImageData;
@@ -7578,7 +5911,7 @@
           }
 
           format = this.getImageFileTypeByImageData(imageData, format);
-          if (!isImageTypeSupported(format)) throw new Error('addImage does not support files of type \'' + format + '\', please ensure that a plugin for \'' + format + '\' support is added.');
+          if (!isImageTypeSupported(format)) { throw new Error('addImage does not support files of type \'' + format + '\', please ensure that a plugin for \'' + format + '\' support is added.'); }
           /**
            * need to test if it's more efficient to convert all binary strings
            * to TypedArray - or should we just leave and process as string?
@@ -7611,12 +5944,13 @@
     */
 
 
-    jsPDFAPI.convertStringToImageData = function (stringData) {
+    jsPDFAPI.convertStringToImageData = function (stringData, throwError) {
+      throwError = typeof throwError === "boolean" ? throwError : true;
       var base64Info;
       var imageData = '';
       var rawData;
 
-      if (this.isString(stringData)) {
+      if (typeof stringData === 'string') {
         var base64Info = this.extractImageFromDataUrl(stringData);
         rawData = base64Info !== null ? base64Info.data : stringData;
 
@@ -7624,153 +5958,22 @@
           imageData = atob(rawData);
         } catch (e) {
           if (!jsPDFAPI.validateStringAsBase64(rawData)) {
-            throw new Error('Supplied Data is not a valid base64-String jsPDF.convertStringToImageData ');
+            if (throwError) {
+              throw new Error('Supplied Data is not a valid base64-String jsPDF.convertStringToImageData ');
+            } else {
+              console.log('Supplied Data is not a valid base64-String jsPDF.convertStringToImageData ');
+            }
           } else {
-            throw new Error('atob-Error in jsPDF.convertStringToImageData ' + e.message);
+            if (throwError) {
+              throw new Error('atob-Error in jsPDF.convertStringToImageData ' + e.message);
+            } else {
+              console.log('atob-Error in jsPDF.convertStringToImageData ' + e.message);
+            }
           }
         }
       }
 
       return imageData;
-    };
-    /**
-     * JPEG SUPPORT
-     **/
-    //takes a string imgData containing the raw bytes of
-    //a jpeg image and returns [width, height]
-    //Algorithm from: http://www.64lines.com/jpeg-width-height
-
-
-    var getJpegSize = function getJpegSize(imgData) {
-
-      var width, height, numcomponents; // Verify we have a valid jpeg header 0xff,0xd8,0xff,0xe0,?,?,'J','F','I','F',0x00
-
-      if (getImageFileTypeByImageData(imgData) !== 'JPEG') {
-        throw new Error('getJpegSize requires a binary string jpeg file');
-      }
-
-      var blockLength = imgData.charCodeAt(4) * 256 + imgData.charCodeAt(5);
-      var i = 4,
-          len = imgData.length;
-
-      while (i < len) {
-        i += blockLength;
-
-        if (imgData.charCodeAt(i) !== 0xff) {
-          throw new Error('getJpegSize could not find the size of the image');
-        }
-
-        if (imgData.charCodeAt(i + 1) === 0xc0 || //(SOF) Huffman  - Baseline DCT
-        imgData.charCodeAt(i + 1) === 0xc1 || //(SOF) Huffman  - Extended sequential DCT
-        imgData.charCodeAt(i + 1) === 0xc2 || // Progressive DCT (SOF2)
-        imgData.charCodeAt(i + 1) === 0xc3 || // Spatial (sequential) lossless (SOF3)
-        imgData.charCodeAt(i + 1) === 0xc4 || // Differential sequential DCT (SOF5)
-        imgData.charCodeAt(i + 1) === 0xc5 || // Differential progressive DCT (SOF6)
-        imgData.charCodeAt(i + 1) === 0xc6 || // Differential spatial (SOF7)
-        imgData.charCodeAt(i + 1) === 0xc7) {
-          height = imgData.charCodeAt(i + 5) * 256 + imgData.charCodeAt(i + 6);
-          width = imgData.charCodeAt(i + 7) * 256 + imgData.charCodeAt(i + 8);
-          numcomponents = imgData.charCodeAt(i + 9);
-          return [width, height, numcomponents];
-        } else {
-          i += 2;
-          blockLength = imgData.charCodeAt(i) * 256 + imgData.charCodeAt(i + 1);
-        }
-      }
-    },
-        getJpegSizeFromBytes = function getJpegSizeFromBytes(data) {
-      var hdr = data[0] << 8 | data[1];
-      if (hdr !== 0xFFD8) throw new Error('Supplied data is not a JPEG');
-      var len = data.length,
-          block = (data[4] << 8) + data[5],
-          pos = 4,
-          bytes,
-          width,
-          height,
-          numcomponents;
-
-      while (pos < len) {
-        pos += block;
-        bytes = readBytes(data, pos);
-        block = (bytes[2] << 8) + bytes[3];
-
-        if ((bytes[1] === 0xC0 || bytes[1] === 0xC2) && bytes[0] === 0xFF && block > 7) {
-          bytes = readBytes(data, pos + 5);
-          width = (bytes[2] << 8) + bytes[3];
-          height = (bytes[0] << 8) + bytes[1];
-          numcomponents = bytes[4];
-          return {
-            width: width,
-            height: height,
-            numcomponents: numcomponents
-          };
-        }
-
-        pos += 2;
-      }
-
-      throw new Error('getJpegSizeFromBytes could not find the size of the image');
-    },
-        readBytes = function readBytes(data, offset) {
-      return data.subarray(offset, offset + 5);
-    };
-    /**
-    * @ignore
-    */
-
-
-    jsPDFAPI.processJPEG = function (data, index, alias, compression, dataAsBinaryString, colorSpace) {
-
-      var filter = this.decode.DCT_DECODE,
-          bpc = 8,
-          dims;
-
-      if (!this.isString(data) && !this.isArrayBuffer(data) && !this.isArrayBufferView(data)) {
-        return null;
-      }
-
-      if (this.isString(data)) {
-        dims = getJpegSize(data);
-      }
-
-      if (this.isArrayBuffer(data)) {
-        data = new Uint8Array(data);
-      }
-
-      if (this.isArrayBufferView(data)) {
-        dims = getJpegSizeFromBytes(data); // if we already have a stored binary string rep use that
-
-        data = dataAsBinaryString || this.arrayBufferToBinaryString(data);
-      }
-
-      if (colorSpace === undefined) {
-        switch (dims.numcomponents) {
-          case 1:
-            colorSpace = this.color_spaces.DEVICE_GRAY;
-            break;
-
-          case 4:
-            colorSpace = this.color_spaces.DEVICE_CMYK;
-            break;
-
-          default:
-          case 3:
-            colorSpace = this.color_spaces.DEVICE_RGB;
-            break;
-        }
-      }
-
-      return this.createImageInfo(data, dims.width, dims.height, colorSpace, bpc, filter, index, alias);
-    };
-    /**
-    * @ignore
-    */
-
-
-    jsPDFAPI.processJPG = function ()
-    /*data, index, alias, compression, dataAsBinaryString*/
-    {
-      return this.processJPEG.apply(this, arguments);
     };
     /**
     * @name getImageProperties
@@ -7789,18 +5992,14 @@
         imageData = createDataURIFromElement(imageData);
       }
 
-      if (this.isString(imageData)) {
-        tmpImageData = this.convertStringToImageData(imageData);
+      if (typeof imageData === "string") {
+        tmpImageData = this.convertStringToImageData(imageData, false);
 
-        if (tmpImageData !== '') {
-          imageData = tmpImageData;
-        } else {
-          tmpImageData = jsPDFAPI.loadFile(imageData);
-
-          if (tmpImageData !== undefined) {
-            imageData = tmpImageData;
-          }
+        if (tmpImageData === '') {
+          tmpImageData = jsPDFAPI.loadFile(imageData) || '';
         }
+
+        imageData = tmpImageData;
       }
 
       format = this.getImageFileTypeByImageData(imageData);
@@ -8133,418 +6332,6 @@
     return this;
   })(jsPDF.API);
 
-  /**
-   * @license
-   * Copyright (c) 2017 Aras Abbasi 
-   *
-   * Licensed under the MIT License.
-   * http://opensource.org/licenses/mit-license
-   */
-
-  /**
-  * jsPDF arabic parser PlugIn
-  *
-  * @name arabic
-  * @module
-  */
-  (function (jsPDFAPI) {
-    /**
-     * Arabic shape substitutions: char code => (isolated, final, initial, medial).
-     * Arabic Substition A
-     */
-
-    var arabicSubstitionA = {
-      0x0621: [0xFE80],
-      // ARABIC LETTER HAMZA 
-      0x0622: [0xFE81, 0xFE82],
-      // ARABIC LETTER ALEF WITH MADDA ABOVE
-      0x0623: [0xFE83, 0xFE84],
-      // ARABIC LETTER ALEF WITH HAMZA ABOVE
-      0x0624: [0xFE85, 0xFE86],
-      // ARABIC LETTER WAW WITH HAMZA ABOVE
-      0x0625: [0xFE87, 0xFE88],
-      // ARABIC LETTER ALEF WITH HAMZA BELOW
-      0x0626: [0xFE89, 0xFE8A, 0xFE8B, 0xFE8C],
-      // ARABIC LETTER YEH WITH HAMZA ABOVE 
-      0x0627: [0xFE8D, 0xFE8E],
-      // ARABIC LETTER ALEF
-      0x0628: [0xFE8F, 0xFE90, 0xFE91, 0xFE92],
-      // ARABIC LETTER BEH
-      0x0629: [0xFE93, 0xFE94],
-      // ARABIC LETTER TEH MARBUTA 
-      0x062A: [0xFE95, 0xFE96, 0xFE97, 0xFE98],
-      // ARABIC LETTER TEH
-      0x062B: [0xFE99, 0xFE9A, 0xFE9B, 0xFE9C],
-      // ARABIC LETTER THEH
-      0x062C: [0xFE9D, 0xFE9E, 0xFE9F, 0xFEA0],
-      // ARABIC LETTER JEEM
-      0x062D: [0xFEA1, 0xFEA2, 0xFEA3, 0xFEA4],
-      // ARABIC LETTER HAH
-      0x062E: [0xFEA5, 0xFEA6, 0xFEA7, 0xFEA8],
-      // ARABIC LETTER KHAH
-      0x062F: [0xFEA9, 0xFEAA],
-      // ARABIC LETTER DAL
-      0x0630: [0xFEAB, 0xFEAC],
-      // ARABIC LETTER THAL
-      0x0631: [0xFEAD, 0xFEAE],
-      // ARABIC LETTER REH
-      0x0632: [0xFEAF, 0xFEB0],
-      // ARABIC LETTER ZAIN
-      0x0633: [0xFEB1, 0xFEB2, 0xFEB3, 0xFEB4],
-      // ARABIC LETTER SEEN
-      0x0634: [0xFEB5, 0xFEB6, 0xFEB7, 0xFEB8],
-      // ARABIC LETTER SHEEN 
-      0x0635: [0xFEB9, 0xFEBA, 0xFEBB, 0xFEBC],
-      // ARABIC LETTER SAD
-      0x0636: [0xFEBD, 0xFEBE, 0xFEBF, 0xFEC0],
-      // ARABIC LETTER DAD
-      0x0637: [0xFEC1, 0xFEC2, 0xFEC3, 0xFEC4],
-      // ARABIC LETTER TAH
-      0x0638: [0xFEC5, 0xFEC6, 0xFEC7, 0xFEC8],
-      // ARABIC LETTER ZAH
-      0x0639: [0xFEC9, 0xFECA, 0xFECB, 0xFECC],
-      // ARABIC LETTER AIN
-      0x063A: [0xFECD, 0xFECE, 0xFECF, 0xFED0],
-      // ARABIC LETTER GHAIN 
-      0x0641: [0xFED1, 0xFED2, 0xFED3, 0xFED4],
-      // ARABIC LETTER FEH
-      0x0642: [0xFED5, 0xFED6, 0xFED7, 0xFED8],
-      // ARABIC LETTER QAF
-      0x0643: [0xFED9, 0xFEDA, 0xFEDB, 0xFEDC],
-      // ARABIC LETTER KAF
-      0x0644: [0xFEDD, 0xFEDE, 0xFEDF, 0xFEE0],
-      // ARABIC LETTER LAM
-      0x0645: [0xFEE1, 0xFEE2, 0xFEE3, 0xFEE4],
-      // ARABIC LETTER MEEM
-      0x0646: [0xFEE5, 0xFEE6, 0xFEE7, 0xFEE8],
-      // ARABIC LETTER NOON 
-      0x0647: [0xFEE9, 0xFEEA, 0xFEEB, 0xFEEC],
-      // ARABIC LETTER HEH
-      0x0648: [0xFEED, 0xFEEE],
-      // ARABIC LETTER WAW
-      0x0649: [0xFEEF, 0xFEF0, 64488, 64489],
-      // ARABIC LETTER ALEF MAKSURA 
-      0x064A: [0xFEF1, 0xFEF2, 0xFEF3, 0xFEF4],
-      // ARABIC LETTER YEH
-      0x0671: [0xFB50, 0xFB51],
-      // ARABIC LETTER ALEF WASLA
-      0x0677: [0xFBDD],
-      // ARABIC LETTER U WITH HAMZA ABOVE
-      0x0679: [0xFB66, 0xFB67, 0xFB68, 0xFB69],
-      // ARABIC LETTER TTEH
-      0x067A: [0xFB5E, 0xFB5F, 0xFB60, 0xFB61],
-      // ARABIC LETTER TTEHEH
-      0x067B: [0xFB52, 0xFB53, 0xFB54, 0xFB55],
-      // ARABIC LETTER BEEH
-      0x067E: [0xFB56, 0xFB57, 0xFB58, 0xFB59],
-      // ARABIC LETTER PEH 
-      0x067F: [0xFB62, 0xFB63, 0xFB64, 0xFB65],
-      // ARABIC LETTER TEHEH
-      0x0680: [0xFB5A, 0xFB5B, 0xFB5C, 0xFB5D],
-      // ARABIC LETTER BEHEH
-      0x0683: [0xFB76, 0xFB77, 0xFB78, 0xFB79],
-      // ARABIC LETTER NYEH
-      0x0684: [0xFB72, 0xFB73, 0xFB74, 0xFB75],
-      // ARABIC LETTER DYEH
-      0x0686: [0xFB7A, 0xFB7B, 0xFB7C, 0xFB7D],
-      // ARABIC LETTER TCHEH
-      0x0687: [0xFB7E, 0xFB7F, 0xFB80, 0xFB81],
-      // ARABIC LETTER TCHEHEH
-      0x0688: [0xFB88, 0xFB89],
-      // ARABIC LETTER DDAL
-      0x068C: [0xFB84, 0xFB85],
-      // ARABIC LETTER DAHAL
-      0x068D: [0xFB82, 0xFB83],
-      // ARABIC LETTER DDAHAL
-      0x068E: [0xFB86, 0xFB87],
-      // ARABIC LETTER DUL 
-      0x0691: [0xFB8C, 0xFB8D],
-      // ARABIC LETTER RREH
-      0x0698: [0xFB8A, 0xFB8B],
-      // ARABIC LETTER JEH
-      0x06A4: [0xFB6A, 0xFB6B, 0xFB6C, 0xFB6D],
-      // ARABIC LETTER VEH
-      0x06A6: [0xFB6E, 0xFB6F, 0xFB70, 0xFB71],
-      // ARABIC LETTER PEHEH
-      0x06A9: [0xFB8E, 0xFB8F, 0xFB90, 0xFB91],
-      // ARABIC LETTER KEHEH
-      0x06AD: [0xFBD3, 0xFBD4, 0xFBD5, 0xFBD6],
-      // ARABIC LETTER NG
-      0x06AF: [0xFB92, 0xFB93, 0xFB94, 0xFB95],
-      // ARABIC LETTER GAF
-      0x06B1: [0xFB9A, 0xFB9B, 0xFB9C, 0xFB9D],
-      // ARABIC LETTER NGOEH
-      0x06B3: [0xFB96, 0xFB97, 0xFB98, 0xFB99],
-      // ARABIC LETTER GUEH
-      0x06BA: [0xFB9E, 0xFB9F],
-      // ARABIC LETTER NOON GHUNNA
-      0x06BB: [0xFBA0, 0xFBA1, 0xFBA2, 0xFBA3],
-      // ARABIC LETTER RNOON
-      0x06BE: [0xFBAA, 0xFBAB, 0xFBAC, 0xFBAD],
-      // ARABIC LETTER HEH DOACHASHMEE
-      0x06C0: [0xFBA4, 0xFBA5],
-      // ARABIC LETTER HEH WITH YEH ABOVE
-      0x06C1: [0xFBA6, 0xFBA7, 0xFBA8, 0xFBA9],
-      // ARABIC LETTER HEH GOAL
-      0x06C5: [0xFBE0, 0xFBE1],
-      // ARABIC LETTER KIRGHIZ OE
-      0x06C6: [0xFBD9, 0xFBDA],
-      // ARABIC LETTER OE
-      0x06C7: [0xFBD7, 0xFBD8],
-      // ARABIC LETTER U
-      0x06C8: [0xFBDB, 0xFBDC],
-      // ARABIC LETTER YU
-      0x06C9: [0xFBE2, 0xFBE3],
-      // ARABIC LETTER KIRGHIZ YU
-      0x06CB: [0xFBDE, 0xFBDF],
-      // ARABIC LETTER VE
-      0x06CC: [0xFBFC, 0xFBFD, 0xFBFE, 0xFBFF],
-      // ARABIC LETTER FARSI YEH
-      0x06D0: [0xFBE4, 0xFBE5, 0xFBE6, 0xFBE7],
-      //ARABIC LETTER E
-      0x06D2: [0xFBAE, 0xFBAF],
-      // ARABIC LETTER YEH BARREE
-      0x06D3: [0xFBB0, 0xFBB1] // ARABIC LETTER YEH BARREE WITH HAMZA ABOVE
-
-    };
-    var ligatures = {
-      0xFEDF: {
-        0xFE82: 0xFEF5,
-        // ARABIC LIGATURE LAM WITH ALEF WITH MADDA ABOVE ISOLATED FORM
-        0xFE84: 0xFEF7,
-        // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA ABOVE ISOLATED FORM
-        0xFE88: 0xFEF9,
-        // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA BELOW ISOLATED FORM
-        0xFE8E: 0xFEFB // ARABIC LIGATURE LAM WITH ALEF ISOLATED FORM
-
-      },
-      0xFEE0: {
-        0xFE82: 0xFEF6,
-        // ARABIC LIGATURE LAM WITH ALEF WITH MADDA ABOVE FINAL FORM
-        0xFE84: 0xFEF8,
-        // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA ABOVE FINAL FORM
-        0xFE88: 0xFEFA,
-        // ARABIC LIGATURE LAM WITH ALEF WITH HAMZA BELOW FINAL FORM
-        0xFE8E: 0xFEFC // ARABIC LIGATURE LAM WITH ALEF FINAL FORM
-
-      },
-      0xFE8D: {
-        0xFEDF: {
-          0xFEE0: {
-            0xFEEA: 0xFDF2
-          }
-        }
-      },
-      // ALLAH
-      0x0651: {
-        0x064C: 0xFC5E,
-        // Shadda + Dammatan
-        0x064D: 0xFC5F,
-        // Shadda + Kasratan
-        0x064E: 0xFC60,
-        // Shadda + Fatha
-        0x064F: 0xFC61,
-        // Shadda + Damma
-        0x0650: 0xFC62 // Shadda + Kasra
-
-      }
-    };
-    var arabic_diacritics = {
-      1612: 64606,
-      // Shadda + Dammatan
-      1613: 64607,
-      // Shadda + Kasratan
-      1614: 64608,
-      // Shadda + Fatha
-      1615: 64609,
-      // Shadda + Damma
-      1616: 64610 // Shadda + Kasra
-
-    };
-    var alfletter = [1570, 1571, 1573, 1575];
-    var noChangeInForm = -1;
-    var isolatedForm = 0;
-    var finalForm = 1;
-    var initialForm = 2;
-    var medialForm = 3;
-    jsPDFAPI.__arabicParser__ = {}; //private
-
-    var isInArabicSubstitutionA = jsPDFAPI.__arabicParser__.isInArabicSubstitutionA = function (letter) {
-      return typeof arabicSubstitionA[letter.charCodeAt(0)] !== "undefined";
-    };
-
-    var isArabicLetter = jsPDFAPI.__arabicParser__.isArabicLetter = function (letter) {
-      return typeof letter === "string" && /^[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]+$/.test(letter);
-    };
-
-    var isArabicEndLetter = jsPDFAPI.__arabicParser__.isArabicEndLetter = function (letter) {
-      return isArabicLetter(letter) && isInArabicSubstitutionA(letter) && arabicSubstitionA[letter.charCodeAt(0)].length <= 2;
-    };
-
-    var isArabicAlfLetter = jsPDFAPI.__arabicParser__.isArabicAlfLetter = function (letter) {
-      return isArabicLetter(letter) && alfletter.indexOf(letter.charCodeAt(0)) >= 0;
-    };
-
-    var arabicLetterHasIsolatedForm = jsPDFAPI.__arabicParser__.arabicLetterHasIsolatedForm = function (letter) {
-      return isArabicLetter(letter) && isInArabicSubstitutionA(letter) && arabicSubstitionA[letter.charCodeAt(0)].length >= 1;
-    };
-
-    var arabicLetterHasFinalForm = jsPDFAPI.__arabicParser__.arabicLetterHasFinalForm = function (letter) {
-      return isArabicLetter(letter) && isInArabicSubstitutionA(letter) && arabicSubstitionA[letter.charCodeAt(0)].length >= 2;
-    };
-
-    var arabicLetterHasInitialForm = jsPDFAPI.__arabicParser__.arabicLetterHasInitialForm = function (letter) {
-      return isArabicLetter(letter) && isInArabicSubstitutionA(letter) && arabicSubstitionA[letter.charCodeAt(0)].length >= 3;
-    };
-
-    var arabicLetterHasMedialForm = jsPDFAPI.__arabicParser__.arabicLetterHasMedialForm = function (letter) {
-      return isArabicLetter(letter) && isInArabicSubstitutionA(letter) && arabicSubstitionA[letter.charCodeAt(0)].length == 4;
-    };
-
-    var resolveLigatures = jsPDFAPI.__arabicParser__.resolveLigatures = function (letters) {
-      var i = 0;
-      var tmpLigatures = ligatures;
-      var position = isolatedForm;
-      var result = '';
-      var effectedLetters = 0;
-
-      for (i = 0; i < letters.length; i += 1) {
-        if (typeof tmpLigatures[letters.charCodeAt(i)] !== "undefined") {
-          effectedLetters++;
-          tmpLigatures = tmpLigatures[letters.charCodeAt(i)];
-
-          if (typeof tmpLigatures === "number") {
-            position = getCorrectForm(letters.charAt(i), letters.charAt(i - effectedLetters), letters.charAt(i + 1));
-            position = position !== -1 ? position : 0;
-            result += String.fromCharCode(tmpLigatures);
-            tmpLigatures = ligatures;
-            effectedLetters = 0;
-          }
-
-          if (i === letters.length - 1) {
-            tmpLigatures = ligatures;
-            result += letters.charAt(i - (effectedLetters - 1));
-            i = i - (effectedLetters - 1);
-            effectedLetters = 0;
-          }
-        } else {
-          tmpLigatures = ligatures;
-          result += letters.charAt(i - effectedLetters);
-          i = i - effectedLetters;
-          effectedLetters = 0;
-        }
-      }
-
-      return result;
-    };
-
-    var isArabicDiacritic = jsPDFAPI.__arabicParser__.isArabicDiacritic = function (letter) {
-      return letter !== undefined && arabic_diacritics[letter.charCodeAt(0)] !== undefined;
-    };
-
-    var getCorrectForm = jsPDFAPI.__arabicParser__.getCorrectForm = function (currentChar, beforeChar, nextChar) {
-
-      if (!isArabicLetter(currentChar)) {
-        return -1;
-      }
-
-      if (isInArabicSubstitutionA(currentChar) === false) {
-        return noChangeInForm;
-      }
-
-      if (!arabicLetterHasFinalForm(currentChar) || !isArabicLetter(beforeChar) && !isArabicLetter(nextChar) || !isArabicLetter(nextChar) && isArabicEndLetter(beforeChar) || isArabicEndLetter(currentChar) && !isArabicLetter(beforeChar) || isArabicEndLetter(currentChar) && isArabicAlfLetter(beforeChar) || isArabicEndLetter(currentChar) && isArabicEndLetter(beforeChar)) {
-        return isolatedForm;
-      }
-
-      if (arabicLetterHasMedialForm(currentChar) && isArabicLetter(beforeChar) && !isArabicEndLetter(beforeChar) && isArabicLetter(nextChar) && arabicLetterHasFinalForm(nextChar)) {
-        return medialForm;
-      }
-
-      if (isArabicEndLetter(currentChar) || !isArabicLetter(nextChar)) {
-        return finalForm;
-      }
-
-      return initialForm;
-    };
-    /**
-    * @name processArabic
-    * @function
-    * @param {string} text
-    * @param {boolean} reverse
-    * @returns {string}
-    */
-
-
-    var processArabic = jsPDFAPI.__arabicParser__.processArabic = jsPDFAPI.processArabic = function (text) {
-      text = text || "";
-      var result = "";
-      var i = 0;
-      var j = 0;
-      var position = 0;
-      var currentLetter = "";
-      var prevLetter = "";
-      var nextLetter = "";
-      var words = text.split("\\s+");
-      var newWords = [];
-
-      for (i = 0; i < words.length; i += 1) {
-        newWords.push('');
-
-        for (j = 0; j < words[i].length; j += 1) {
-          currentLetter = words[i][j];
-          prevLetter = words[i][j - 1];
-          nextLetter = words[i][j + 1];
-
-          if (isArabicLetter(currentLetter)) {
-            position = getCorrectForm(currentLetter, prevLetter, nextLetter);
-
-            if (position !== -1) {
-              newWords[i] += String.fromCharCode(arabicSubstitionA[currentLetter.charCodeAt(0)][position]);
-            } else {
-              newWords[i] += currentLetter;
-            }
-          } else {
-            newWords[i] += currentLetter;
-          }
-        }
-
-        newWords[i] = resolveLigatures(newWords[i]);
-      }
-
-      result = newWords.join(' ');
-      return result;
-    };
-
-    var arabicParserFunction = function arabicParserFunction(args) {
-      var text = args.text;
-      var x = args.x;
-      var y = args.y;
-      var options = args.options || {};
-      var mutex = args.mutex || {};
-      var lang = options.lang;
-      var tmpText = [];
-
-      if (Object.prototype.toString.call(text) === '[object Array]') {
-        var i = 0;
-        tmpText = [];
-
-        for (i = 0; i < text.length; i += 1) {
-          if (Object.prototype.toString.call(text[i]) === '[object Array]') {
-            tmpText.push([processArabic(text[i][0]), text[i][1], text[i][2]]);
-          } else {
-            tmpText.push([processArabic(text[i])]);
-          }
-        }
-
-        args.text = tmpText;
-      } else {
-        args.text = processArabic(text);
-      }
-    };
-
-    jsPDFAPI.events.push(['preProcessText', arabicParserFunction]);
-  })(jsPDF.API);
-
   /** @license
    * jsPDF Autoprint Plugin
    *
@@ -8558,8 +6345,7 @@
   */
   (function (jsPDFAPI) {
     /**
-    * Makes the PDF automatically print. This works in Chrome, Firefox, Acrobat
-    * Reader.
+    * Makes the PDF automatically open the print-Dialog when opened in a PDF-viewer.
     *
     * @name autoPrint
     * @function
@@ -8930,7 +6716,7 @@
 
 
           y = getLastCellPosition().y + getLastCellPosition().h;
-          if (pgAdded) y = margin + 10;
+          if (pgAdded) { y = margin + 10; }
         }
       }
 
@@ -9174,7 +6960,7 @@
         header = headerNames[j];
         model[header] = this.splitTextToSize(String(model[header]), columnWidths[header] - padding);
         var h = this.internal.getLineHeight() * model[header].length + padding;
-        if (h > lineHeight) lineHeight = h;
+        if (h > lineHeight) { lineHeight = h; }
       }
 
       return lineHeight;
@@ -9285,7 +7071,8 @@
     }; //stub
 
 
-    var f2, f3, getHorizontalCoordinateString, getVerticalCoordinateString, getHorizontalCoordinate, getVerticalCoordinate;
+    var f2, f3, getHorizontalCoordinateString, getVerticalCoordinateString, getHorizontalCoordinate, getVerticalCoordinate, Point, Rectangle, Matrix, _ctx;
+
     jsPDFAPI.events.push(['initialized', function () {
       this.context2d = new Context2D(this);
       f2 = this.internal.f2;
@@ -9294,6 +7081,10 @@
       getVerticalCoordinateString = this.internal.getVerticalCoordinateString;
       getHorizontalCoordinate = this.internal.getHorizontalCoordinate;
       getVerticalCoordinate = this.internal.getVerticalCoordinate;
+      Point = this.internal.Point;
+      Rectangle = this.internal.Rectangle;
+      Matrix = this.internal.Matrix;
+      _ctx = new ContextLayer();
     }]);
 
     var Context2D = function Context2D(pdf) {
@@ -9420,14 +7211,11 @@
           pageBreaks = value;
         }
       });
-
-      var _ctx = new ContextLayer();
       /**
       * @name ctx
       * @type {object}
       * @default {}
       */
-
 
       Object.defineProperty(this, 'ctx', {
         get: function get() {
@@ -11034,6 +8822,7 @@
 
     var doClip = function doClip() {
       this.pdf.clip();
+      this.pdf.discardPath();
     };
 
     var doMove = function doMove(x, y) {
@@ -11291,283 +9080,6 @@
 
       return new Rectangle(Math.round(minx), Math.round(miny), Math.round(maxx - minx), Math.round(maxy - miny));
     };
-
-    var Point = function Point(x, y) {
-      var _x = x || 0;
-
-      Object.defineProperty(this, 'x', {
-        enumerable: true,
-        get: function get() {
-          return _x;
-        },
-        set: function set(value) {
-          if (!isNaN(value)) {
-            _x = parseFloat(value);
-          }
-        }
-      });
-
-      var _y = y || 0;
-
-      Object.defineProperty(this, 'y', {
-        enumerable: true,
-        get: function get() {
-          return _y;
-        },
-        set: function set(value) {
-          if (!isNaN(value)) {
-            _y = parseFloat(value);
-          }
-        }
-      });
-      var _type = 'pt';
-      Object.defineProperty(this, 'type', {
-        enumerable: true,
-        get: function get() {
-          return _type;
-        },
-        set: function set(value) {
-          _type = value.toString();
-        }
-      });
-      return this;
-    };
-
-    var Rectangle = function Rectangle(x, y, w, h) {
-      Point.call(this, x, y);
-      this.type = 'rect';
-
-      var _w = w || 0;
-
-      Object.defineProperty(this, 'w', {
-        enumerable: true,
-        get: function get() {
-          return _w;
-        },
-        set: function set(value) {
-          if (!isNaN(value)) {
-            _w = parseFloat(value);
-          }
-        }
-      });
-
-      var _h = h || 0;
-
-      Object.defineProperty(this, 'h', {
-        enumerable: true,
-        get: function get() {
-          return _h;
-        },
-        set: function set(value) {
-          if (!isNaN(value)) {
-            _h = parseFloat(value);
-          }
-        }
-      });
-      return this;
-    };
-
-    var Matrix = function Matrix(sx, shy, shx, sy, tx, ty) {
-      var _matrix = [];
-      Object.defineProperty(this, 'sx', {
-        get: function get() {
-          return _matrix[0];
-        },
-        set: function set(value) {
-          _matrix[0] = Math.round(value * 100000) / 100000;
-        }
-      });
-      Object.defineProperty(this, 'shy', {
-        get: function get() {
-          return _matrix[1];
-        },
-        set: function set(value) {
-          _matrix[1] = Math.round(value * 100000) / 100000;
-        }
-      });
-      Object.defineProperty(this, 'shx', {
-        get: function get() {
-          return _matrix[2];
-        },
-        set: function set(value) {
-          _matrix[2] = Math.round(value * 100000) / 100000;
-        }
-      });
-      Object.defineProperty(this, 'sy', {
-        get: function get() {
-          return _matrix[3];
-        },
-        set: function set(value) {
-          _matrix[3] = Math.round(value * 100000) / 100000;
-        }
-      });
-      Object.defineProperty(this, 'tx', {
-        get: function get() {
-          return _matrix[4];
-        },
-        set: function set(value) {
-          _matrix[4] = Math.round(value * 100000) / 100000;
-        }
-      });
-      Object.defineProperty(this, 'ty', {
-        get: function get() {
-          return _matrix[5];
-        },
-        set: function set(value) {
-          _matrix[5] = Math.round(value * 100000) / 100000;
-        }
-      });
-      Object.defineProperty(this, 'rotation', {
-        get: function get() {
-          return Math.atan2(this.shx, this.sx);
-        }
-      });
-      Object.defineProperty(this, 'scaleX', {
-        get: function get() {
-          return this.decompose().scale.sx;
-        }
-      });
-      Object.defineProperty(this, 'scaleY', {
-        get: function get() {
-          return this.decompose().scale.sy;
-        }
-      });
-      Object.defineProperty(this, 'isIdentity', {
-        get: function get() {
-          if (this.sx !== 1) {
-            return false;
-          }
-
-          if (this.shy !== 0) {
-            return false;
-          }
-
-          if (this.shx !== 0) {
-            return false;
-          }
-
-          if (this.sy !== 1) {
-            return false;
-          }
-
-          if (this.tx !== 0) {
-            return false;
-          }
-
-          if (this.ty !== 0) {
-            return false;
-          }
-
-          return true;
-        }
-      });
-      this.sx = !isNaN(sx) ? sx : 1;
-      this.shy = !isNaN(shy) ? shy : 0;
-      this.shx = !isNaN(shx) ? shx : 0;
-      this.sy = !isNaN(sy) ? sy : 1;
-      this.tx = !isNaN(tx) ? tx : 0;
-      this.ty = !isNaN(ty) ? ty : 0;
-      return this;
-    };
-    /**
-    * Multiply the matrix with given Matrix
-    * 
-    * @function multiply
-    * @param matrix
-    * @returns {Matrix}
-    * @private
-    * @ignore
-    */
-
-
-    Matrix.prototype.multiply = function (matrix) {
-      var sx = matrix.sx * this.sx + matrix.shy * this.shx;
-      var shy = matrix.sx * this.shy + matrix.shy * this.sy;
-      var shx = matrix.shx * this.sx + matrix.sy * this.shx;
-      var sy = matrix.shx * this.shy + matrix.sy * this.sy;
-      var tx = matrix.tx * this.sx + matrix.ty * this.shx + this.tx;
-      var ty = matrix.tx * this.shy + matrix.ty * this.sy + this.ty;
-      return new Matrix(sx, shy, shx, sy, tx, ty);
-    };
-    /**
-    * @function decompose
-    * @private
-    * @ignore
-    */
-
-
-    Matrix.prototype.decompose = function () {
-      var a = this.sx;
-      var b = this.shy;
-      var c = this.shx;
-      var d = this.sy;
-      var e = this.tx;
-      var f = this.ty;
-      var scaleX = Math.sqrt(a * a + b * b);
-      a /= scaleX;
-      b /= scaleX;
-      var shear = a * c + b * d;
-      c -= a * shear;
-      d -= b * shear;
-      var scaleY = Math.sqrt(c * c + d * d);
-      c /= scaleY;
-      d /= scaleY;
-      shear /= scaleY;
-
-      if (a * d < b * c) {
-        a = -a;
-        b = -b;
-        shear = -shear;
-        scaleX = -scaleX;
-      }
-
-      return {
-        scale: new Matrix(scaleX, 0, 0, scaleY, 0, 0),
-        translate: new Matrix(1, 0, 0, 1, e, f),
-        rotate: new Matrix(a, b, -b, a, 0, 0),
-        skew: new Matrix(1, 0, shear, 1, 0, 0)
-      };
-    };
-    /**
-    * @function applyToPoint
-    * @private
-    * @ignore
-    */
-
-
-    Matrix.prototype.applyToPoint = function (pt) {
-      var x = pt.x * this.sx + pt.y * this.shx + this.tx;
-      var y = pt.x * this.shy + pt.y * this.sy + this.ty;
-      return new Point(x, y);
-    };
-    /**
-    * @function applyToRectangle
-    * @private
-    * @ignore
-    */
-
-
-    Matrix.prototype.applyToRectangle = function (rect) {
-      var pt1 = this.applyToPoint(rect);
-      var pt2 = this.applyToPoint(new Point(rect.x + rect.w, rect.y + rect.h));
-      return new Rectangle(pt1.x, pt1.y, pt2.x - pt1.x, pt2.y - pt1.y);
-    };
-    /**
-    * @function clone
-    * @private
-    * @ignore
-    */
-
-
-    Matrix.prototype.clone = function () {
-      var sx = this.sx;
-      var shy = this.shy;
-      var shx = this.shx;
-      var sy = this.sy;
-      var tx = this.tx;
-      var ty = this.ty;
-      return new Matrix(sx, shy, shx, sy, tx, ty);
-    };
   })(jsPDF.API, typeof self !== 'undefined' && self || typeof window !== 'undefined' && window || typeof global !== 'undefined' && global || Function('return typeof this === "object" && this.content')() || Function('return this')());
 
   /**
@@ -11616,76 +9128,6 @@
         }
       }(e, c[l]), h.fromCharCode.apply(h, e);
     };
-    /**
-    * TODO: Not Tested:
-    //https://gist.github.com/revolunet/843889
-    // LZW-compress a string
-    var LZWEncode = function(s, options) {
-      options = Object.assign({
-        predictor: 1,
-        colors: 1,
-        bitsPerComponent: 8,
-        columns: 1,
-        earlyChange: 1
-      }, options);
-       var dict = {};
-      var data = (s + "").split("");
-      var out = [];
-      var currChar;
-      var phrase = data[0];
-      var code = 256; //0xe000
-      for (var i=1; i<data.length; i++) {
-        currChar=data[i];
-        if (dict['_' + phrase + currChar] != null) {
-          phrase += currChar;
-        }
-        else {
-          out.push(phrase.length > 1 ? dict['_'+phrase] : phrase.charCodeAt(0));
-          dict['_' + phrase + currChar] = code;
-          code++;
-          phrase=currChar;
-        }
-      }
-      out.push(phrase.length > 1 ? dict['_'+phrase] : phrase.charCodeAt(0));
-      for (var i=0; i<out.length; i++) {
-        out[i] = String.fromCharCode(out[i]);
-      }
-      return out.join("");
-    }
-     // Decompress an LZW-encoded string
-    var LZWDecode = function(s, options) {
-      options = Object.assign({
-        predictor: 1,
-        colors: 1,
-        bitsPerComponent: 8,
-        columns: 1,
-        earlyChange: 1
-      }, options);
-       var dict = {};
-      var data = (s + "").split("");
-      var currChar = data[0];
-      var oldPhrase = currChar;
-      var out = [currChar];
-      var code = 256;
-      var phrase;
-      for (var i=1; i<data.length; i++) {
-        var currCode = data[i].charCodeAt(0);
-        if (currCode < 256) {
-          phrase = data[i];
-        }
-        else {
-           phrase = dict['_'+currCode] ? dict['_'+currCode] : (oldPhrase + currChar);
-        }
-        out.push(phrase);
-        currChar = phrase.charAt(0);
-        dict['_'+code] = oldPhrase + currChar;
-        code++;
-        oldPhrase = phrase;
-      }
-      return out.join("");
-    }
-    */
-
 
     var ASCIIHexEncode = function ASCIIHexEncode(value) {
       var result = '';
@@ -11725,6 +9167,13 @@
       return result;
     };
 
+    var appendBuffer = function appendBuffer(buffer1, buffer2) {
+      var combinedBuffer = new Uint8Array(buffer1.byteLength + buffer2.byteLength);
+      combinedBuffer.set(new Uint8Array(buffer1), 0);
+      combinedBuffer.set(new Uint8Array(buffer2), buffer1.byteLength);
+      return combinedBuffer;
+    };
+
     var FlateEncode = function FlateEncode(data, options) {
       options = Object.assign({
         predictor: 1,
@@ -11743,12 +9192,15 @@
 
       adler32 = jsPDFAPI.adler32cs.from(data);
       deflater = new Deflater(6);
-      deflater.append(new Uint8Array(arr));
-      data = deflater.flush();
-      arr = new Uint8Array(data.length + 6);
-      arr.set(new Uint8Array([120, 156])), arr.set(data, 2);
-      arr.set(new Uint8Array([adler32 & 0xFF, adler32 >> 8 & 0xFF, adler32 >> 16 & 0xFF, adler32 >> 24 & 0xFF]), data.length + 2);
-      data = String.fromCharCode.apply(null, arr);
+      data = deflater.append(new Uint8Array(arr));
+      data = appendBuffer(data, deflater.flush());
+      arr = new Uint8Array(data.byteLength + 6);
+      arr.set(new Uint8Array([120, 156]));
+      arr.set(data, 2);
+      arr.set(new Uint8Array([adler32 & 0xff, adler32 >> 8 & 0xff, adler32 >> 16 & 0xff, adler32 >> 24 & 0xff]), data.byteLength + 2);
+      data = arr.reduce(function (data, byte) {
+        return data + String.fromCharCode(byte);
+      }, '');
       return data;
     };
 
@@ -11794,19 +9246,6 @@
             data = FlateEncode(data);
             reverseChain.push("/FlateDecode");
             break;
-
-          /**
-          case "LZWDecode":
-          case "/LZWDecode":
-            data = LZWDecode(data);
-            reverseChain.push("/LZWEncode");
-            break;
-          case "LZWEncode":
-          case "/LZWEncode":
-            data = LZWEncode(data);
-            reverseChain.push("/LZWDecode");
-            break;
-          */
 
           default:
             throw "The filter: \"" + filterChain[i] + "\" is not implemented";
@@ -11922,6 +9361,11 @@
    * @module
    */
   (function (jsPDFAPI, global) {
+
+    if (typeof Promise === 'undefined') {
+      console.warn('Promise not found. html-Plugin will not work');
+      return;
+    }
     /**
     * Determine the type of a variable/object.
     * 
@@ -11929,10 +9373,11 @@
     * @ignore
     */
 
+
     var objType = function objType(obj) {
       var type = _typeof(obj);
 
-      if (type === 'undefined') return 'undefined';else if (type === 'string' || obj instanceof String) return 'string';else if (type === 'number' || obj instanceof Number) return 'number';else if (type === 'function' || obj instanceof Function) return 'function';else if (!!obj && obj.constructor === Array) return 'array';else if (obj && obj.nodeType === 1) return 'element';else if (type === 'object') return 'object';else return 'unknown';
+      if (type === 'undefined') { return 'undefined'; }else if (type === 'string' || obj instanceof String) { return 'string'; }else if (type === 'number' || obj instanceof Number) { return 'number'; }else if (type === 'function' || obj instanceof Function) { return 'function'; }else if (!!obj && obj.constructor === Array) { return 'array'; }else if (obj && obj.nodeType === 1) { return 'element'; }else if (type === 'object') { return 'object'; }else { return 'unknown'; }
     };
     /**
     * Create an HTML element with optional className, innerHTML, and style.
@@ -11944,7 +9389,7 @@
 
     var createElement = function createElement(tagName, opt) {
       var el = document.createElement(tagName);
-      if (opt.className) el.className = opt.className;
+      if (opt.className) { el.className = opt.className; }
 
       if (opt.innerHTML) {
         el.innerHTML = opt.innerHTML;
@@ -12476,10 +9921,10 @@
 
     Worker.prototype.setProgress = function setProgress(val, state, n, stack) {
       // Immediately update all progress values.
-      if (val != null) this.progress.val = val;
-      if (state != null) this.progress.state = state;
-      if (n != null) this.progress.n = n;
-      if (stack != null) this.progress.stack = stack;
+      if (val != null) { this.progress.val = val; }
+      if (state != null) { this.progress.state = state; }
+      if (n != null) { this.progress.n = n; }
+      if (stack != null) { this.progress.stack = stack; }
       this.progress.ratio = this.progress.val / this.progress.state; // Return this for command chaining.
 
       return this;
@@ -13038,527 +10483,174 @@
 
   /**
    * @license
-   * 
-   * Copyright (c) 2014 James Robb, https://github.com/jamesbrobb
    *
-   * 
-   * ====================================================================
+   * Licensed under the MIT License.
+   * http://opensource.org/licenses/mit-license
    */
 
   /**
-  * jsPDF PNG PlugIn
-  * @name png_support
+  * jsPDF jpeg Support PlugIn
+  *
+  * @name jpeg_support
   * @module
   */
   (function (jsPDFAPI) {
-    /*
-     * @see http://www.w3.org/TR/PNG-Chunks.html
-     *
-     Color    Allowed      Interpretation
-     Type     Bit Depths
-    	   0       1,2,4,8,16  Each pixel is a grayscale sample.
-    	   2       8,16        Each pixel is an R,G,B triple.
-    	   3       1,2,4,8     Each pixel is a palette index;
-                           a PLTE chunk must appear.
-    	   4       8,16        Each pixel is a grayscale sample,
-                           followed by an alpha sample.
-    	   6       8,16        Each pixel is an R,G,B triple,
-                           followed by an alpha sample.
-    */
+    //a jpeg image and returns [width, height]
+    //Algorithm from: http://www.64lines.com/jpeg-width-height
 
-    /*
-     * PNG filter method types
-     *
-     * @see http://www.w3.org/TR/PNG-Filters.html
-     * @see http://www.libpng.org/pub/png/book/chapter09.html
-     *
-     * This is what the value 'Predictor' in decode params relates to
-     *
-     * 15 is "optimal prediction", which means the prediction algorithm can change from line to line.
-     * In that case, you actually have to read the first byte off each line for the prediction algorthim (which should be 0-4, corresponding to PDF 10-14) and select the appropriate unprediction algorithm based on that byte.
-     *
-       0       None
-       1       Sub
-       2       Up
-       3       Average
-       4       Paeth
-     */
+    var getJpegSize = function getJpegSize(imgData) {
 
-    var doesNotHavePngJS = function doesNotHavePngJS() {
-      return typeof PNG !== 'function' || typeof FlateStream !== 'function';
-    },
-        canCompress = function canCompress(value) {
-      return value !== jsPDFAPI.image_compression.NONE && hasCompressionJS();
-    },
-        hasCompressionJS = function hasCompressionJS() {
-      var inst = typeof Deflater === 'function';
-      if (!inst) throw new Error("requires deflate.js for compression");
-      return inst;
-    },
-        compressBytes = function compressBytes(bytes, lineLength, colorsPerPixel, compression) {
-      var level = 5,
-          filter_method = filterUp;
+      var width, height, numcomponents; // Verify we have a valid jpeg header 0xff,0xd8,0xff,0xe0,?,?,'J','F','I','F',0x00
 
-      switch (compression) {
-        case jsPDFAPI.image_compression.FAST:
-          level = 3;
-          filter_method = filterSub;
-          break;
-
-        case jsPDFAPI.image_compression.MEDIUM:
-          level = 6;
-          filter_method = filterAverage;
-          break;
-
-        case jsPDFAPI.image_compression.SLOW:
-          level = 9;
-          filter_method = filterPaeth; //uses to sum to choose best filter for each line
-
-          break;
+      if (getImageFileTypeByImageData(imgData) !== 'JPEG') {
+        throw new Error('getJpegSize requires a binary string jpeg file');
       }
 
-      bytes = applyPngFilterMethod(bytes, lineLength, colorsPerPixel, filter_method);
-      var header = new Uint8Array(createZlibHeader(level));
-      var checksum = adler32(bytes);
-      var deflate = new Deflater(level);
-      var a = deflate.append(bytes);
-      var cBytes = deflate.flush();
-      var len = header.length + a.length + cBytes.length;
-      var cmpd = new Uint8Array(len + 4);
-      cmpd.set(header);
-      cmpd.set(a, header.length);
-      cmpd.set(cBytes, header.length + a.length);
-      cmpd[len++] = checksum >>> 24 & 0xff;
-      cmpd[len++] = checksum >>> 16 & 0xff;
-      cmpd[len++] = checksum >>> 8 & 0xff;
-      cmpd[len++] = checksum & 0xff;
-      return jsPDFAPI.arrayBufferToBinaryString(cmpd);
-    },
-        createZlibHeader = function createZlibHeader(bytes, level) {
-      /*
-       * @see http://www.ietf.org/rfc/rfc1950.txt for zlib header
-       */
-      var cm = 8;
-      var cinfo = Math.LOG2E * Math.log(0x8000) - 8;
-      var cmf = cinfo << 4 | cm;
-      var hdr = cmf << 8;
-      var flevel = Math.min(3, (level - 1 & 0xff) >> 1);
-      hdr |= flevel << 6;
-      hdr |= 0; //FDICT
+      var blockLength = imgData.charCodeAt(4) * 256 + imgData.charCodeAt(5);
+      var i = 4,
+          len = imgData.length;
 
-      hdr += 31 - hdr % 31;
-      return [cmf, hdr & 0xff & 0xff];
-    },
-        adler32 = function adler32(array, param) {
-      var adler = 1;
-      var s1 = adler & 0xffff,
-          s2 = adler >>> 16 & 0xffff;
-      var len = array.length;
-      var tlen;
-      var i = 0;
+      while (i < len) {
+        i += blockLength;
 
-      while (len > 0) {
-        tlen = len > param ? param : len;
-        len -= tlen;
+        if (imgData.charCodeAt(i) !== 0xff) {
+          throw new Error('getJpegSize could not find the size of the image');
+        }
 
-        do {
-          s1 += array[i++];
-          s2 += s1;
-        } while (--tlen);
-
-        s1 %= 65521;
-        s2 %= 65521;
-      }
-
-      return (s2 << 16 | s1) >>> 0;
-    },
-        applyPngFilterMethod = function applyPngFilterMethod(bytes, lineLength, colorsPerPixel, filter_method) {
-      var lines = bytes.length / lineLength,
-          result = new Uint8Array(bytes.length + lines),
-          filter_methods = getFilterMethods(),
-          i = 0,
-          line,
-          prevLine,
-          offset;
-
-      for (; i < lines; i++) {
-        offset = i * lineLength;
-        line = bytes.subarray(offset, offset + lineLength);
-
-        if (filter_method) {
-          result.set(filter_method(line, colorsPerPixel, prevLine), offset + i);
+        if (imgData.charCodeAt(i + 1) === 0xc0 || //(SOF) Huffman  - Baseline DCT
+        imgData.charCodeAt(i + 1) === 0xc1 || //(SOF) Huffman  - Extended sequential DCT
+        imgData.charCodeAt(i + 1) === 0xc2 || // Progressive DCT (SOF2)
+        imgData.charCodeAt(i + 1) === 0xc3 || // Spatial (sequential) lossless (SOF3)
+        imgData.charCodeAt(i + 1) === 0xc4 || // Differential sequential DCT (SOF5)
+        imgData.charCodeAt(i + 1) === 0xc5 || // Differential progressive DCT (SOF6)
+        imgData.charCodeAt(i + 1) === 0xc6 || // Differential spatial (SOF7)
+        imgData.charCodeAt(i + 1) === 0xc7) {
+          height = imgData.charCodeAt(i + 5) * 256 + imgData.charCodeAt(i + 6);
+          width = imgData.charCodeAt(i + 7) * 256 + imgData.charCodeAt(i + 8);
+          numcomponents = imgData.charCodeAt(i + 9);
+          return [width, height, numcomponents];
         } else {
-          var j = 0,
-              len = filter_methods.length,
-              results = [];
+          i += 2;
+          blockLength = imgData.charCodeAt(i) * 256 + imgData.charCodeAt(i + 1);
+        }
+      }
+    };
 
-          for (; j < len; j++) {
-            results[j] = filter_methods[j](line, colorsPerPixel, prevLine);
-          }
+    var getJpegSizeFromBytes = function getJpegSizeFromBytes(data) {
+      var hdr = data[0] << 8 | data[1];
+      if (hdr !== 0xFFD8) { throw new Error('Supplied data is not a JPEG'); }
+      var len = data.length,
+          block = (data[4] << 8) + data[5],
+          pos = 4,
+          bytes,
+          width,
+          height,
+          numcomponents;
 
-          var ind = getIndexOfSmallestSum(results.concat());
-          result.set(results[ind], offset + i);
+      while (pos < len) {
+        pos += block;
+        bytes = readBytes(data, pos);
+        block = (bytes[2] << 8) + bytes[3];
+
+        if ((bytes[1] === 0xC0 || bytes[1] === 0xC2) && bytes[0] === 0xFF && block > 7) {
+          bytes = readBytes(data, pos + 5);
+          width = (bytes[2] << 8) + bytes[3];
+          height = (bytes[0] << 8) + bytes[1];
+          numcomponents = bytes[4];
+          return {
+            width: width,
+            height: height,
+            numcomponents: numcomponents
+          };
         }
 
-        prevLine = line;
+        pos += 2;
       }
 
-      return result;
-    },
-        filterNone = function filterNone(line, colorsPerPixel, prevLine) {
-      /*var result = new Uint8Array(line.length + 1);
-      result[0] = 0;
-      result.set(line, 1);*/
-      var result = Array.apply([], line);
-      result.unshift(0);
-      return result;
-    },
-        filterSub = function filterSub(line, colorsPerPixel, prevLine) {
-      var result = [],
-          i = 0,
-          len = line.length,
-          left;
-      result[0] = 1;
+      throw new Error('getJpegSizeFromBytes could not find the size of the image');
+    };
 
-      for (; i < len; i++) {
-        left = line[i - colorsPerPixel] || 0;
-        result[i + 1] = line[i] - left + 0x0100 & 0xff;
-      }
-
-      return result;
-    },
-        filterUp = function filterUp(line, colorsPerPixel, prevLine) {
-      var result = [],
-          i = 0,
-          len = line.length,
-          up;
-      result[0] = 2;
-
-      for (; i < len; i++) {
-        up = prevLine && prevLine[i] || 0;
-        result[i + 1] = line[i] - up + 0x0100 & 0xff;
-      }
-
-      return result;
-    },
-        filterAverage = function filterAverage(line, colorsPerPixel, prevLine) {
-      var result = [],
-          i = 0,
-          len = line.length,
-          left,
-          up;
-      result[0] = 3;
-
-      for (; i < len; i++) {
-        left = line[i - colorsPerPixel] || 0;
-        up = prevLine && prevLine[i] || 0;
-        result[i + 1] = line[i] + 0x0100 - (left + up >>> 1) & 0xff;
-      }
-
-      return result;
-    },
-        filterPaeth = function filterPaeth(line, colorsPerPixel, prevLine) {
-      var result = [],
-          i = 0,
-          len = line.length,
-          left,
-          up,
-          upLeft,
-          paeth;
-      result[0] = 4;
-
-      for (; i < len; i++) {
-        left = line[i - colorsPerPixel] || 0;
-        up = prevLine && prevLine[i] || 0;
-        upLeft = prevLine && prevLine[i - colorsPerPixel] || 0;
-        paeth = paethPredictor(left, up, upLeft);
-        result[i + 1] = line[i] - paeth + 0x0100 & 0xff;
-      }
-
-      return result;
-    },
-        paethPredictor = function paethPredictor(left, up, upLeft) {
-      var p = left + up - upLeft,
-          pLeft = Math.abs(p - left),
-          pUp = Math.abs(p - up),
-          pUpLeft = Math.abs(p - upLeft);
-      return pLeft <= pUp && pLeft <= pUpLeft ? left : pUp <= pUpLeft ? up : upLeft;
-    },
-        getFilterMethods = function getFilterMethods() {
-      return [filterNone, filterSub, filterUp, filterAverage, filterPaeth];
-    },
-        getIndexOfSmallestSum = function getIndexOfSmallestSum(arrays) {
-      var i = 0,
-          len = arrays.length,
-          sum,
-          min,
-          ind;
-
-      while (i < len) {
-        sum = absSum(arrays[i].slice(1));
-
-        if (sum < min || !min) {
-          min = sum;
-          ind = i;
-        }
-
-        i++;
-      }
-
-      return ind;
-    },
-        absSum = function absSum(array) {
-      var i = 0,
-          len = array.length,
-          sum = 0;
-
-      while (i < len) {
-        sum += Math.abs(array[i++]);
-      }
-
-      return sum;
-    },
-        getPredictorFromCompression = function getPredictorFromCompression(compression) {
-      var predictor;
-
-      switch (compression) {
-        case jsPDFAPI.image_compression.FAST:
-          predictor = 11;
-          break;
-
-        case jsPDFAPI.image_compression.MEDIUM:
-          predictor = 13;
-          break;
-
-        case jsPDFAPI.image_compression.SLOW:
-          predictor = 14;
-          break;
-
-        default:
-          predictor = 12;
-          break;
-      }
-
-      return predictor;
+    var readBytes = function readBytes(data, offset) {
+      return data.subarray(offset, offset + 5);
     };
     /**
-    *
-    * @name processPNG
-    * @function
     * @ignore
     */
 
 
-    jsPDFAPI.processPNG = function (imageData, imageIndex, alias, compression, dataAsBinaryString) {
+    jsPDFAPI.processJPEG = function (data, index, alias, compression, dataAsBinaryString, colorSpace) {
 
-      var colorSpace = this.color_spaces.DEVICE_RGB,
-          decode = this.decode.FLATE_DECODE,
+      var filter = this.decode.DCT_DECODE,
           bpc = 8,
-          img,
-          dp,
-          trns,
-          colors,
-          pal,
-          smask;
-      /*	if(this.isString(imageData)) {
-      		}*/
+          dims;
 
-      if (this.isArrayBuffer(imageData)) imageData = new Uint8Array(imageData);
-
-      if (this.isArrayBufferView(imageData)) {
-        if (doesNotHavePngJS()) throw new Error("PNG support requires png.js and zlib.js");
-        img = new PNG(imageData);
-        imageData = img.imgData;
-        bpc = img.bits;
-        colorSpace = img.colorSpace;
-        colors = img.colors; //logImg(img);
-
-        /*
-         * colorType 6 - Each pixel is an R,G,B triple, followed by an alpha sample.
-         *
-         * colorType 4 - Each pixel is a grayscale sample, followed by an alpha sample.
-         *
-         * Extract alpha to create two separate images, using the alpha as a sMask
-         */
-
-        if ([4, 6].indexOf(img.colorType) !== -1) {
-          /*
-           * processes 8 bit RGBA and grayscale + alpha images
-           */
-          if (img.bits === 8) {
-            var pixels = img.pixelBitlength == 32 ? new Uint32Array(img.decodePixels().buffer) : img.pixelBitlength == 16 ? new Uint16Array(img.decodePixels().buffer) : new Uint8Array(img.decodePixels().buffer),
-                len = pixels.length,
-                imgData = new Uint8Array(len * img.colors),
-                alphaData = new Uint8Array(len),
-                pDiff = img.pixelBitlength - img.bits,
-                i = 0,
-                n = 0,
-                pixel,
-                pbl;
-
-            for (; i < len; i++) {
-              pixel = pixels[i];
-              pbl = 0;
-
-              while (pbl < pDiff) {
-                imgData[n++] = pixel >>> pbl & 0xff;
-                pbl = pbl + img.bits;
-              }
-
-              alphaData[i] = pixel >>> pbl & 0xff;
-            }
-          }
-          /*
-           * processes 16 bit RGBA and grayscale + alpha images
-           */
-
-
-          if (img.bits === 16) {
-            var pixels = new Uint32Array(img.decodePixels().buffer),
-                len = pixels.length,
-                imgData = new Uint8Array(len * (32 / img.pixelBitlength) * img.colors),
-                alphaData = new Uint8Array(len * (32 / img.pixelBitlength)),
-                hasColors = img.colors > 1,
-                i = 0,
-                n = 0,
-                a = 0,
-                pixel;
-
-            while (i < len) {
-              pixel = pixels[i++];
-              imgData[n++] = pixel >>> 0 & 0xFF;
-
-              if (hasColors) {
-                imgData[n++] = pixel >>> 16 & 0xFF;
-                pixel = pixels[i++];
-                imgData[n++] = pixel >>> 0 & 0xFF;
-              }
-
-              alphaData[a++] = pixel >>> 16 & 0xFF;
-            }
-
-            bpc = 8;
-          }
-
-          if (canCompress(compression)) {
-            imageData = compressBytes(imgData, img.width * img.colors, img.colors, compression);
-            smask = compressBytes(alphaData, img.width, 1, compression);
-          } else {
-            imageData = imgData;
-            smask = alphaData;
-            decode = null;
-          }
-        }
-        /*
-         * Indexed png. Each pixel is a palette index.
-         */
-
-
-        if (img.colorType === 3) {
-          colorSpace = this.color_spaces.INDEXED;
-          pal = img.palette;
-
-          if (img.transparency.indexed) {
-            var trans = img.transparency.indexed;
-            var total = 0,
-                i = 0,
-                len = trans.length;
-
-            for (; i < len; ++i) {
-              total += trans[i];
-            }
-
-            total = total / 255;
-            /*
-             * a single color is specified as 100% transparent (0),
-             * so we set trns to use a /Mask with that index
-             */
-
-            if (total === len - 1 && trans.indexOf(0) !== -1) {
-              trns = [trans.indexOf(0)];
-              /*
-               * there's more than one colour within the palette that specifies
-               * a transparency value less than 255, so we unroll the pixels to create an image sMask
-               */
-            } else if (total !== len) {
-              var pixels = img.decodePixels(),
-                  alphaData = new Uint8Array(pixels.length),
-                  i = 0,
-                  len = pixels.length;
-
-              for (; i < len; i++) {
-                alphaData[i] = trans[pixels[i]];
-              }
-
-              smask = compressBytes(alphaData, img.width, 1);
-            }
-          }
-        }
-
-        var predictor = getPredictorFromCompression(compression);
-        if (decode === this.decode.FLATE_DECODE) dp = '/Predictor ' + predictor + ' /Colors ' + colors + ' /BitsPerComponent ' + bpc + ' /Columns ' + img.width;else //remove 'Predictor' as it applies to the type of png filter applied to its IDAT - we only apply with compression
-          dp = '/Colors ' + colors + ' /BitsPerComponent ' + bpc + ' /Columns ' + img.width;
-        if (this.isArrayBuffer(imageData) || this.isArrayBufferView(imageData)) imageData = this.arrayBufferToBinaryString(imageData);
-        if (smask && this.isArrayBuffer(smask) || this.isArrayBufferView(smask)) smask = this.arrayBufferToBinaryString(smask);
-        return this.createImageInfo(imageData, img.width, img.height, colorSpace, bpc, decode, imageIndex, alias, dp, trns, pal, smask, predictor);
+      if (!(typeof data === 'string') && !this.isArrayBuffer(data) && !this.isArrayBufferView(data)) {
+        return null;
       }
 
-      throw new Error("Unsupported PNG image data, try using JPEG instead.");
+      if (typeof data === 'string') {
+        dims = getJpegSize(data);
+      }
+
+      if (this.isArrayBuffer(data)) {
+        data = new Uint8Array(data);
+      }
+
+      if (this.isArrayBufferView(data)) {
+        dims = getJpegSizeFromBytes(data); // if we already have a stored binary string rep use that
+
+        data = dataAsBinaryString || this.arrayBufferToBinaryString(data);
+      }
+
+      if (colorSpace === undefined) {
+        switch (dims.numcomponents) {
+          case 1:
+            colorSpace = this.color_spaces.DEVICE_GRAY;
+            break;
+
+          case 4:
+            colorSpace = this.color_spaces.DEVICE_CMYK;
+            break;
+
+          default:
+          case 3:
+            colorSpace = this.color_spaces.DEVICE_RGB;
+            break;
+        }
+      }
+
+      return this.createImageInfo(data, dims.width, dims.height, colorSpace, bpc, filter, index, alias);
+    };
+    /**
+    * @ignore
+    */
+
+
+    jsPDFAPI.processJPG = function ()
+    /*data, index, alias, compression, dataAsBinaryString*/
+    {
+      return this.processJPEG.apply(this, arguments);
     };
   })(jsPDF.API);
 
   /**
    * @license
-   * Copyright (c) 2017 Aras Abbasi 
+   * Copyright (c) 2019 Aras Abbasi 
    *
    * Licensed under the MIT License.
    * http://opensource.org/licenses/mit-license
    */
 
   /**
-  * jsPDF gif Support PlugIn
+  * jsPDF webp Support PlugIn
   *
-  * @name gif_support
+  * @name webp_support
   * @module
   */
   (function (jsPDFAPI) {
 
-    jsPDFAPI.processGIF89A = function (imageData, imageIndex, alias, compression, dataAsBinaryString) {
-      var reader = new GifReader(imageData);
-      var width = reader.width,
-          height = reader.height;
-      var qu = 100;
-      var pixels = [];
-      reader.decodeAndBlitFrameRGBA(0, pixels);
-      var rawImageData = {
-        data: pixels,
-        width: width,
-        height: height
-      };
-      var encoder = new JPEGEncoder(qu);
-      var data = encoder.encode(rawImageData, qu);
-      return jsPDFAPI.processJPEG.call(this, data, imageIndex, alias, compression);
-    };
-
-    jsPDFAPI.processGIF87A = jsPDFAPI.processGIF89A;
-  })(jsPDF.API);
-
-  /**
-   * Copyright (c) 2018 Aras Abbasi 
-   *
-   * Licensed under the MIT License.
-   * http://opensource.org/licenses/mit-license
-   */
-
-  /**
-  * jsPDF bmp Support PlugIn
-  * @name bmp_support
-  * @module
-  */
-  (function (jsPDFAPI) {
-
-    jsPDFAPI.processBMP = function (imageData, imageIndex, alias, compression, dataAsBinaryString) {
-      var reader = new BmpDecoder(imageData, false);
+    jsPDFAPI.processWEBP = function (imageData, imageIndex, alias, compression, dataAsBinaryString) {
+      var reader = new WebPDecoder(imageData, false);
       var width = reader.width,
           height = reader.height;
       var qu = 100;
@@ -15288,9 +12380,11 @@
           range = [];
         }
 
-        unicode = ('0000' + map[code].toString(16)).slice(-4);
-        code = ('0000' + (+code).toString(16)).slice(-4);
-        range.push("<" + code + "><" + unicode + ">");
+        if (map[code] !== undefined && map[code] !== null && typeof map[code].toString === "function") {
+          unicode = ('0000' + map[code].toString(16)).slice(-4);
+          code = ('0000' + (+code).toString(16)).slice(-4);
+          range.push("<" + code + "><" + unicode + ">");
+        }
       }
 
       if (range.length) {
@@ -15301,7 +12395,13 @@
       return unicodeMap;
     };
 
-    var identityHFunction = function identityHFunction(font, out, newObject, putStream) {
+    var identityHFunction = function identityHFunction(options) {
+      var font = options.font;
+      var out = options.out;
+      var newObject = options.newObject;
+      var putStream = options.putStream;
+      var pdfEscapeWithNeededParanthesis = options.pdfEscapeWithNeededParanthesis;
+
       if (font.metadata instanceof jsPDF.API.TTFFont && font.encoding === 'Identity-H') {
         //Tag with Identity-H
         var widths = font.metadata.Unicode.widths;
@@ -15329,7 +12429,7 @@
         var fontDescriptor = newObject();
         out('<<');
         out('/Type /FontDescriptor');
-        out('/FontName /' + font.fontName);
+        out('/FontName /' + pdfEscapeWithNeededParanthesis(font.fontName));
         out('/FontFile2 ' + fontTable + ' 0 R');
         out('/FontBBox ' + jsPDF.API.PDFObject.convert(font.metadata.bbox));
         out('/Flags ' + font.metadata.flags);
@@ -15343,7 +12443,7 @@
         var DescendantFont = newObject();
         out('<<');
         out('/Type /Font');
-        out('/BaseFont /' + font.fontName);
+        out('/BaseFont /' + pdfEscapeWithNeededParanthesis(font.fontName));
         out('/FontDescriptor ' + fontDescriptor + ' 0 R');
         out('/W ' + jsPDF.API.PDFObject.convert(widths));
         out('/CIDToGIDMap /Identity');
@@ -15372,10 +12472,16 @@
     };
 
     jsPDFAPI.events.push(['putFont', function (args) {
-      identityHFunction(args.font, args.out, args.newObject, args.putStream);
+      identityHFunction(args);
     }]);
 
-    var winAnsiEncodingFunction = function winAnsiEncodingFunction(font, out, newObject, putStream) {
+    var winAnsiEncodingFunction = function winAnsiEncodingFunction(options) {
+      var font = options.font;
+      var out = options.out;
+      var newObject = options.newObject;
+      var putStream = options.putStream;
+      var pdfEscapeWithNeededParanthesis = options.pdfEscapeWithNeededParanthesis;
+
       if (font.metadata instanceof jsPDF.API.TTFFont && font.encoding === 'WinAnsiEncoding') {
         //Tag with WinAnsi encoding
         var widths = font.metadata.Unicode.widths;
@@ -15409,7 +12515,7 @@
         out('/FontFile2 ' + fontTable + ' 0 R');
         out('/Flags 96');
         out('/FontBBox ' + jsPDF.API.PDFObject.convert(font.metadata.bbox));
-        out('/FontName /' + font.fontName);
+        out('/FontName /' + pdfEscapeWithNeededParanthesis(font.fontName));
         out('/ItalicAngle ' + font.metadata.italicAngle);
         out('/Ascent ' + font.metadata.ascender);
         out('>>');
@@ -15427,7 +12533,7 @@
     };
 
     jsPDFAPI.events.push(['putFont', function (args) {
-      winAnsiEncodingFunction(args.font, args.out, args.newObject, args.putStream);
+      winAnsiEncodingFunction(args);
     }]);
 
     var utf8TextFunction = function utf8TextFunction(args) {
@@ -15642,198 +12748,6 @@
 
       if (typeof this.internal.vFS[filename] !== "undefined") {
         return this.internal.vFS[filename];
-      }
-
-      return null;
-    };
-  })(jsPDF.API);
-
-  /**
-   * jsPDF addHTML PlugIn
-   * Copyright (c) 2014 Diego Casorran
-   *
-   * Licensed under the MIT License.
-   * http://opensource.org/licenses/mit-license
-   */
-  (function (jsPDFAPI) {
-    /**
-     * Renders an HTML element to canvas object which added to the PDF
-     *
-     * This feature requires [html2canvas](https://github.com/niklasvh/html2canvas)
-     * or [rasterizeHTML](https://github.com/cburgmer/rasterizeHTML.js)
-     *
-     * @returns {jsPDF}
-     * @name addHTML
-     * @param element {Mixed} HTML Element, or anything supported by html2canvas.
-     * @param x {Number} starting X coordinate in jsPDF instance's declared units.
-     * @param y {Number} starting Y coordinate in jsPDF instance's declared units.
-     * @param options {Object} Additional options, check the code below.
-     * @param callback {Function} to call when the rendering has finished.
-     * NOTE: Every parameter is optional except 'element' and 'callback', in such
-     *       case the image is positioned at 0x0 covering the whole PDF document
-     *       size. Ie, to easily take screenshots of webpages saving them to PDF.
-     * @deprecated This is being replace with a vector-supporting API. See
-     * [this link](https://cdn.rawgit.com/MrRio/jsPDF/master/examples/html2pdf/showcase_supported_html.html)
-     */
-
-    jsPDFAPI.addHTML = function (element, x, y, options, callback) {
-
-      if (typeof html2canvas === 'undefined' && typeof rasterizeHTML === 'undefined') throw new Error('You need either ' + 'https://github.com/niklasvh/html2canvas' + ' or https://github.com/cburgmer/rasterizeHTML.js');
-
-      if (typeof x !== 'number') {
-        options = x;
-        callback = y;
-      }
-
-      if (typeof options === 'function') {
-        callback = options;
-        options = null;
-      }
-
-      if (typeof callback !== 'function') {
-        callback = function callback() {};
-      }
-
-      var I = this.internal,
-          K = I.scaleFactor,
-          W = I.pageSize.getWidth(),
-          H = I.pageSize.getHeight();
-      options = options || {};
-
-      options.onrendered = function (obj) {
-        x = parseInt(x) || 0;
-        y = parseInt(y) || 0;
-        var dim = options.dim || {};
-        var margin = Object.assign({
-          top: 0,
-          right: 0,
-          bottom: 0,
-          left: 0,
-          useFor: 'content'
-        }, options.margin);
-        var h = dim.h || Math.min(H, obj.height / K);
-        var w = dim.w || Math.min(W, obj.width / K) - x;
-        var format = options.format || 'JPEG';
-        var imageCompression = options.imageCompression || 'SLOW';
-        var notFittingHeight = obj.height > H - margin.top - margin.bottom;
-
-        if (notFittingHeight && options.pagesplit) {
-          var cropArea = function cropArea(parmObj, parmX, parmY, parmWidth, parmHeight) {
-            var canvas = document.createElement('canvas');
-            canvas.height = parmHeight;
-            canvas.width = parmWidth;
-            var ctx = canvas.getContext('2d');
-            ctx.mozImageSmoothingEnabled = false;
-            ctx.webkitImageSmoothingEnabled = false;
-            ctx.msImageSmoothingEnabled = false;
-            ctx.imageSmoothingEnabled = false;
-            ctx.fillStyle = options.backgroundColor || '#ffffff';
-            ctx.fillRect(0, 0, parmWidth, parmHeight);
-            ctx.drawImage(parmObj, parmX, parmY, parmWidth, parmHeight, 0, 0, parmWidth, parmHeight);
-            return canvas;
-          };
-
-          var crop = function () {
-            var cy = 0;
-            var cx = 0;
-            var position = {};
-            var isOverWide = false;
-            var width;
-            var height;
-
-            while (1) {
-              cx = 0;
-              position.top = cy !== 0 ? margin.top : y;
-              position.left = cy !== 0 ? margin.left : x;
-              isOverWide = (W - margin.left - margin.right) * K < obj.width;
-
-              if (margin.useFor === "content") {
-                if (cy === 0) {
-                  width = Math.min((W - margin.left) * K, obj.width);
-                  height = Math.min((H - margin.top) * K, obj.height - cy);
-                } else {
-                  width = Math.min(W * K, obj.width);
-                  height = Math.min(H * K, obj.height - cy);
-                  position.top = 0;
-                }
-              } else {
-                width = Math.min((W - margin.left - margin.right) * K, obj.width);
-                height = Math.min((H - margin.bottom - margin.top) * K, obj.height - cy);
-              }
-
-              if (isOverWide) {
-                while (1) {
-                  if (margin.useFor === "content") {
-                    if (cx === 0) {
-                      width = Math.min((W - margin.left) * K, obj.width);
-                    } else {
-                      width = Math.min(W * K, obj.width - cx);
-                      position.left = 0;
-                    }
-                  }
-
-                  var canvas = cropArea(obj, cx, cy, width, height);
-                  var args = [canvas, position.left, position.top, canvas.width / K, canvas.height / K, format, null, imageCompression];
-                  this.addImage.apply(this, args);
-                  cx += width;
-
-                  if (cx >= obj.width) {
-                    break;
-                  }
-
-                  this.addPage();
-                }
-              } else {
-                var canvas = cropArea(obj, 0, cy, width, height);
-                var args = [canvas, position.left, position.top, canvas.width / K, canvas.height / K, format, null, imageCompression];
-                this.addImage.apply(this, args);
-              }
-
-              cy += height;
-
-              if (cy >= obj.height) {
-                break;
-              }
-
-              this.addPage();
-            }
-
-            callback(w, cy, null, args);
-          }.bind(this);
-
-          if (obj.nodeName === 'CANVAS') {
-            var img = new Image();
-            img.onload = crop;
-            img.src = obj.toDataURL("image/png");
-            obj = img;
-          } else {
-            crop();
-          }
-        } else {
-          var alias = Math.random().toString(35);
-          var args = [obj, x, y, w, h, format, alias, imageCompression];
-          this.addImage.apply(this, args);
-          callback(w, h, alias, args);
-        }
-      }.bind(this);
-
-      if (typeof html2canvas !== 'undefined' && !options.rstz) {
-        return html2canvas(element, options);
-      }
-
-      if (typeof rasterizeHTML !== 'undefined') {
-        var meth = 'drawDocument';
-
-        if (typeof element === 'string') {
-          meth = /^http/.test(element) ? 'drawURL' : 'drawHTML';
-        }
-
-        options.width = options.width || W * K;
-        return rasterizeHTML[meth](element, void 0, options).then(function (r) {
-          options.onrendered(r.image);
-        }, function (e) {
-          callback(null, e);
-        });
       }
 
       return null;
@@ -16377,7 +13291,7 @@
       }
 
       function loadImage(url, width, height) {
-        if (!url) return;
+        if (!url) { return; }
         var img = new Image();
         found_images = ++x;
         img.crossOrigin = '';
@@ -16484,8 +13398,8 @@
     };
 
     process = function process(pdf, element, x, y, settings, callback) {
-      if (!element) return false;
-      if (typeof element !== "string" && !element.parentNode) element = '' + element.innerHTML;
+      if (!element) { return false; }
+      if (typeof element !== "string" && !element.parentNode) { element = '' + element.innerHTML; }
 
       if (typeof element === "string") {
         element = function (element) {
@@ -16517,7 +13431,7 @@
 
         r.pdf.internal.events.publish('htmlRenderingFinished');
         out = r.dispose();
-        if (typeof callback === 'function') callback(out);else if (found_images) console.error('jsPDF Warning: rendering issues? provide a callback to fromHTML!');
+        if (typeof callback === 'function') { callback(out); }else if (found_images) { console.error('jsPDF Warning: rendering issues? provide a callback to fromHTML!'); }
       });
       return out || {
         x: r.x,
@@ -16941,1587 +13855,11 @@
         top: 0,
         bottom: 0
       };
-      if (!settings) settings = {};
-      if (!settings.elementHandlers) settings.elementHandlers = {};
+      if (!settings) { settings = {}; }
+      if (!settings.elementHandlers) { settings.elementHandlers = {}; }
       return process(this, HTML, isNaN(x) ? 4 : x, isNaN(y) ? 4 : y, settings, callback);
     };
   })(jsPDF.API);
-
-  /**
-   * html2pdf.js
-   * Copyright (c) 2014 Steven Spungin (TwelveTone LLC)  steven@twelvetone.tv
-   *
-   * Licensed under the MIT License.
-   * http://opensource.org/licenses/mit-license
-   */
-  (function (jsPDFAPI, globalObj) {
-    globalObj.html2pdf = function (html, pdf, callback) {
-      var canvas = pdf.canvas;
-
-      if (!canvas) {
-        alert('jsPDF canvas plugin not installed');
-        return;
-      }
-
-      canvas.pdf = pdf;
-      pdf.annotations = {
-        _nameMap: [],
-        createAnnotation: function createAnnotation(href, bounds) {
-          var x = pdf.context2d._wrapX(bounds.left);
-
-          var y = pdf.context2d._wrapY(bounds.top);
-
-          var page = pdf.context2d._page(bounds.top);
-
-          var options;
-          var index = href.indexOf('#');
-
-          if (index >= 0) {
-            options = {
-              name: href.substring(index + 1)
-            };
-          } else {
-            options = {
-              url: href
-            };
-          }
-
-          pdf.link(x, y, bounds.right - bounds.left, bounds.bottom - bounds.top, options);
-        },
-        setName: function setName(name, bounds) {
-          var x = pdf.context2d._wrapX(bounds.left);
-
-          var y = pdf.context2d._wrapY(bounds.top);
-
-          var page = pdf.context2d._page(bounds.top);
-
-          this._nameMap[name] = {
-            page: page,
-            x: x,
-            y: y
-          };
-        }
-      };
-      canvas.annotations = pdf.annotations;
-
-      pdf.context2d._pageBreakAt = function (y) {
-        this.pageBreaks.push(y);
-      };
-
-      pdf.context2d._gotoPage = function (pageOneBased) {
-        while (pdf.internal.getNumberOfPages() < pageOneBased) {
-          pdf.addPage();
-        }
-
-        pdf.setPage(pageOneBased);
-      };
-
-      var htmlElement;
-      var height;
-
-      if (typeof html === 'string') {
-        // remove all scripts
-        html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-        var iframe = document.createElement('iframe'); //iframe.style.width = canvas.width;
-        //iframe.src = "";
-        //iframe.document.domain =
-
-        document.body.appendChild(iframe);
-        var doc;
-        var body;
-        doc = iframe.contentDocument;
-
-        if (doc == undefined || doc == null) {
-          doc = iframe.contentWindow.document;
-        } //iframe.setAttribute('style', 'position:absolute;right:0; top:0; bottom:0; height:100%; width:500px');
-
-
-        doc.open();
-        doc.write(html);
-        doc.close();
-        htmlElement = doc.body;
-        body = doc.body || {}, html = doc.documentElement || {};
-        height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
-      } else {
-        htmlElement = html;
-        body = html.body || {}, height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
-      }
-
-      height = pdf.internal.pageSize.getHeight();
-      var options = {
-        async: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        canvas: canvas,
-        imageTimeout: 15000,
-        logging: true,
-        proxy: null,
-        removeContainer: true,
-        foreignObjectRendering: false,
-        useCORS: false,
-        windowHeight: height,
-        scrollY: height
-      };
-      pdf.context2d.pageWrapYEnabled = true;
-      pdf.context2d.pageWrapY = pdf.internal.pageSize.getHeight();
-      var promise = html2canvas(htmlElement, options).then(function (canvas) {
-        if (callback) {
-          if (iframe) {
-            iframe.parentElement.removeChild(iframe);
-          }
-
-          callback(pdf);
-        }
-      });
-    };
-  })(jsPDF.API, typeof window !== "undefined" && window || typeof global !== "undefined" && global);
-  /*rollup-keeper-start*/
-
-
-  window.tmp = html2pdf;
-  /*rollup-keeper-end*/
-
-  /* Blob.js
-   * A Blob, File, FileReader & URL implementation.
-   * 2018-08-09
-   *
-   * By Eli Grey, http://eligrey.com
-   * By Jimmy Wärting, https://github.com/jimmywarting
-   * License: MIT
-   *   See https://github.com/eligrey/Blob.js/blob/master/LICENSE.md
-   */
-
-  (function (global) {
-    var BlobBuilder = global.BlobBuilder || global.WebKitBlobBuilder || global.MSBlobBuilder || global.MozBlobBuilder;
-
-    global.URL = global.URL || global.webkitURL || function (href, a) {
-      a = document.createElement('a');
-      a.href = href;
-      return a;
-    };
-
-    var origBlob = global.Blob;
-    var createObjectURL = URL.createObjectURL;
-    var revokeObjectURL = URL.revokeObjectURL;
-    var strTag = global.Symbol && global.Symbol.toStringTag;
-    var blobSupported = false;
-    var blobSupportsArrayBufferView = false;
-    var arrayBufferSupported = !!global.ArrayBuffer;
-    var blobBuilderSupported = BlobBuilder && BlobBuilder.prototype.append && BlobBuilder.prototype.getBlob;
-
-    try {
-      // Check if Blob constructor is supported
-      blobSupported = new Blob(['ä']).size === 2; // Check if Blob constructor supports ArrayBufferViews
-      // Fails in Safari 6, so we need to map to ArrayBuffers there.
-
-      blobSupportsArrayBufferView = new Blob([new Uint8Array([1, 2])]).size === 2;
-    } catch (e) {}
-    /**
-     * Helper function that maps ArrayBufferViews to ArrayBuffers
-     * Used by BlobBuilder constructor and old browsers that didn't
-     * support it in the Blob constructor.
-     */
-
-
-    function mapArrayBufferViews(ary) {
-      return ary.map(function (chunk) {
-        if (chunk.buffer instanceof ArrayBuffer) {
-          var buf = chunk.buffer; // if this is a subarray, make a copy so we only
-          // include the subarray region from the underlying buffer
-
-          if (chunk.byteLength !== buf.byteLength) {
-            var copy = new Uint8Array(chunk.byteLength);
-            copy.set(new Uint8Array(buf, chunk.byteOffset, chunk.byteLength));
-            buf = copy.buffer;
-          }
-
-          return buf;
-        }
-
-        return chunk;
-      });
-    }
-
-    function BlobBuilderConstructor(ary, options) {
-      options = options || {};
-      var bb = new BlobBuilder();
-      mapArrayBufferViews(ary).forEach(function (part) {
-        bb.append(part);
-      });
-      return options.type ? bb.getBlob(options.type) : bb.getBlob();
-    }
-
-    function BlobConstructor(ary, options) {
-      return new origBlob(mapArrayBufferViews(ary), options || {});
-    }
-
-    if (global.Blob) {
-      BlobBuilderConstructor.prototype = Blob.prototype;
-      BlobConstructor.prototype = Blob.prototype;
-    }
-
-    function FakeBlobBuilder() {
-      function toUTF8Array(str) {
-        var utf8 = [];
-
-        for (var i = 0; i < str.length; i++) {
-          var charcode = str.charCodeAt(i);
-          if (charcode < 0x80) utf8.push(charcode);else if (charcode < 0x800) {
-            utf8.push(0xc0 | charcode >> 6, 0x80 | charcode & 0x3f);
-          } else if (charcode < 0xd800 || charcode >= 0xe000) {
-            utf8.push(0xe0 | charcode >> 12, 0x80 | charcode >> 6 & 0x3f, 0x80 | charcode & 0x3f);
-          } // surrogate pair
-          else {
-              i++; // UTF-16 encodes 0x10000-0x10FFFF by
-              // subtracting 0x10000 and splitting the
-              // 20 bits of 0x0-0xFFFFF into two halves
-
-              charcode = 0x10000 + ((charcode & 0x3ff) << 10 | str.charCodeAt(i) & 0x3ff);
-              utf8.push(0xf0 | charcode >> 18, 0x80 | charcode >> 12 & 0x3f, 0x80 | charcode >> 6 & 0x3f, 0x80 | charcode & 0x3f);
-            }
-        }
-
-        return utf8;
-      }
-
-      function fromUtf8Array(array) {
-        var out, i, len, c;
-        var char2, char3;
-        out = "";
-        len = array.length;
-        i = 0;
-
-        while (i < len) {
-          c = array[i++];
-
-          switch (c >> 4) {
-            case 0:
-            case 1:
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-            case 6:
-            case 7:
-              // 0xxxxxxx
-              out += String.fromCharCode(c);
-              break;
-
-            case 12:
-            case 13:
-              // 110x xxxx   10xx xxxx
-              char2 = array[i++];
-              out += String.fromCharCode((c & 0x1F) << 6 | char2 & 0x3F);
-              break;
-
-            case 14:
-              // 1110 xxxx  10xx xxxx  10xx xxxx
-              char2 = array[i++];
-              char3 = array[i++];
-              out += String.fromCharCode((c & 0x0F) << 12 | (char2 & 0x3F) << 6 | (char3 & 0x3F) << 0);
-              break;
-          }
-        }
-
-        return out;
-      }
-
-      function isDataView(obj) {
-        return obj && DataView.prototype.isPrototypeOf(obj);
-      }
-
-      function bufferClone(buf) {
-        var view = new Array(buf.byteLength);
-        var array = new Uint8Array(buf);
-        var i = view.length;
-
-        while (i--) {
-          view[i] = array[i];
-        }
-
-        return view;
-      }
-
-      function encodeByteArray(input) {
-        var byteToCharMap = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        var output = [];
-
-        for (var i = 0; i < input.length; i += 3) {
-          var byte1 = input[i];
-          var haveByte2 = i + 1 < input.length;
-          var byte2 = haveByte2 ? input[i + 1] : 0;
-          var haveByte3 = i + 2 < input.length;
-          var byte3 = haveByte3 ? input[i + 2] : 0;
-          var outByte1 = byte1 >> 2;
-          var outByte2 = (byte1 & 0x03) << 4 | byte2 >> 4;
-          var outByte3 = (byte2 & 0x0F) << 2 | byte3 >> 6;
-          var outByte4 = byte3 & 0x3F;
-
-          if (!haveByte3) {
-            outByte4 = 64;
-
-            if (!haveByte2) {
-              outByte3 = 64;
-            }
-          }
-
-          output.push(byteToCharMap[outByte1], byteToCharMap[outByte2], byteToCharMap[outByte3], byteToCharMap[outByte4]);
-        }
-
-        return output.join('');
-      }
-
-      var create = Object.create || function (a) {
-        function c() {}
-
-        c.prototype = a;
-        return new c();
-      };
-
-      if (arrayBufferSupported) {
-        var viewClasses = ['[object Int8Array]', '[object Uint8Array]', '[object Uint8ClampedArray]', '[object Int16Array]', '[object Uint16Array]', '[object Int32Array]', '[object Uint32Array]', '[object Float32Array]', '[object Float64Array]'];
-
-        var isArrayBufferView = ArrayBuffer.isView || function (obj) {
-          return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1;
-        };
-      }
-      /********************************************************/
-
-      /*                   Blob constructor                   */
-
-      /********************************************************/
-
-
-      function Blob(chunks, opts) {
-        chunks = chunks || [];
-
-        for (var i = 0, len = chunks.length; i < len; i++) {
-          var chunk = chunks[i];
-
-          if (chunk instanceof Blob) {
-            chunks[i] = chunk._buffer;
-          } else if (typeof chunk === 'string') {
-            chunks[i] = toUTF8Array(chunk);
-          } else if (arrayBufferSupported && (ArrayBuffer.prototype.isPrototypeOf(chunk) || isArrayBufferView(chunk))) {
-            chunks[i] = bufferClone(chunk);
-          } else if (arrayBufferSupported && isDataView(chunk)) {
-            chunks[i] = bufferClone(chunk.buffer);
-          } else {
-            chunks[i] = toUTF8Array(String(chunk));
-          }
-        }
-
-        this._buffer = [].concat.apply([], chunks);
-        this.size = this._buffer.length;
-        this.type = opts ? opts.type || '' : '';
-      }
-
-      Blob.prototype.slice = function (start, end, type) {
-        var slice = this._buffer.slice(start || 0, end || this._buffer.length);
-
-        return new Blob([slice], {
-          type: type
-        });
-      };
-
-      Blob.prototype.toString = function () {
-        return '[object Blob]';
-      };
-      /********************************************************/
-
-      /*                   File constructor                   */
-
-      /********************************************************/
-
-
-      function File(chunks, name, opts) {
-        opts = opts || {};
-        var a = Blob.call(this, chunks, opts) || this;
-        a.name = name;
-        a.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date();
-        a.lastModified = +a.lastModifiedDate;
-        return a;
-      }
-
-      File.prototype = create(Blob.prototype);
-      File.prototype.constructor = File;
-      if (Object.setPrototypeOf) Object.setPrototypeOf(File, Blob);else {
-        try {
-          File.__proto__ = Blob;
-        } catch (e) {}
-      }
-
-      File.prototype.toString = function () {
-        return '[object File]';
-      };
-      /********************************************************/
-
-      /*                FileReader constructor                */
-
-      /********************************************************/
-
-
-      function FileReader() {
-        if (!(this instanceof FileReader)) throw new TypeError("Failed to construct 'FileReader': Please use the 'new' operator, this DOM object constructor cannot be called as a function.");
-        var delegate = document.createDocumentFragment();
-        this.addEventListener = delegate.addEventListener;
-
-        this.dispatchEvent = function (evt) {
-          var local = this['on' + evt.type];
-          if (typeof local === 'function') local(evt);
-          delegate.dispatchEvent(evt);
-        };
-
-        this.removeEventListener = delegate.removeEventListener;
-      }
-
-      function _read(fr, blob, kind) {
-        if (!(blob instanceof Blob)) throw new TypeError("Failed to execute '" + kind + "' on 'FileReader': parameter 1 is not of type 'Blob'.");
-        fr.result = '';
-        setTimeout(function () {
-          this.readyState = FileReader.LOADING;
-          fr.dispatchEvent(new Event('load'));
-          fr.dispatchEvent(new Event('loadend'));
-        });
-      }
-
-      FileReader.EMPTY = 0;
-      FileReader.LOADING = 1;
-      FileReader.DONE = 2;
-      FileReader.prototype.error = null;
-      FileReader.prototype.onabort = null;
-      FileReader.prototype.onerror = null;
-      FileReader.prototype.onload = null;
-      FileReader.prototype.onloadend = null;
-      FileReader.prototype.onloadstart = null;
-      FileReader.prototype.onprogress = null;
-
-      FileReader.prototype.readAsDataURL = function (blob) {
-        _read(this, blob, 'readAsDataURL');
-
-        this.result = 'data:' + blob.type + ';base64,' + encodeByteArray(blob._buffer);
-      };
-
-      FileReader.prototype.readAsText = function (blob) {
-        _read(this, blob, 'readAsText');
-
-        this.result = fromUtf8Array(blob._buffer);
-      };
-
-      FileReader.prototype.readAsArrayBuffer = function (blob) {
-        _read(this, blob, 'readAsText');
-
-        this.result = blob._buffer.slice();
-      };
-
-      FileReader.prototype.abort = function () {};
-      /********************************************************/
-
-      /*                         URL                          */
-
-      /********************************************************/
-
-
-      URL.createObjectURL = function (blob) {
-        return blob instanceof Blob ? 'data:' + blob.type + ';base64,' + encodeByteArray(blob._buffer) : createObjectURL.call(URL, blob);
-      };
-
-      URL.revokeObjectURL = function (url) {
-        revokeObjectURL && revokeObjectURL.call(URL, url);
-      };
-      /********************************************************/
-
-      /*                         XHR                          */
-
-      /********************************************************/
-
-
-      var _send = global.XMLHttpRequest && global.XMLHttpRequest.prototype.send;
-
-      if (_send) {
-        XMLHttpRequest.prototype.send = function (data) {
-          if (data instanceof Blob) {
-            this.setRequestHeader('Content-Type', data.type);
-
-            _send.call(this, fromUtf8Array(data._buffer));
-          } else {
-            _send.call(this, data);
-          }
-        };
-      }
-
-      global.FileReader = FileReader;
-      global.File = File;
-      global.Blob = Blob;
-    }
-
-    if (strTag) {
-      try {
-        File.prototype[strTag] = 'File';
-        Blob.prototype[strTag] = 'Blob';
-        FileReader.prototype[strTag] = 'FileReader';
-      } catch (e) {}
-    }
-
-    function fixFileAndXHR() {
-      var isIE = !!global.ActiveXObject || '-ms-scroll-limit' in document.documentElement.style && '-ms-ime-align' in document.documentElement.style; // Monkey patched 
-      // IE don't set Content-Type header on XHR whose body is a typed Blob
-      // https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/6047383
-
-      var _send = global.XMLHttpRequest && global.XMLHttpRequest.prototype.send;
-
-      if (isIE && _send) {
-        XMLHttpRequest.prototype.send = function (data) {
-          if (data instanceof Blob) {
-            this.setRequestHeader('Content-Type', data.type);
-
-            _send.call(this, data);
-          } else {
-            _send.call(this, data);
-          }
-        };
-      }
-
-      try {
-        new File([], '');
-      } catch (e) {
-        try {
-          var klass = new Function('class File extends Blob {' + 'constructor(chunks, name, opts) {' + 'opts = opts || {};' + 'super(chunks, opts || {});' + 'this.name = name;' + 'this.lastModifiedDate = opts.lastModified ? new Date(opts.lastModified) : new Date;' + 'this.lastModified = +this.lastModifiedDate;' + '}};' + 'return new File([], ""), File')();
-          global.File = klass;
-        } catch (e) {
-          var klass = function klass(b, d, c) {
-            var blob = new Blob(b, c);
-            var t = c && void 0 !== c.lastModified ? new Date(c.lastModified) : new Date();
-            blob.name = d;
-            blob.lastModifiedDate = t;
-            blob.lastModified = +t;
-
-            blob.toString = function () {
-              return '[object File]';
-            };
-
-            if (strTag) blob[strTag] = 'File';
-            return blob;
-          };
-
-          global.File = klass;
-        }
-      }
-    }
-
-    if (blobSupported) {
-      fixFileAndXHR();
-      global.Blob = blobSupportsArrayBufferView ? global.Blob : BlobConstructor;
-    } else if (blobBuilderSupported) {
-      fixFileAndXHR();
-      global.Blob = BlobBuilderConstructor;
-    } else {
-      FakeBlobBuilder();
-    }
-  })(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function('return typeof this === "object" && this.content')() || Function('return this')());
-
-  /* FileSaver.js
-   * A saveAs() FileSaver implementation.
-   * 1.3.8
-   * 2018-03-22 14:03:47
-   *
-   * By Eli Grey, https://eligrey.com
-   * License: MIT
-   *   See https://github.com/eligrey/FileSaver.js/blob/master/LICENSE.md
-   */
-
-  /*global self */
-
-  /*jslint bitwise: true, indent: 4, laxbreak: true, laxcomma: true, smarttabs: true, plusplus: true */
-
-  /*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/src/FileSaver.js */
-  var saveAs = saveAs || function (view) {
-
-    if (typeof view === "undefined" || typeof navigator !== "undefined" && /MSIE [1-9]\./.test(navigator.userAgent)) {
-      return;
-    }
-
-    var doc = view.document // only get URL when necessary in case Blob.js hasn't overridden it yet
-    ,
-        get_URL = function () {
-      return view.URL || view.webkitURL || view;
-    },
-        save_link = doc.createElementNS("http://www.w3.org/1999/xhtml", "a"),
-        can_use_save_link = "download" in save_link,
-        click = function (node) {
-      var event = new MouseEvent("click");
-      node.dispatchEvent(event);
-    },
-        is_safari = /constructor/i.test(view.HTMLElement) || view.safari,
-        is_chrome_ios = /CriOS\/[\d]+/.test(navigator.userAgent),
-        setImmediate = view.setImmediate || view.setTimeout,
-        throw_outside = function (ex) {
-      setImmediate(function () {
-        throw ex;
-      }, 0);
-    },
-        force_saveable_type = "application/octet-stream" // the Blob API is fundamentally broken as there is no "downloadfinished" event to subscribe to
-    ,
-        arbitrary_revoke_timeout = 1000 * 40 // in ms
-    ,
-        revoke = function (file) {
-      var revoker = function () {
-        if (typeof file === "string") {
-          // file is an object URL
-          get_URL().revokeObjectURL(file);
-        } else {
-          // file is a File
-          file.remove();
-        }
-      };
-
-      setTimeout(revoker, arbitrary_revoke_timeout);
-    },
-        dispatch = function (filesaver, event_types, event) {
-      event_types = [].concat(event_types);
-      var i = event_types.length;
-
-      while (i--) {
-        var listener = filesaver["on" + event_types[i]];
-
-        if (typeof listener === "function") {
-          try {
-            listener.call(filesaver, event || filesaver);
-          } catch (ex) {
-            throw_outside(ex);
-          }
-        }
-      }
-    },
-        auto_bom = function (blob) {
-      // prepend BOM for UTF-8 XML and text/* types (including HTML)
-      // note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
-      if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-        return new Blob([String.fromCharCode(0xFEFF), blob], {
-          type: blob.type
-        });
-      }
-
-      return blob;
-    },
-        FileSaver = function (blob, name, no_auto_bom) {
-      if (!no_auto_bom) {
-        blob = auto_bom(blob);
-      } // First try a.download, then web filesystem, then object URLs
-
-
-      var filesaver = this,
-          type = blob.type,
-          force = type === force_saveable_type,
-          object_url,
-          dispatch_all = function () {
-        dispatch(filesaver, "writestart progress write writeend".split(" "));
-      } // on any filesys errors revert to saving with object URLs
-      ,
-          fs_error = function () {
-        if ((is_chrome_ios || force && is_safari) && view.FileReader) {
-          // Safari doesn't allow downloading of blob urls
-          var reader = new FileReader();
-
-          reader.onloadend = function () {
-            var url = is_chrome_ios ? reader.result : reader.result.replace(/^data:[^;]*;/, 'data:attachment/file;');
-            var popup = view.open(url, '_blank');
-            if (!popup) view.location.href = url;
-            url = undefined; // release reference before dispatching
-
-            filesaver.readyState = filesaver.DONE;
-            dispatch_all();
-          };
-
-          reader.readAsDataURL(blob);
-          filesaver.readyState = filesaver.INIT;
-          return;
-        } // don't create more object URLs than needed
-
-
-        if (!object_url) {
-          object_url = get_URL().createObjectURL(blob);
-        }
-
-        if (force) {
-          view.location.href = object_url;
-        } else {
-          var opened = view.open(object_url, "_blank");
-
-          if (!opened) {
-            // Apple does not allow window.open, see https://developer.apple.com/library/safari/documentation/Tools/Conceptual/SafariExtensionGuide/WorkingwithWindowsandTabs/WorkingwithWindowsandTabs.html
-            view.location.href = object_url;
-          }
-        }
-
-        filesaver.readyState = filesaver.DONE;
-        dispatch_all();
-        revoke(object_url);
-      };
-
-      filesaver.readyState = filesaver.INIT;
-
-      if (can_use_save_link) {
-        object_url = get_URL().createObjectURL(blob);
-        setImmediate(function () {
-          save_link.href = object_url;
-          save_link.download = name;
-          click(save_link);
-          dispatch_all();
-          revoke(object_url);
-          filesaver.readyState = filesaver.DONE;
-        }, 0);
-        return;
-      }
-
-      fs_error();
-    },
-        FS_proto = FileSaver.prototype,
-        saveAs = function (blob, name, no_auto_bom) {
-      return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
-    }; // IE 10+ (native saveAs)
-
-
-    if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
-      return function (blob, name, no_auto_bom) {
-        name = name || blob.name || "download";
-
-        if (!no_auto_bom) {
-          blob = auto_bom(blob);
-        }
-
-        return navigator.msSaveOrOpenBlob(blob, name);
-      };
-    } // todo: detect chrome extensions & packaged apps
-    //save_link.target = "_blank";
-
-
-    FS_proto.abort = function () {};
-
-    FS_proto.readyState = FS_proto.INIT = 0;
-    FS_proto.WRITING = 1;
-    FS_proto.DONE = 2;
-    FS_proto.error = FS_proto.onwritestart = FS_proto.onprogress = FS_proto.onwrite = FS_proto.onabort = FS_proto.onerror = FS_proto.onwriteend = null;
-    return saveAs;
-  }(typeof self !== "undefined" && self || typeof window !== "undefined" && window || undefined);
-
-  // (c) Dean McNamee <dean@gmail.com>, 2013.
-  //
-  // https://github.com/deanm/omggif
-  //
-  // 
-  //
-  // omggif is a JavaScript implementation of a GIF 89a encoder and decoder,
-  // including animation and compression.  It does not rely on any specific
-  // underlying system, so should run in the browser, Node, or Plask.
-  function GifWriter(buf, width, height, gopts) {
-    var p = 0;
-    var gopts = gopts === undefined ? {} : gopts;
-    var loop_count = gopts.loop === undefined ? null : gopts.loop;
-    var global_palette = gopts.palette === undefined ? null : gopts.palette;
-    if (width <= 0 || height <= 0 || width > 65535 || height > 65535) throw "Width/Height invalid.";
-
-    function check_palette_and_num_colors(palette) {
-      var num_colors = palette.length;
-      if (num_colors < 2 || num_colors > 256 || num_colors & num_colors - 1) throw "Invalid code/color length, must be power of 2 and 2 .. 256.";
-      return num_colors;
-    } // - Header.
-
-
-    buf[p++] = 0x47;
-    buf[p++] = 0x49;
-    buf[p++] = 0x46; // GIF
-
-    buf[p++] = 0x38;
-    buf[p++] = 0x39;
-    buf[p++] = 0x61; // 89a
-    // Handling of Global Color Table (palette) and background index.
-
-    var gp_num_colors_pow2 = 0;
-    var background = 0;
-
-    if (global_palette !== null) {
-      var gp_num_colors = check_palette_and_num_colors(global_palette);
-
-      while (gp_num_colors >>= 1) ++gp_num_colors_pow2;
-
-      gp_num_colors = 1 << gp_num_colors_pow2;
-      --gp_num_colors_pow2;
-
-      if (gopts.background !== undefined) {
-        background = gopts.background;
-        if (background >= gp_num_colors) throw "Background index out of range."; // The GIF spec states that a background index of 0 should be ignored, so
-        // this is probably a mistake and you really want to set it to another
-        // slot in the palette.  But actually in the end most browsers, etc end
-        // up ignoring this almost completely (including for dispose background).
-
-        if (background === 0) throw "Background index explicitly passed as 0.";
-      }
-    } // - Logical Screen Descriptor.
-    // NOTE(deanm): w/h apparently ignored by implementations, but set anyway.
-
-
-    buf[p++] = width & 0xff;
-    buf[p++] = width >> 8 & 0xff;
-    buf[p++] = height & 0xff;
-    buf[p++] = height >> 8 & 0xff; // NOTE: Indicates 0-bpp original color resolution (unused?).
-
-    buf[p++] = (global_palette !== null ? 0x80 : 0) | // Global Color Table Flag.
-    gp_num_colors_pow2; // NOTE: No sort flag (unused?).
-
-    buf[p++] = background; // Background Color Index.
-
-    buf[p++] = 0; // Pixel aspect ratio (unused?).
-    // - Global Color Table
-
-    if (global_palette !== null) {
-      for (var i = 0, il = global_palette.length; i < il; ++i) {
-        var rgb = global_palette[i];
-        buf[p++] = rgb >> 16 & 0xff;
-        buf[p++] = rgb >> 8 & 0xff;
-        buf[p++] = rgb & 0xff;
-      }
-    }
-
-    if (loop_count !== null) {
-      // Netscape block for looping.
-      if (loop_count < 0 || loop_count > 65535) throw "Loop count invalid."; // Extension code, label, and length.
-
-      buf[p++] = 0x21;
-      buf[p++] = 0xff;
-      buf[p++] = 0x0b; // NETSCAPE2.0
-
-      buf[p++] = 0x4e;
-      buf[p++] = 0x45;
-      buf[p++] = 0x54;
-      buf[p++] = 0x53;
-      buf[p++] = 0x43;
-      buf[p++] = 0x41;
-      buf[p++] = 0x50;
-      buf[p++] = 0x45;
-      buf[p++] = 0x32;
-      buf[p++] = 0x2e;
-      buf[p++] = 0x30; // Sub-block
-
-      buf[p++] = 0x03;
-      buf[p++] = 0x01;
-      buf[p++] = loop_count & 0xff;
-      buf[p++] = loop_count >> 8 & 0xff;
-      buf[p++] = 0x00; // Terminator.
-    }
-
-    var ended = false;
-
-    this.addFrame = function (x, y, w, h, indexed_pixels, opts) {
-      if (ended === true) {
-        --p;
-        ended = false;
-      } // Un-end.
-
-
-      opts = opts === undefined ? {} : opts; // TODO(deanm): Bounds check x, y.  Do they need to be within the virtual
-      // canvas width/height, I imagine?
-
-      if (x < 0 || y < 0 || x > 65535 || y > 65535) throw "x/y invalid.";
-      if (w <= 0 || h <= 0 || w > 65535 || h > 65535) throw "Width/Height invalid.";
-      if (indexed_pixels.length < w * h) throw "Not enough pixels for the frame size.";
-      var using_local_palette = true;
-      var palette = opts.palette;
-
-      if (palette === undefined || palette === null) {
-        using_local_palette = false;
-        palette = global_palette;
-      }
-
-      if (palette === undefined || palette === null) throw "Must supply either a local or global palette.";
-      var num_colors = check_palette_and_num_colors(palette); // Compute the min_code_size (power of 2), destroying num_colors.
-
-      var min_code_size = 0;
-
-      while (num_colors >>= 1) ++min_code_size;
-
-      num_colors = 1 << min_code_size; // Now we can easily get it back.
-
-      var delay = opts.delay === undefined ? 0 : opts.delay; // From the spec:
-      //     0 -   No disposal specified. The decoder is
-      //           not required to take any action.
-      //     1 -   Do not dispose. The graphic is to be left
-      //           in place.
-      //     2 -   Restore to background color. The area used by the
-      //           graphic must be restored to the background color.
-      //     3 -   Restore to previous. The decoder is required to
-      //           restore the area overwritten by the graphic with
-      //           what was there prior to rendering the graphic.
-      //  4-7 -    To be defined.
-      // NOTE(deanm): Dispose background doesn't really work, apparently most
-      // browsers ignore the background palette index and clear to transparency.
-
-      var disposal = opts.disposal === undefined ? 0 : opts.disposal;
-      if (disposal < 0 || disposal > 3) // 4-7 is reserved.
-        throw "Disposal out of range.";
-      var use_transparency = false;
-      var transparent_index = 0;
-
-      if (opts.transparent !== undefined && opts.transparent !== null) {
-        use_transparency = true;
-        transparent_index = opts.transparent;
-        if (transparent_index < 0 || transparent_index >= num_colors) throw "Transparent color index.";
-      }
-
-      if (disposal !== 0 || use_transparency || delay !== 0) {
-        // - Graphics Control Extension
-        buf[p++] = 0x21;
-        buf[p++] = 0xf9; // Extension / Label.
-
-        buf[p++] = 4; // Byte size.
-
-        buf[p++] = disposal << 2 | (use_transparency === true ? 1 : 0);
-        buf[p++] = delay & 0xff;
-        buf[p++] = delay >> 8 & 0xff;
-        buf[p++] = transparent_index; // Transparent color index.
-
-        buf[p++] = 0; // Block Terminator.
-      } // - Image Descriptor
-
-
-      buf[p++] = 0x2c; // Image Seperator.
-
-      buf[p++] = x & 0xff;
-      buf[p++] = x >> 8 & 0xff; // Left.
-
-      buf[p++] = y & 0xff;
-      buf[p++] = y >> 8 & 0xff; // Top.
-
-      buf[p++] = w & 0xff;
-      buf[p++] = w >> 8 & 0xff;
-      buf[p++] = h & 0xff;
-      buf[p++] = h >> 8 & 0xff; // NOTE: No sort flag (unused?).
-      // TODO(deanm): Support interlace.
-
-      buf[p++] = using_local_palette === true ? 0x80 | min_code_size - 1 : 0; // - Local Color Table
-
-      if (using_local_palette === true) {
-        for (var i = 0, il = palette.length; i < il; ++i) {
-          var rgb = palette[i];
-          buf[p++] = rgb >> 16 & 0xff;
-          buf[p++] = rgb >> 8 & 0xff;
-          buf[p++] = rgb & 0xff;
-        }
-      }
-
-      p = GifWriterOutputLZWCodeStream(buf, p, min_code_size < 2 ? 2 : min_code_size, indexed_pixels);
-    };
-
-    this.end = function () {
-      if (ended === false) {
-        buf[p++] = 0x3b; // Trailer.
-
-        ended = true;
-      }
-
-      return p;
-    };
-  } // Main compression routine, palette indexes -> LZW code stream.
-  // |index_stream| must have at least one entry.
-
-
-  function GifWriterOutputLZWCodeStream(buf, p, min_code_size, index_stream) {
-    buf[p++] = min_code_size;
-    var cur_subblock = p++; // Pointing at the length field.
-
-    var clear_code = 1 << min_code_size;
-    var code_mask = clear_code - 1;
-    var eoi_code = clear_code + 1;
-    var next_code = eoi_code + 1;
-    var cur_code_size = min_code_size + 1; // Number of bits per code.
-
-    var cur_shift = 0; // We have at most 12-bit codes, so we should have to hold a max of 19
-    // bits here (and then we would write out).
-
-    var cur = 0;
-
-    function emit_bytes_to_buffer(bit_block_size) {
-      while (cur_shift >= bit_block_size) {
-        buf[p++] = cur & 0xff;
-        cur >>= 8;
-        cur_shift -= 8;
-
-        if (p === cur_subblock + 256) {
-          // Finished a subblock.
-          buf[cur_subblock] = 255;
-          cur_subblock = p++;
-        }
-      }
-    }
-
-    function emit_code(c) {
-      cur |= c << cur_shift;
-      cur_shift += cur_code_size;
-      emit_bytes_to_buffer(8);
-    } // I am not an expert on the topic, and I don't want to write a thesis.
-    // However, it is good to outline here the basic algorithm and the few data
-    // structures and optimizations here that make this implementation fast.
-    // The basic idea behind LZW is to build a table of previously seen runs
-    // addressed by a short id (herein called output code).  All data is
-    // referenced by a code, which represents one or more values from the
-    // original input stream.  All input bytes can be referenced as the same
-    // value as an output code.  So if you didn't want any compression, you
-    // could more or less just output the original bytes as codes (there are
-    // some details to this, but it is the idea).  In order to achieve
-    // compression, values greater then the input range (codes can be up to
-    // 12-bit while input only 8-bit) represent a sequence of previously seen
-    // inputs.  The decompressor is able to build the same mapping while
-    // decoding, so there is always a shared common knowledge between the
-    // encoding and decoder, which is also important for "timing" aspects like
-    // how to handle variable bit width code encoding.
-    //
-    // One obvious but very important consequence of the table system is there
-    // is always a unique id (at most 12-bits) to map the runs.  'A' might be
-    // 4, then 'AA' might be 10, 'AAA' 11, 'AAAA' 12, etc.  This relationship
-    // can be used for an effecient lookup strategy for the code mapping.  We
-    // need to know if a run has been seen before, and be able to map that run
-    // to the output code.  Since we start with known unique ids (input bytes),
-    // and then from those build more unique ids (table entries), we can
-    // continue this chain (almost like a linked list) to always have small
-    // integer values that represent the current byte chains in the encoder.
-    // This means instead of tracking the input bytes (AAAABCD) to know our
-    // current state, we can track the table entry for AAAABC (it is guaranteed
-    // to exist by the nature of the algorithm) and the next character D.
-    // Therefor the tuple of (table_entry, byte) is guaranteed to also be
-    // unique.  This allows us to create a simple lookup key for mapping input
-    // sequences to codes (table indices) without having to store or search
-    // any of the code sequences.  So if 'AAAA' has a table entry of 12, the
-    // tuple of ('AAAA', K) for any input byte K will be unique, and can be our
-    // key.  This leads to a integer value at most 20-bits, which can always
-    // fit in an SMI value and be used as a fast sparse array / object key.
-    // Output code for the current contents of the index buffer.
-
-
-    var ib_code = index_stream[0] & code_mask; // Load first input index.
-
-    var code_table = {}; // Key'd on our 20-bit "tuple".
-
-    emit_code(clear_code); // Spec says first code should be a clear code.
-    // First index already loaded, process the rest of the stream.
-
-    for (var i = 1, il = index_stream.length; i < il; ++i) {
-      var k = index_stream[i] & code_mask;
-      var cur_key = ib_code << 8 | k; // (prev, k) unique tuple.
-
-      var cur_code = code_table[cur_key]; // buffer + k.
-      // Check if we have to create a new code table entry.
-
-      if (cur_code === undefined) {
-        // We don't have buffer + k.
-        // Emit index buffer (without k).
-        // This is an inline version of emit_code, because this is the core
-        // writing routine of the compressor (and V8 cannot inline emit_code
-        // because it is a closure here in a different context).  Additionally
-        // we can call emit_byte_to_buffer less often, because we can have
-        // 30-bits (from our 31-bit signed SMI), and we know our codes will only
-        // be 12-bits, so can safely have 18-bits there without overflow.
-        // emit_code(ib_code);
-        cur |= ib_code << cur_shift;
-        cur_shift += cur_code_size;
-
-        while (cur_shift >= 8) {
-          buf[p++] = cur & 0xff;
-          cur >>= 8;
-          cur_shift -= 8;
-
-          if (p === cur_subblock + 256) {
-            // Finished a subblock.
-            buf[cur_subblock] = 255;
-            cur_subblock = p++;
-          }
-        }
-
-        if (next_code === 4096) {
-          // Table full, need a clear.
-          emit_code(clear_code);
-          next_code = eoi_code + 1;
-          cur_code_size = min_code_size + 1;
-          code_table = {};
-        } else {
-          // Table not full, insert a new entry.
-          // Increase our variable bit code sizes if necessary.  This is a bit
-          // tricky as it is based on "timing" between the encoding and
-          // decoder.  From the encoders perspective this should happen after
-          // we've already emitted the index buffer and are about to create the
-          // first table entry that would overflow our current code bit size.
-          if (next_code >= 1 << cur_code_size) ++cur_code_size;
-          code_table[cur_key] = next_code++; // Insert into code table.
-        }
-
-        ib_code = k; // Index buffer to single input k.
-      } else {
-        ib_code = cur_code; // Index buffer to sequence in code table.
-      }
-    }
-
-    emit_code(ib_code); // There will still be something in the index buffer.
-
-    emit_code(eoi_code); // End Of Information.
-    // Flush / finalize the sub-blocks stream to the buffer.
-
-    emit_bytes_to_buffer(1); // Finish the sub-blocks, writing out any unfinished lengths and
-    // terminating with a sub-block of length 0.  If we have already started
-    // but not yet used a sub-block it can just become the terminator.
-
-    if (cur_subblock + 1 === p) {
-      // Started but unused.
-      buf[cur_subblock] = 0;
-    } else {
-      // Started and used, write length and additional terminator block.
-      buf[cur_subblock] = p - cur_subblock - 1;
-      buf[p++] = 0;
-    }
-
-    return p;
-  }
-
-  function GifReader(buf) {
-    var p = 0; // - Header (GIF87a or GIF89a).
-
-    if (buf[p++] !== 0x47 || buf[p++] !== 0x49 || buf[p++] !== 0x46 || buf[p++] !== 0x38 || (buf[p++] + 1 & 0xfd) !== 0x38 || buf[p++] !== 0x61) {
-      throw "Invalid GIF 87a/89a header.";
-    } // - Logical Screen Descriptor.
-
-
-    var width = buf[p++] | buf[p++] << 8;
-    var height = buf[p++] | buf[p++] << 8;
-    var pf0 = buf[p++]; // <Packed Fields>.
-
-    var global_palette_flag = pf0 >> 7;
-    var num_global_colors_pow2 = pf0 & 0x7;
-    var num_global_colors = 1 << num_global_colors_pow2 + 1;
-    var background = buf[p++];
-    buf[p++]; // Pixel aspect ratio (unused?).
-
-    var global_palette_offset = null;
-
-    if (global_palette_flag) {
-      global_palette_offset = p;
-      p += num_global_colors * 3; // Seek past palette.
-    }
-
-    var no_eof = true;
-    var frames = [];
-    var delay = 0;
-    var transparent_index = null;
-    var disposal = 0; // 0 - No disposal specified.
-
-    var loop_count = null;
-    this.width = width;
-    this.height = height;
-
-    while (no_eof && p < buf.length) {
-      switch (buf[p++]) {
-        case 0x21:
-          // Graphics Control Extension Block
-          switch (buf[p++]) {
-            case 0xff:
-              // Application specific block
-              // Try if it's a Netscape block (with animation loop counter).
-              if (buf[p] !== 0x0b || // 21 FF already read, check block size.
-              // NETSCAPE2.0
-              buf[p + 1] == 0x4e && buf[p + 2] == 0x45 && buf[p + 3] == 0x54 && buf[p + 4] == 0x53 && buf[p + 5] == 0x43 && buf[p + 6] == 0x41 && buf[p + 7] == 0x50 && buf[p + 8] == 0x45 && buf[p + 9] == 0x32 && buf[p + 10] == 0x2e && buf[p + 11] == 0x30 && // Sub-block
-              buf[p + 12] == 0x03 && buf[p + 13] == 0x01 && buf[p + 16] == 0) {
-                p += 14;
-                loop_count = buf[p++] | buf[p++] << 8;
-                p++; // Skip terminator.
-              } else {
-                // We don't know what it is, just try to get past it.
-                p += 12;
-
-                while (true) {
-                  // Seek through subblocks.
-                  var block_size = buf[p++];
-                  if (block_size === 0) break;
-                  p += block_size;
-                }
-              }
-
-              break;
-
-            case 0xf9:
-              // Graphics Control Extension
-              if (buf[p++] !== 0x4 || buf[p + 4] !== 0) throw "Invalid graphics extension block.";
-              var pf1 = buf[p++];
-              delay = buf[p++] | buf[p++] << 8;
-              transparent_index = buf[p++];
-              if ((pf1 & 1) === 0) transparent_index = null;
-              disposal = pf1 >> 2 & 0x7;
-              p++; // Skip terminator.
-
-              break;
-
-            case 0xfe:
-              // Comment Extension.
-              while (true) {
-                // Seek through subblocks.
-                var block_size = buf[p++];
-                if (block_size === 0) break; // console.log(buf.slice(p, p+block_size).toString('ascii'));
-
-                p += block_size;
-              }
-
-              break;
-
-            default:
-              throw "Unknown graphic control label: 0x" + buf[p - 1].toString(16);
-          }
-
-          break;
-
-        case 0x2c:
-          // Image Descriptor.
-          var x = buf[p++] | buf[p++] << 8;
-          var y = buf[p++] | buf[p++] << 8;
-          var w = buf[p++] | buf[p++] << 8;
-          var h = buf[p++] | buf[p++] << 8;
-          var pf2 = buf[p++];
-          var local_palette_flag = pf2 >> 7;
-          var interlace_flag = pf2 >> 6 & 1;
-          var num_local_colors_pow2 = pf2 & 0x7;
-          var num_local_colors = 1 << num_local_colors_pow2 + 1;
-          var palette_offset = global_palette_offset;
-          var has_local_palette = false;
-
-          if (local_palette_flag) {
-            var has_local_palette = true;
-            palette_offset = p; // Override with local palette.
-
-            p += num_local_colors * 3; // Seek past palette.
-          }
-
-          var data_offset = p;
-          p++; // codesize
-
-          while (true) {
-            var block_size = buf[p++];
-            if (block_size === 0) break;
-            p += block_size;
-          }
-
-          frames.push({
-            x: x,
-            y: y,
-            width: w,
-            height: h,
-            has_local_palette: has_local_palette,
-            palette_offset: palette_offset,
-            data_offset: data_offset,
-            data_length: p - data_offset,
-            transparent_index: transparent_index,
-            interlaced: !!interlace_flag,
-            delay: delay,
-            disposal: disposal
-          });
-          break;
-
-        case 0x3b:
-          // Trailer Marker (end of file).
-          no_eof = false;
-          break;
-
-        default:
-          throw "Unknown gif block: 0x" + buf[p - 1].toString(16);
-          break;
-      }
-    }
-
-    this.numFrames = function () {
-      return frames.length;
-    };
-
-    this.loopCount = function () {
-      return loop_count;
-    };
-
-    this.frameInfo = function (frame_num) {
-      if (frame_num < 0 || frame_num >= frames.length) throw "Frame index out of range.";
-      return frames[frame_num];
-    };
-
-    this.decodeAndBlitFrameBGRA = function (frame_num, pixels) {
-      var frame = this.frameInfo(frame_num);
-      var num_pixels = frame.width * frame.height;
-      var index_stream = new Uint8Array(num_pixels); // At most 8-bit indices.
-
-      GifReaderLZWOutputIndexStream(buf, frame.data_offset, index_stream, num_pixels);
-      var palette_offset = frame.palette_offset; // NOTE(deanm): It seems to be much faster to compare index to 256 than
-      // to === null.  Not sure why, but CompareStub_EQ_STRICT shows up high in
-      // the profile, not sure if it's related to using a Uint8Array.
-
-      var trans = frame.transparent_index;
-      if (trans === null) trans = 256; // We are possibly just blitting to a portion of the entire frame.
-      // That is a subrect within the framerect, so the additional pixels
-      // must be skipped over after we finished a scanline.
-
-      var framewidth = frame.width;
-      var framestride = width - framewidth;
-      var xleft = framewidth; // Number of subrect pixels left in scanline.
-      // Output indicies of the top left and bottom right corners of the subrect.
-
-      var opbeg = (frame.y * width + frame.x) * 4;
-      var opend = ((frame.y + frame.height) * width + frame.x) * 4;
-      var op = opbeg;
-      var scanstride = framestride * 4; // Use scanstride to skip past the rows when interlacing.  This is skipping
-      // 7 rows for the first two passes, then 3 then 1.
-
-      if (frame.interlaced === true) {
-        scanstride += (framewidth + framestride) * 4 * 7; // Pass 1.
-      }
-
-      var interlaceskip = 8; // Tracking the row interval in the current pass.
-
-      for (var i = 0, il = index_stream.length; i < il; ++i) {
-        var index = index_stream[i];
-
-        if (xleft === 0) {
-          // Beginning of new scan line
-          op += scanstride;
-          xleft = framewidth;
-
-          if (op >= opend) {
-            // Catch the wrap to switch passes when interlacing.
-            scanstride = framestride + (framewidth + framestride) * 4 * (interlaceskip - 1); // interlaceskip / 2 * 4 is interlaceskip << 1.
-
-            op = opbeg + (framewidth + framestride) * (interlaceskip << 1);
-            interlaceskip >>= 1;
-          }
-        }
-
-        if (index === trans) {
-          op += 4;
-        } else {
-          var r = buf[palette_offset + index * 3];
-          var g = buf[palette_offset + index * 3 + 1];
-          var b = buf[palette_offset + index * 3 + 2];
-          pixels[op++] = b;
-          pixels[op++] = g;
-          pixels[op++] = r;
-          pixels[op++] = 255;
-        }
-
-        --xleft;
-      }
-    }; // I will go to copy and paste hell one day...
-
-
-    this.decodeAndBlitFrameRGBA = function (frame_num, pixels) {
-      var frame = this.frameInfo(frame_num);
-      var num_pixels = frame.width * frame.height;
-      var index_stream = new Uint8Array(num_pixels); // At most 8-bit indices.
-
-      GifReaderLZWOutputIndexStream(buf, frame.data_offset, index_stream, num_pixels);
-      var palette_offset = frame.palette_offset; // NOTE(deanm): It seems to be much faster to compare index to 256 than
-      // to === null.  Not sure why, but CompareStub_EQ_STRICT shows up high in
-      // the profile, not sure if it's related to using a Uint8Array.
-
-      var trans = frame.transparent_index;
-      if (trans === null) trans = 256; // We are possibly just blitting to a portion of the entire frame.
-      // That is a subrect within the framerect, so the additional pixels
-      // must be skipped over after we finished a scanline.
-
-      var framewidth = frame.width;
-      var framestride = width - framewidth;
-      var xleft = framewidth; // Number of subrect pixels left in scanline.
-      // Output indicies of the top left and bottom right corners of the subrect.
-
-      var opbeg = (frame.y * width + frame.x) * 4;
-      var opend = ((frame.y + frame.height) * width + frame.x) * 4;
-      var op = opbeg;
-      var scanstride = framestride * 4; // Use scanstride to skip past the rows when interlacing.  This is skipping
-      // 7 rows for the first two passes, then 3 then 1.
-
-      if (frame.interlaced === true) {
-        scanstride += (framewidth + framestride) * 4 * 7; // Pass 1.
-      }
-
-      var interlaceskip = 8; // Tracking the row interval in the current pass.
-
-      for (var i = 0, il = index_stream.length; i < il; ++i) {
-        var index = index_stream[i];
-
-        if (xleft === 0) {
-          // Beginning of new scan line
-          op += scanstride;
-          xleft = framewidth;
-
-          if (op >= opend) {
-            // Catch the wrap to switch passes when interlacing.
-            scanstride = framestride + (framewidth + framestride) * 4 * (interlaceskip - 1); // interlaceskip / 2 * 4 is interlaceskip << 1.
-
-            op = opbeg + (framewidth + framestride) * (interlaceskip << 1);
-            interlaceskip >>= 1;
-          }
-        }
-
-        if (index === trans) {
-          op += 4;
-        } else {
-          var r = buf[palette_offset + index * 3];
-          var g = buf[palette_offset + index * 3 + 1];
-          var b = buf[palette_offset + index * 3 + 2];
-          pixels[op++] = r;
-          pixels[op++] = g;
-          pixels[op++] = b;
-          pixels[op++] = 255;
-        }
-
-        --xleft;
-      }
-    };
-  }
-
-  function GifReaderLZWOutputIndexStream(code_stream, p, output, output_length) {
-    var min_code_size = code_stream[p++];
-    var clear_code = 1 << min_code_size;
-    var eoi_code = clear_code + 1;
-    var next_code = eoi_code + 1;
-    var cur_code_size = min_code_size + 1; // Number of bits per code.
-    // NOTE: This shares the same name as the encoder, but has a different
-    // meaning here.  Here this masks each code coming from the code stream.
-
-    var code_mask = (1 << cur_code_size) - 1;
-    var cur_shift = 0;
-    var cur = 0;
-    var op = 0; // Output pointer.
-
-    var subblock_size = code_stream[p++]; // TODO(deanm): Would using a TypedArray be any faster?  At least it would
-    // solve the fast mode / backing store uncertainty.
-    // var code_table = Array(4096);
-
-    var code_table = new Int32Array(4096); // Can be signed, we only use 20 bits.
-
-    var prev_code = null; // Track code-1.
-
-    while (true) {
-      // Read up to two bytes, making sure we always 12-bits for max sized code.
-      while (cur_shift < 16) {
-        if (subblock_size === 0) break; // No more data to be read.
-
-        cur |= code_stream[p++] << cur_shift;
-        cur_shift += 8;
-
-        if (subblock_size === 1) {
-          // Never let it get to 0 to hold logic above.
-          subblock_size = code_stream[p++]; // Next subblock.
-        } else {
-          --subblock_size;
-        }
-      } // TODO(deanm): We should never really get here, we should have received
-      // and EOI.
-
-
-      if (cur_shift < cur_code_size) break;
-      var code = cur & code_mask;
-      cur >>= cur_code_size;
-      cur_shift -= cur_code_size; // TODO(deanm): Maybe should check that the first code was a clear code,
-      // at least this is what you're supposed to do.  But actually our encoder
-      // now doesn't emit a clear code first anyway.
-
-      if (code === clear_code) {
-        // We don't actually have to clear the table.  This could be a good idea
-        // for greater error checking, but we don't really do any anyway.  We
-        // will just track it with next_code and overwrite old entries.
-        next_code = eoi_code + 1;
-        cur_code_size = min_code_size + 1;
-        code_mask = (1 << cur_code_size) - 1; // Don't update prev_code ?
-
-        prev_code = null;
-        continue;
-      } else if (code === eoi_code) {
-        break;
-      } // We have a similar situation as the decoder, where we want to store
-      // variable length entries (code table entries), but we want to do in a
-      // faster manner than an array of arrays.  The code below stores sort of a
-      // linked list within the code table, and then "chases" through it to
-      // construct the dictionary entries.  When a new entry is created, just the
-      // last byte is stored, and the rest (prefix) of the entry is only
-      // referenced by its table entry.  Then the code chases through the
-      // prefixes until it reaches a single byte code.  We have to chase twice,
-      // first to compute the length, and then to actually copy the data to the
-      // output (backwards, since we know the length).  The alternative would be
-      // storing something in an intermediate stack, but that doesn't make any
-      // more sense.  I implemented an approach where it also stored the length
-      // in the code table, although it's a bit tricky because you run out of
-      // bits (12 + 12 + 8), but I didn't measure much improvements (the table
-      // entries are generally not the long).  Even when I created benchmarks for
-      // very long table entries the complexity did not seem worth it.
-      // The code table stores the prefix entry in 12 bits and then the suffix
-      // byte in 8 bits, so each entry is 20 bits.
-
-
-      var chase_code = code < next_code ? code : prev_code; // Chase what we will output, either {CODE} or {CODE-1}.
-
-      var chase_length = 0;
-      var chase = chase_code;
-
-      while (chase > clear_code) {
-        chase = code_table[chase] >> 8;
-        ++chase_length;
-      }
-
-      var k = chase;
-      var op_end = op + chase_length + (chase_code !== code ? 1 : 0);
-
-      if (op_end > output_length) {
-        console.log("Warning, gif stream longer than expected.");
-        return;
-      } // Already have the first byte from the chase, might as well write it fast.
-
-
-      output[op++] = k;
-      op += chase_length;
-      var b = op; // Track pointer, writing backwards.
-
-      if (chase_code !== code) // The case of emitting {CODE-1} + k.
-        output[op++] = k;
-      chase = chase_code;
-
-      while (chase_length--) {
-        chase = code_table[chase];
-        output[--b] = chase & 0xff; // Write backwards.
-
-        chase >>= 8; // Pull down to the prefix code.
-      }
-
-      if (prev_code !== null && next_code < 4096) {
-        code_table[next_code++] = prev_code << 8 | k; // TODO(deanm): Figure out this clearing vs code growth logic better.  I
-        // have an feeling that it should just happen somewhere else, for now it
-        // is awkward between when we grow past the max and then hit a clear code.
-        // For now just check if we hit the max 12-bits (then a clear code should
-        // follow, also of course encoded in 12-bits).
-
-        if (next_code >= code_mask + 1 && cur_code_size < 12) {
-          ++cur_code_size;
-          code_mask = code_mask << 1 | 1;
-        }
-      }
-
-      prev_code = code;
-    }
-
-    if (op !== output_length) {
-      console.log("Warning, gif stream shorter than expected.");
-    }
-
-    return output;
-  }
-
-  try {
-    exports.GifWriter = GifWriter;
-    exports.GifReader = GifReader;
-  } catch (e) {} // CommonJS.
-
-  /*rollup-keeper-start*/
-
-
-  window.tmp = GifReader;
-  /*rollup-keeper-end*/
 
   /*
    * Copyright (c) 2012 chick307 <chick307@gmail.com>
@@ -18536,13 +13874,13 @@
 
     var _Buffer = null,
         _isBuffer = function () {
-      if (!_hasArrayBuffer) return function _isBuffer() {
+      if (!_hasArrayBuffer) { return function _isBuffer() {
         return false;
-      };
+      }; }
 
       try {
         var buffer = {};
-        if (typeof buffer.Buffer === 'function') _Buffer = buffer.Buffer;
+        if (typeof buffer.Buffer === 'function') { _Buffer = buffer.Buffer; }
       } catch (error) {}
 
       return function _isBuffer(value) {
@@ -18614,7 +13952,7 @@
           throw new TypeError('Constructor cannot called be as a function.');
         }
 
-        if (binaryString == null) throw new Error('First argument needs to be a string.');
+        if (binaryString == null) { throw new Error('First argument needs to be a string.'); }
         this.checksum = _update(1, binaryString.toString());
       });
 
@@ -18626,7 +13964,7 @@
           throw new TypeError('Constructor cannot called be as a function.');
         }
 
-        if (utf8String == null) throw new Error('First argument needs to be a string.');
+        if (utf8String == null) { throw new Error('First argument needs to be a string.'); }
 
         var binaryString = _utf8ToBinary(utf8String.toString());
 
@@ -18642,20 +13980,20 @@
             throw new TypeError('Constructor cannot called be as a function.');
           }
 
-          if (!_isBuffer(buffer)) throw new Error('First argument needs to be ArrayBuffer.');
+          if (!_isBuffer(buffer)) { throw new Error('First argument needs to be ArrayBuffer.'); }
           var array = new Uint8Array(buffer);
           return this.checksum = _updateUint8Array(1, array);
         });
       }
 
       proto.update = function update(binaryString) {
-        if (binaryString == null) throw new Error('First argument needs to be a string.');
+        if (binaryString == null) { throw new Error('First argument needs to be a string.'); }
         binaryString = binaryString.toString();
         return this.checksum = _update(this.checksum, binaryString);
       };
 
       proto.updateUtf8 = function updateUtf8(utf8String) {
-        if (utf8String == null) throw new Error('First argument needs to be a string.');
+        if (utf8String == null) { throw new Error('First argument needs to be a string.'); }
 
         var binaryString = _utf8ToBinary(utf8String.toString());
 
@@ -18664,7 +14002,7 @@
 
       if (_hasArrayBuffer) {
         proto.updateBuffer = function updateBuffer(buffer) {
-          if (!_isBuffer(buffer)) throw new Error('First argument needs to be ArrayBuffer.');
+          if (!_isBuffer(buffer)) { throw new Error('First argument needs to be ArrayBuffer.'); }
           var array = new Uint8Array(buffer);
           return this.checksum = _updateUint8Array(this.checksum, array);
         };
@@ -18678,12 +14016,12 @@
     }();
 
     exports.from = function from(binaryString) {
-      if (binaryString == null) throw new Error('First argument needs to be a string.');
+      if (binaryString == null) { throw new Error('First argument needs to be a string.'); }
       return _update(1, binaryString.toString());
     };
 
     exports.fromUtf8 = function fromUtf8(utf8String) {
-      if (utf8String == null) throw new Error('First argument needs to be a string.');
+      if (utf8String == null) { throw new Error('First argument needs to be a string.'); }
 
       var binaryString = _utf8ToBinary(utf8String.toString());
 
@@ -18692,7 +14030,7 @@
 
     if (_hasArrayBuffer) {
       exports.fromBuffer = function fromBuffer(buffer) {
-        if (!_isBuffer(buffer)) throw new Error('First argument need to be ArrayBuffer.');
+        if (!_isBuffer(buffer)) { throw new Error('First argument need to be ArrayBuffer.'); }
         var array = new Uint8Array(buffer);
         return _updateUint8Array(1, array);
       };
@@ -19913,7 +15251,7 @@
     this.encode = function (image, quality) // image data object
     {
       var time_start = new Date().getTime();
-      if (quality) setQuality(quality); // Initialize bit writer
+      if (quality) { setQuality(quality); } // Initialize bit writer
 
       byteout = new Array();
       bytenew = 0;
@@ -20015,7 +15353,7 @@
         quality = 100;
       }
 
-      if (currentQuality == quality) return; // don't recalc if unchanged
+      if (currentQuality == quality) { return; } // don't recalc if unchanged
 
       var sf = 0;
 
@@ -20031,7 +15369,7 @@
 
     function init() {
       var time_start = new Date().getTime();
-      if (!quality) quality = 50; // Create tables
+      if (!quality) { quality = 50; } // Create tables
 
       initCharLookupTable();
       initHuffmanTbl();
@@ -20043,10 +15381,10 @@
 
     init();
   }
-  /*rollup-keeper-start*/
 
-  window.tmp = JPEGEncoder;
-  /*rollup-keeper-end*/
+  try {
+    exports.JPEGEncoder = JPEGEncoder;
+  } catch (e) {} // CommonJS.
 
   /**
    * @author shaozilee
@@ -20062,7 +15400,7 @@
     this.bottom_up = true;
     this.flag = String.fromCharCode(this.buffer[0]) + String.fromCharCode(this.buffer[1]);
     this.pos += 2;
-    if (["BM", "BA", "CI", "CP", "IC", "PT"].indexOf(this.flag) === -1) throw new Error("Invalid BMP File");
+    if (["BM", "BA", "CI", "CP", "IC", "PT"].indexOf(this.flag) === -1) { throw new Error("Invalid BMP File"); }
     this.parseHeader();
     this.parseBGR();
   }
@@ -20186,7 +15524,7 @@
         this.data[location + 1] = rgb.green;
         this.data[location + 2] = rgb.red;
         this.data[location + 3] = 0xFF;
-        if (x * 2 + 1 >= this.width) break;
+        if (x * 2 + 1 >= this.width) { break; }
         rgb = this.palette[after];
         this.data[location + 4] = rgb.blue;
         this.data[location + 4 + 1] = rgb.green;
@@ -20339,1957 +15677,4509 @@
   BmpDecoder.prototype.getData = function () {
     return this.data;
   };
-  /*rollup-keeper-start*/
 
+  try {
+    exports.BmpDecoder = BmpDecoder;
+  } catch (e) {} // CommonJS.
 
-  window.tmp = BmpDecoder;
-  /*rollup-keeper-end*/
+  function WebPDecoder(imageData) {
+    // Copyright 2011 Google Inc.
+    //
+    // This code is licensed under the same terms as WebM:
+    //  Software License Agreement:  http://www.webmproject.org/license/software/
+    //  Additional IP Rights Grant:  http://www.webmproject.org/license/additional/
+    // -----------------------------------------------------------------------------
+    //
+    // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
+    // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+    // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. 
+    // IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, 
+    // INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+    // BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, 
+    // DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY 
+    // OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
+    // NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+    // EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+    //
+    // -----------------------------------------------------------------------------
+    //
+    // Copyright 2011-2017 Dominik Homberger
+    // Libwebp Javascript / libwebpjs - the libwebp implementation in javascript (v0.6.0)
+    //
+    // Author: Dominik Homberger (dominik.homberger@gmail.com)
+    function x(F) {
+      if (!F) { throw Error("assert :P"); }
+    }
 
-  /*
-   Copyright (c) 2013 Gildas Lormeau. All rights reserved.
+    function fa(F, L, J) {
+      for (var H = 0; 4 > H; H++) {
+        if (F[L + H] != J.charCodeAt(H)) { return !0; }
+      }
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions are met:
+      return !1;
+    }
 
-   1. Redistributions of source code must retain the above copyright notice,
-   this list of conditions and the following disclaimer.
+    function I(F, L, J, H, Z) {
+      for (var O = 0; O < Z; O++) {
+        F[L + O] = J[H + O];
+      }
+    }
 
-   2. Redistributions in binary form must reproduce the above copyright 
-   notice, this list of conditions and the following disclaimer in 
-   the documentation and/or other materials provided with the distribution.
+    function M(F, L, J, H) {
+      for (var Z = 0; Z < H; Z++) {
+        F[L + Z] = J;
+      }
+    }
 
-   3. The names of the authors may not be used to endorse or promote products
-   derived from this software without specific prior written permission.
+    function V(F) {
+      return new Int32Array(F);
+    }
 
-   THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
-   INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-   FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL JCRAFT,
-   INC. OR ANY CONTRIBUTORS TO THIS SOFTWARE BE LIABLE FOR ANY DIRECT, INDIRECT,
-   INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-   LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA,
-   OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-   EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-   */
+    function wa(F, L) {
+      for (var J = [], H = 0; H < F; H++) {
+        J.push(new L());
+      }
 
-  /*
-   * This program is based on JZlib 1.0.2 ymnk, JCraft,Inc.
-   * JZlib is based on zlib-1.1.3, so all credit should go authors
-   * Jean-loup Gailly(jloup@gzip.org) and Mark Adler(madler@alumni.caltech.edu)
-   * and contributors of zlib.
-   */
-  (function (global) {
+      return J;
+    }
 
-    var MAX_BITS = 15;
-    var D_CODES = 30;
-    var BL_CODES = 19;
-    var LENGTH_CODES = 29;
-    var LITERALS = 256;
-    var L_CODES = LITERALS + 1 + LENGTH_CODES;
-    var HEAP_SIZE = 2 * L_CODES + 1;
-    var END_BLOCK = 256; // Bit length codes must not exceed MAX_BL_BITS bits
+    function wb() {
+      function F(J, H, Z) {
+        for (var O = Z[H], L = 0; L < O; L++) {
+          J.push(Z.length > H + 1 ? [] : 0);
+          if (Z.length < H + 1) { break; }
+          F(J[L], H + 1, Z);
+        }
+      }
 
-    var MAX_BL_BITS = 7; // repeat previous bit length 3-6 times (2 bits of repeat count)
+      var L = [];
+      F(L, 0, [3, 11]);
+      return L;
+    }
 
-    var REP_3_6 = 16; // repeat a zero length 3-10 times (3 bits of repeat count)
+    function Ed(F, L) {
+      function J(H, O, F) {
+        for (var Z = F[O], ma = 0; ma < Z; ma++) {
+          H.push(F.length > O + 1 ? [] : new L());
+          if (F.length < O + 1) { break; }
+          J(H[ma], O + 1, F);
+        }
+      }
 
-    var REPZ_3_10 = 17; // repeat a zero length 11-138 times (7 bits of repeat count)
+      var H = [];
+      J(H, 0, F);
+      return H;
+    }
 
-    var REPZ_11_138 = 18; // The lengths of the bit length codes are sent in order of decreasing
-    // probability, to avoid transmitting the lengths for unused bit
-    // length codes.
+    WebPDecoder = function WebPDecoder() {
 
-    var Buf_size = 8 * 2; // JZlib version : "1.0.2"
-
-    var Z_DEFAULT_COMPRESSION = -1; // compression strategy
-
-    var Z_FILTERED = 1;
-    var Z_HUFFMAN_ONLY = 2;
-    var Z_DEFAULT_STRATEGY = 0;
-    var Z_NO_FLUSH = 0;
-    var Z_PARTIAL_FLUSH = 1;
-    var Z_FULL_FLUSH = 3;
-    var Z_FINISH = 4;
-    var Z_OK = 0;
-    var Z_STREAM_END = 1;
-    var Z_NEED_DICT = 2;
-    var Z_STREAM_ERROR = -2;
-    var Z_DATA_ERROR = -3;
-    var Z_BUF_ERROR = -5; // Tree
-    // see definition of array dist_code below
-
-    var _dist_code = [0, 1, 2, 3, 4, 4, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 8, 8, 8, 8, 9, 9, 9, 9, 9, 9, 9, 9, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 13, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 0, 0, 16, 17, 18, 18, 19, 19, 20, 20, 20, 20, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 28, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29, 29];
-
-    function Tree() {
-      var that = this; // dyn_tree; // the dynamic tree
-      // max_code; // largest code with non zero frequency
-      // stat_desc; // the corresponding static tree
-      // Compute the optimal bit lengths for a tree and update the total bit
-      // length
-      // for the current block.
-      // IN assertion: the fields freq and dad are set, heap[heap_max] and
-      // above are the tree nodes sorted by increasing frequency.
-      // OUT assertions: the field len is set to the optimal bit length, the
-      // array bl_count contains the frequencies for each bit length.
-      // The length opt_len is updated; static_len is also updated if stree is
-      // not null.
-
-      function gen_bitlen(s) {
-        var tree = that.dyn_tree;
-        var stree = that.stat_desc.static_tree;
-        var extra = that.stat_desc.extra_bits;
-        var base = that.stat_desc.extra_base;
-        var max_length = that.stat_desc.max_length;
-        var h; // heap index
-
-        var n, m; // iterate over the tree elements
-
-        var bits; // bit length
-
-        var xbits; // extra bits
-
-        var f; // frequency
-
-        var overflow = 0; // number of elements with bit length too large
-
-        for (bits = 0; bits <= MAX_BITS; bits++) {
-          s.bl_count[bits] = 0;
-        } // In a first pass, compute the optimal bit lengths (which may
-        // overflow in the case of the bit length tree).
-
-
-        tree[s.heap[s.heap_max] * 2 + 1] = 0; // root of the heap
-
-        for (h = s.heap_max + 1; h < HEAP_SIZE; h++) {
-          n = s.heap[h];
-          bits = tree[tree[n * 2 + 1] * 2 + 1] + 1;
-
-          if (bits > max_length) {
-            bits = max_length;
-            overflow++;
-          }
-
-          tree[n * 2 + 1] = bits; // We overwrite tree[n*2+1] which is no longer needed
-
-          if (n > that.max_code) continue; // not a leaf node
-
-          s.bl_count[bits]++;
-          xbits = 0;
-          if (n >= base) xbits = extra[n - base];
-          f = tree[n * 2];
-          s.opt_len += f * (bits + xbits);
-          if (stree) s.static_len += f * (stree[n * 2 + 1] + xbits);
+      function L(a, b) {
+        for (var c = 1 << b - 1 >>> 0; a & c;) {
+          c >>>= 1;
         }
 
-        if (overflow === 0) return; // This happens for example on obj2 and pic of the Calgary corpus
-        // Find the first bit length which could increase:
+        return c ? (a & c - 1) + c : a;
+      }
+
+      function J(a, b, c, d, e) {
+        x(!(d % c));
 
         do {
-          bits = max_length - 1;
-
-          while (s.bl_count[bits] === 0) {
-            bits--;
-          }
-
-          s.bl_count[bits]--; // move one leaf down the tree
-
-          s.bl_count[bits + 1] += 2; // move one overflow item as its brother
-
-          s.bl_count[max_length]--; // The brother of the overflow item also moves one step up,
-          // but this does not affect bl_count[max_length]
-
-          overflow -= 2;
-        } while (overflow > 0);
-
-        for (bits = max_length; bits !== 0; bits--) {
-          n = s.bl_count[bits];
-
-          while (n !== 0) {
-            m = s.heap[--h];
-            if (m > that.max_code) continue;
-
-            if (tree[m * 2 + 1] != bits) {
-              s.opt_len += (bits - tree[m * 2 + 1]) * tree[m * 2];
-              tree[m * 2 + 1] = bits;
-            }
-
-            n--;
-          }
-        }
-      } // Reverse the first len bits of a code, using straightforward code (a
-      // faster
-      // method would use a table)
-      // IN assertion: 1 <= len <= 15
-
-
-      function bi_reverse(code, // the value to invert
-      len // its bit length
-      ) {
-        var res = 0;
-
-        do {
-          res |= code & 1;
-          code >>>= 1;
-          res <<= 1;
-        } while (--len > 0);
-
-        return res >>> 1;
-      } // Generate the codes for a given tree and bit counts (which need not be
-      // optimal).
-      // IN assertion: the array bl_count contains the bit length statistics for
-      // the given tree and the field len is set for all tree elements.
-      // OUT assertion: the field code is set for all tree elements of non
-      // zero code length.
-
-
-      function gen_codes(tree, // the tree to decorate
-      max_code, // largest code with non zero frequency
-      bl_count // number of codes at each bit length
-      ) {
-        var next_code = []; // next code value for each
-        // bit length
-
-        var code = 0; // running code value
-
-        var bits; // bit index
-
-        var n; // code index
-
-        var len; // The distribution counts are first used to generate the code values
-        // without bit reversal.
-
-        for (bits = 1; bits <= MAX_BITS; bits++) {
-          next_code[bits] = code = code + bl_count[bits - 1] << 1;
-        } // Check that the bit counts in bl_count are consistent. The last code
-        // must be all ones.
-        // Assert (code + bl_count[MAX_BITS]-1 == (1<<MAX_BITS)-1,
-        // "inconsistent bit counts");
-        // Tracev((stderr,"\ngen_codes: max_code %d ", max_code));
-
-
-        for (n = 0; n <= max_code; n++) {
-          len = tree[n * 2 + 1];
-          if (len === 0) continue; // Now reverse the bits
-
-          tree[n * 2] = bi_reverse(next_code[len]++, len);
-        }
-      } // Construct one Huffman tree and assigns the code bit strings and lengths.
-      // Update the total bit length for the current block.
-      // IN assertion: the field freq is set for all tree elements.
-      // OUT assertions: the fields len and code are set to the optimal bit length
-      // and corresponding code. The length opt_len is updated; static_len is
-      // also updated if stree is not null. The field max_code is set.
-
-
-      that.build_tree = function (s) {
-        var tree = that.dyn_tree;
-        var stree = that.stat_desc.static_tree;
-        var elems = that.stat_desc.elems;
-        var n, m; // iterate over heap elements
-
-        var max_code = -1; // largest code with non zero frequency
-
-        var node; // new node being created
-        // Construct the initial heap, with least frequent element in
-        // heap[1]. The sons of heap[n] are heap[2*n] and heap[2*n+1].
-        // heap[0] is not used.
-
-        s.heap_len = 0;
-        s.heap_max = HEAP_SIZE;
-
-        for (n = 0; n < elems; n++) {
-          if (tree[n * 2] !== 0) {
-            s.heap[++s.heap_len] = max_code = n;
-            s.depth[n] = 0;
-          } else {
-            tree[n * 2 + 1] = 0;
-          }
-        } // The pkzip format requires that at least one distance code exists,
-        // and that at least one bit should be sent even if there is only one
-        // possible code. So to avoid special checks later on we force at least
-        // two codes of non zero frequency.
-
-
-        while (s.heap_len < 2) {
-          node = s.heap[++s.heap_len] = max_code < 2 ? ++max_code : 0;
-          tree[node * 2] = 1;
-          s.depth[node] = 0;
-          s.opt_len--;
-          if (stree) s.static_len -= stree[node * 2 + 1]; // node is 0 or 1 so it does not have extra bits
-        }
-
-        that.max_code = max_code; // The elements heap[heap_len/2+1 .. heap_len] are leaves of the tree,
-        // establish sub-heaps of increasing lengths:
-
-        for (n = Math.floor(s.heap_len / 2); n >= 1; n--) {
-          s.pqdownheap(tree, n);
-        } // Construct the Huffman tree by repeatedly combining the least two
-        // frequent nodes.
-
-
-        node = elems; // next internal node of the tree
-
-        do {
-          // n = node of least frequency
-          n = s.heap[1];
-          s.heap[1] = s.heap[s.heap_len--];
-          s.pqdownheap(tree, 1);
-          m = s.heap[1]; // m = node of next least frequency
-
-          s.heap[--s.heap_max] = n; // keep the nodes sorted by frequency
-
-          s.heap[--s.heap_max] = m; // Create a new node father of n and m
-
-          tree[node * 2] = tree[n * 2] + tree[m * 2];
-          s.depth[node] = Math.max(s.depth[n], s.depth[m]) + 1;
-          tree[n * 2 + 1] = tree[m * 2 + 1] = node; // and insert the new node in the heap
-
-          s.heap[1] = node++;
-          s.pqdownheap(tree, 1);
-        } while (s.heap_len >= 2);
-
-        s.heap[--s.heap_max] = s.heap[1]; // At this point, the fields freq and dad are set. We can now
-        // generate the bit lengths.
-
-        gen_bitlen(s); // The field len is now set, we can generate the bit codes
-
-        gen_codes(tree, that.max_code, s.bl_count);
-      };
-    }
-
-    Tree._length_code = [0, 1, 2, 3, 4, 5, 6, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 12, 12, 13, 13, 13, 13, 14, 14, 14, 14, 15, 15, 15, 15, 16, 16, 16, 16, 16, 16, 16, 16, 17, 17, 17, 17, 17, 17, 17, 17, 18, 18, 18, 18, 18, 18, 18, 18, 19, 19, 19, 19, 19, 19, 19, 19, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 21, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 22, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 23, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 24, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 25, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 26, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28];
-    Tree.base_length = [0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 14, 16, 20, 24, 28, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 0];
-    Tree.base_dist = [0, 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96, 128, 192, 256, 384, 512, 768, 1024, 1536, 2048, 3072, 4096, 6144, 8192, 12288, 16384, 24576]; // Mapping from a distance to a distance code. dist is the distance - 1 and
-    // must not have side effects. _dist_code[256] and _dist_code[257] are never
-    // used.
-
-    Tree.d_code = function (dist) {
-      return dist < 256 ? _dist_code[dist] : _dist_code[256 + (dist >>> 7)];
-    }; // extra bits for each length code
-
-
-    Tree.extra_lbits = [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0]; // extra bits for each distance code
-
-    Tree.extra_dbits = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13]; // extra bits for each bit length code
-
-    Tree.extra_blbits = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 3, 7];
-    Tree.bl_order = [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15]; // StaticTree
-
-    function StaticTree(static_tree, extra_bits, extra_base, elems, max_length) {
-      var that = this;
-      that.static_tree = static_tree;
-      that.extra_bits = extra_bits;
-      that.extra_base = extra_base;
-      that.elems = elems;
-      that.max_length = max_length;
-    }
-
-    StaticTree.static_ltree = [12, 8, 140, 8, 76, 8, 204, 8, 44, 8, 172, 8, 108, 8, 236, 8, 28, 8, 156, 8, 92, 8, 220, 8, 60, 8, 188, 8, 124, 8, 252, 8, 2, 8, 130, 8, 66, 8, 194, 8, 34, 8, 162, 8, 98, 8, 226, 8, 18, 8, 146, 8, 82, 8, 210, 8, 50, 8, 178, 8, 114, 8, 242, 8, 10, 8, 138, 8, 74, 8, 202, 8, 42, 8, 170, 8, 106, 8, 234, 8, 26, 8, 154, 8, 90, 8, 218, 8, 58, 8, 186, 8, 122, 8, 250, 8, 6, 8, 134, 8, 70, 8, 198, 8, 38, 8, 166, 8, 102, 8, 230, 8, 22, 8, 150, 8, 86, 8, 214, 8, 54, 8, 182, 8, 118, 8, 246, 8, 14, 8, 142, 8, 78, 8, 206, 8, 46, 8, 174, 8, 110, 8, 238, 8, 30, 8, 158, 8, 94, 8, 222, 8, 62, 8, 190, 8, 126, 8, 254, 8, 1, 8, 129, 8, 65, 8, 193, 8, 33, 8, 161, 8, 97, 8, 225, 8, 17, 8, 145, 8, 81, 8, 209, 8, 49, 8, 177, 8, 113, 8, 241, 8, 9, 8, 137, 8, 73, 8, 201, 8, 41, 8, 169, 8, 105, 8, 233, 8, 25, 8, 153, 8, 89, 8, 217, 8, 57, 8, 185, 8, 121, 8, 249, 8, 5, 8, 133, 8, 69, 8, 197, 8, 37, 8, 165, 8, 101, 8, 229, 8, 21, 8, 149, 8, 85, 8, 213, 8, 53, 8, 181, 8, 117, 8, 245, 8, 13, 8, 141, 8, 77, 8, 205, 8, 45, 8, 173, 8, 109, 8, 237, 8, 29, 8, 157, 8, 93, 8, 221, 8, 61, 8, 189, 8, 125, 8, 253, 8, 19, 9, 275, 9, 147, 9, 403, 9, 83, 9, 339, 9, 211, 9, 467, 9, 51, 9, 307, 9, 179, 9, 435, 9, 115, 9, 371, 9, 243, 9, 499, 9, 11, 9, 267, 9, 139, 9, 395, 9, 75, 9, 331, 9, 203, 9, 459, 9, 43, 9, 299, 9, 171, 9, 427, 9, 107, 9, 363, 9, 235, 9, 491, 9, 27, 9, 283, 9, 155, 9, 411, 9, 91, 9, 347, 9, 219, 9, 475, 9, 59, 9, 315, 9, 187, 9, 443, 9, 123, 9, 379, 9, 251, 9, 507, 9, 7, 9, 263, 9, 135, 9, 391, 9, 71, 9, 327, 9, 199, 9, 455, 9, 39, 9, 295, 9, 167, 9, 423, 9, 103, 9, 359, 9, 231, 9, 487, 9, 23, 9, 279, 9, 151, 9, 407, 9, 87, 9, 343, 9, 215, 9, 471, 9, 55, 9, 311, 9, 183, 9, 439, 9, 119, 9, 375, 9, 247, 9, 503, 9, 15, 9, 271, 9, 143, 9, 399, 9, 79, 9, 335, 9, 207, 9, 463, 9, 47, 9, 303, 9, 175, 9, 431, 9, 111, 9, 367, 9, 239, 9, 495, 9, 31, 9, 287, 9, 159, 9, 415, 9, 95, 9, 351, 9, 223, 9, 479, 9, 63, 9, 319, 9, 191, 9, 447, 9, 127, 9, 383, 9, 255, 9, 511, 9, 0, 7, 64, 7, 32, 7, 96, 7, 16, 7, 80, 7, 48, 7, 112, 7, 8, 7, 72, 7, 40, 7, 104, 7, 24, 7, 88, 7, 56, 7, 120, 7, 4, 7, 68, 7, 36, 7, 100, 7, 20, 7, 84, 7, 52, 7, 116, 7, 3, 8, 131, 8, 67, 8, 195, 8, 35, 8, 163, 8, 99, 8, 227, 8];
-    StaticTree.static_dtree = [0, 5, 16, 5, 8, 5, 24, 5, 4, 5, 20, 5, 12, 5, 28, 5, 2, 5, 18, 5, 10, 5, 26, 5, 6, 5, 22, 5, 14, 5, 30, 5, 1, 5, 17, 5, 9, 5, 25, 5, 5, 5, 21, 5, 13, 5, 29, 5, 3, 5, 19, 5, 11, 5, 27, 5, 7, 5, 23, 5];
-    StaticTree.static_l_desc = new StaticTree(StaticTree.static_ltree, Tree.extra_lbits, LITERALS + 1, L_CODES, MAX_BITS);
-    StaticTree.static_d_desc = new StaticTree(StaticTree.static_dtree, Tree.extra_dbits, 0, D_CODES, MAX_BITS);
-    StaticTree.static_bl_desc = new StaticTree(null, Tree.extra_blbits, 0, BL_CODES, MAX_BL_BITS); // Deflate
-
-    var MAX_MEM_LEVEL = 9;
-    var DEF_MEM_LEVEL = 8;
-
-    function Config(good_length, max_lazy, nice_length, max_chain, func) {
-      var that = this;
-      that.good_length = good_length;
-      that.max_lazy = max_lazy;
-      that.nice_length = nice_length;
-      that.max_chain = max_chain;
-      that.func = func;
-    }
-
-    var STORED = 0;
-    var FAST = 1;
-    var SLOW = 2;
-    var config_table = [new Config(0, 0, 0, 0, STORED), new Config(4, 4, 8, 4, FAST), new Config(4, 5, 16, 8, FAST), new Config(4, 6, 32, 32, FAST), new Config(4, 4, 16, 16, SLOW), new Config(8, 16, 32, 32, SLOW), new Config(8, 16, 128, 128, SLOW), new Config(8, 32, 128, 256, SLOW), new Config(32, 128, 258, 1024, SLOW), new Config(32, 258, 258, 4096, SLOW)];
-    var z_errmsg = ["need dictionary", // Z_NEED_DICT
-    // 2
-    "stream end", // Z_STREAM_END 1
-    "", // Z_OK 0
-    "", // Z_ERRNO (-1)
-    "stream error", // Z_STREAM_ERROR (-2)
-    "data error", // Z_DATA_ERROR (-3)
-    "", // Z_MEM_ERROR (-4)
-    "buffer error", // Z_BUF_ERROR (-5)
-    "", // Z_VERSION_ERROR (-6)
-    ""]; // block not completed, need more input or more output
-
-    var NeedMore = 0; // block flush performed
-
-    var BlockDone = 1; // finish started, need only more output at next deflate
-
-    var FinishStarted = 2; // finish done, accept no more input or output
-
-    var FinishDone = 3; // preset dictionary flag in zlib header
-
-    var PRESET_DICT = 0x20;
-    var INIT_STATE = 42;
-    var BUSY_STATE = 113;
-    var FINISH_STATE = 666; // The deflate compression method
-
-    var Z_DEFLATED = 8;
-    var STORED_BLOCK = 0;
-    var STATIC_TREES = 1;
-    var DYN_TREES = 2;
-    var MIN_MATCH = 3;
-    var MAX_MATCH = 258;
-    var MIN_LOOKAHEAD = MAX_MATCH + MIN_MATCH + 1;
-
-    function smaller(tree, n, m, depth) {
-      var tn2 = tree[n * 2];
-      var tm2 = tree[m * 2];
-      return tn2 < tm2 || tn2 == tm2 && depth[n] <= depth[m];
-    }
-
-    function Deflate() {
-      var that = this;
-      var strm; // pointer back to this zlib stream
-
-      var status; // as the name implies
-      // pending_buf; // output still pending
-
-      var pending_buf_size; // size of pending_buf
-
-      var last_flush; // value of flush param for previous deflate call
-
-      var w_size; // LZ77 window size (32K by default)
-
-      var w_bits; // log2(w_size) (8..16)
-
-      var w_mask; // w_size - 1
-
-      var window; // Sliding window. Input bytes are read into the second half of the window,
-      // and move to the first half later to keep a dictionary of at least wSize
-      // bytes. With this organization, matches are limited to a distance of
-      // wSize-MAX_MATCH bytes, but this ensures that IO is always
-      // performed with a length multiple of the block size. Also, it limits
-      // the window size to 64K, which is quite useful on MSDOS.
-      // To do: use the user input buffer as sliding window.
-
-      var window_size; // Actual size of window: 2*wSize, except when the user input buffer
-      // is directly used as sliding window.
-
-      var prev; // Link to older string with same hash index. To limit the size of this
-      // array to 64K, this link is maintained only for the last 32K strings.
-      // An index in this array is thus a window index modulo 32K.
-
-      var head; // Heads of the hash chains or NIL.
-
-      var ins_h; // hash index of string to be inserted
-
-      var hash_size; // number of elements in hash table
-
-      var hash_bits; // log2(hash_size)
-
-      var hash_mask; // hash_size-1
-      // Number of bits by which ins_h must be shifted at each input
-      // step. It must be such that after MIN_MATCH steps, the oldest
-      // byte no longer takes part in the hash key, that is:
-      // hash_shift * MIN_MATCH >= hash_bits
-
-      var hash_shift; // Window position at the beginning of the current output block. Gets
-      // negative when the window is moved backwards.
-
-      var block_start;
-      var match_length; // length of best match
-
-      var prev_match; // previous match
-
-      var match_available; // set if previous match exists
-
-      var strstart; // start of string to insert
-
-      var match_start; // start of matching string
-
-      var lookahead; // number of valid bytes ahead in window
-      // Length of the best match at previous step. Matches not greater than this
-      // are discarded. This is used in the lazy match evaluation.
-
-      var prev_length; // To speed up deflation, hash chains are never searched beyond this
-      // length. A higher limit improves compression ratio but degrades the speed.
-
-      var max_chain_length; // Attempt to find a better match only when the current match is strictly
-      // smaller than this value. This mechanism is used only for compression
-      // levels >= 4.
-
-      var max_lazy_match; // Insert new strings in the hash table only if the match length is not
-      // greater than this length. This saves time but degrades compression.
-      // max_insert_length is used only for compression levels <= 3.
-
-      var level; // compression level (1..9)
-
-      var strategy; // favor or force Huffman coding
-      // Use a faster search when the previous match is longer than this
-
-      var good_match; // Stop searching when current match exceeds this
-
-      var nice_match;
-      var dyn_ltree; // literal and length tree
-
-      var dyn_dtree; // distance tree
-
-      var bl_tree; // Huffman tree for bit lengths
-
-      var l_desc = new Tree(); // desc for literal tree
-
-      var d_desc = new Tree(); // desc for distance tree
-
-      var bl_desc = new Tree(); // desc for bit length tree
-      // that.heap_len; // number of elements in the heap
-      // that.heap_max; // element of largest frequency
-      // The sons of heap[n] are heap[2*n] and heap[2*n+1]. heap[0] is not used.
-      // The same heap array is used to build all trees.
-      // Depth of each subtree used as tie breaker for trees of equal frequency
-
-      that.depth = [];
-      var l_buf; // index for literals or lengths */
-      // Size of match buffer for literals/lengths. There are 4 reasons for
-      // limiting lit_bufsize to 64K:
-      // - frequencies can be kept in 16 bit counters
-      // - if compression is not successful for the first block, all input
-      // data is still in the window so we can still emit a stored block even
-      // when input comes from standard input. (This can also be done for
-      // all blocks if lit_bufsize is not greater than 32K.)
-      // - if compression is not successful for a file smaller than 64K, we can
-      // even emit a stored file instead of a stored block (saving 5 bytes).
-      // This is applicable only for zip (not gzip or zlib).
-      // - creating new Huffman trees less frequently may not provide fast
-      // adaptation to changes in the input data statistics. (Take for
-      // example a binary file with poorly compressible code followed by
-      // a highly compressible string table.) Smaller buffer sizes give
-      // fast adaptation but have of course the overhead of transmitting
-      // trees more frequently.
-      // - I can't count above 4
-
-      var lit_bufsize;
-      var last_lit; // running index in l_buf
-      // Buffer for distances. To simplify the code, d_buf and l_buf have
-      // the same number of elements. To use different lengths, an extra flag
-      // array would be necessary.
-
-      var d_buf; // index of pendig_buf
-      // that.opt_len; // bit length of current block with optimal trees
-      // that.static_len; // bit length of current block with static trees
-
-      var matches; // number of string matches in current block
-
-      var last_eob_len; // bit length of EOB code for last block
-      // Output buffer. bits are inserted starting at the bottom (least
-      // significant bits).
-
-      var bi_buf; // Number of valid bits in bi_buf. All bits above the last valid bit
-      // are always zero.
-
-      var bi_valid; // number of codes at each bit length for an optimal tree
-
-      that.bl_count = []; // heap used to build the Huffman trees
-
-      that.heap = [];
-      dyn_ltree = [];
-      dyn_dtree = [];
-      bl_tree = [];
-
-      function lm_init() {
-        var i;
-        window_size = 2 * w_size;
-        head[hash_size - 1] = 0;
-
-        for (i = 0; i < hash_size - 1; i++) {
-          head[i] = 0;
-        } // Set the default configuration parameters:
-
-
-        max_lazy_match = config_table[level].max_lazy;
-        good_match = config_table[level].good_length;
-        nice_match = config_table[level].nice_length;
-        max_chain_length = config_table[level].max_chain;
-        strstart = 0;
-        block_start = 0;
-        lookahead = 0;
-        match_length = prev_length = MIN_MATCH - 1;
-        match_available = 0;
-        ins_h = 0;
+          d -= c, a[b + d] = e;
+        } while (0 < d);
       }
 
-      function init_block() {
-        var i; // Initialize the trees.
+      function H(a, b, c, d, e, f) {
+        var g = b,
+            h = 1 << c,
+            k,
+            l,
+            m = V(16),
+            n = V(16);
+        x(0 != e);
+        x(null != d);
+        x(null != a);
+        x(0 < c);
 
-        for (i = 0; i < L_CODES; i++) {
-          dyn_ltree[i * 2] = 0;
+        for (l = 0; l < e; ++l) {
+          if (15 < d[l]) { return 0; }
+          ++m[d[l]];
         }
 
-        for (i = 0; i < D_CODES; i++) {
-          dyn_dtree[i * 2] = 0;
+        if (m[0] == e) { return 0; }
+        n[1] = 0;
+
+        for (k = 1; 15 > k; ++k) {
+          if (m[k] > 1 << k) { return 0; }
+          n[k + 1] = n[k] + m[k];
         }
 
-        for (i = 0; i < BL_CODES; i++) {
-          bl_tree[i * 2] = 0;
+        for (l = 0; l < e; ++l) {
+          k = d[l], 0 < d[l] && (f[n[k]++] = l);
         }
 
-        dyn_ltree[END_BLOCK * 2] = 1;
-        that.opt_len = that.static_len = 0;
-        last_lit = matches = 0;
-      } // Initialize the tree data structures for a new zlib stream.
+        if (1 == n[15]) { return d = new O(), d.g = 0, d.value = f[0], J(a, g, 1, h, d), h; }
+        var r = -1,
+            q = h - 1,
+            t = 0,
+            v = 1,
+            p = 1,
+            u,
+            w = 1 << c;
+        l = 0;
+        k = 1;
 
+        for (e = 2; k <= c; ++k, e <<= 1) {
+          p <<= 1;
+          v += p;
+          p -= m[k];
+          if (0 > p) { return 0; }
 
-      function tr_init() {
-        l_desc.dyn_tree = dyn_ltree;
-        l_desc.stat_desc = StaticTree.static_l_desc;
-        d_desc.dyn_tree = dyn_dtree;
-        d_desc.stat_desc = StaticTree.static_d_desc;
-        bl_desc.dyn_tree = bl_tree;
-        bl_desc.stat_desc = StaticTree.static_bl_desc;
-        bi_buf = 0;
-        bi_valid = 0;
-        last_eob_len = 8; // enough lookahead for inflate
-        // Initialize the first block of the first file:
-
-        init_block();
-      } // Restore the heap property by moving down the tree starting at node k,
-      // exchanging a node with the smallest of its two sons if necessary,
-      // stopping
-      // when the heap property is re-established (each father smaller than its
-      // two sons).
-
-
-      that.pqdownheap = function (tree, // the tree to restore
-      k // node to move down
-      ) {
-        var heap = that.heap;
-        var v = heap[k];
-        var j = k << 1; // left son of k
-
-        while (j <= that.heap_len) {
-          // Set j to the smallest of the two sons:
-          if (j < that.heap_len && smaller(tree, heap[j + 1], heap[j], that.depth)) {
-            j++;
-          } // Exit if v is smaller than both sons
-
-
-          if (smaller(tree, v, heap[j], that.depth)) break; // Exchange v with the smallest son
-
-          heap[k] = heap[j];
-          k = j; // And continue down the tree, setting j to the left son of k
-
-          j <<= 1;
-        }
-
-        heap[k] = v;
-      }; // Scan a literal or distance tree to determine the frequencies of the codes
-      // in the bit length tree.
-
-
-      function scan_tree(tree, // the tree to be scanned
-      max_code // and its largest code of non zero frequency
-      ) {
-        var n; // iterates over all tree elements
-
-        var prevlen = -1; // last emitted length
-
-        var curlen; // length of current code
-
-        var nextlen = tree[0 * 2 + 1]; // length of next code
-
-        var count = 0; // repeat count of the current code
-
-        var max_count = 7; // max repeat count
-
-        var min_count = 4; // min repeat count
-
-        if (nextlen === 0) {
-          max_count = 138;
-          min_count = 3;
-        }
-
-        tree[(max_code + 1) * 2 + 1] = 0xffff; // guard
-
-        for (n = 0; n <= max_code; n++) {
-          curlen = nextlen;
-          nextlen = tree[(n + 1) * 2 + 1];
-
-          if (++count < max_count && curlen == nextlen) {
-            continue;
-          } else if (count < min_count) {
-            bl_tree[curlen * 2] += count;
-          } else if (curlen !== 0) {
-            if (curlen != prevlen) bl_tree[curlen * 2]++;
-            bl_tree[REP_3_6 * 2]++;
-          } else if (count <= 10) {
-            bl_tree[REPZ_3_10 * 2]++;
-          } else {
-            bl_tree[REPZ_11_138 * 2]++;
-          }
-
-          count = 0;
-          prevlen = curlen;
-
-          if (nextlen === 0) {
-            max_count = 138;
-            min_count = 3;
-          } else if (curlen == nextlen) {
-            max_count = 6;
-            min_count = 3;
-          } else {
-            max_count = 7;
-            min_count = 4;
+          for (; 0 < m[k]; --m[k]) {
+            d = new O(), d.g = k, d.value = f[l++], J(a, g + t, e, w, d), t = L(t, k);
           }
         }
-      } // Construct the Huffman tree for the bit lengths and return the index in
-      // bl_order of the last bit length code to send.
 
+        k = c + 1;
 
-      function build_bl_tree() {
-        var max_blindex; // index of last bit length code of non zero freq
-        // Determine the bit length frequencies for literal and distance trees
+        for (e = 2; 15 >= k; ++k, e <<= 1) {
+          p <<= 1;
+          v += p;
+          p -= m[k];
+          if (0 > p) { return 0; }
 
-        scan_tree(dyn_ltree, l_desc.max_code);
-        scan_tree(dyn_dtree, d_desc.max_code); // Build the bit length tree:
+          for (; 0 < m[k]; --m[k]) {
+            d = new O();
 
-        bl_desc.build_tree(that); // opt_len now includes the length of the tree representations, except
-        // the lengths of the bit lengths codes and the 5+5+4 bits for the
-        // counts.
-        // Determine the number of bit length codes to send. The pkzip format
-        // requires that at least 4 bit length codes be sent. (appnote.txt says
-        // 3 but the actual value used is 4.)
+            if ((t & q) != r) {
+              g += w;
+              r = k;
 
-        for (max_blindex = BL_CODES - 1; max_blindex >= 3; max_blindex--) {
-          if (bl_tree[Tree.bl_order[max_blindex] * 2 + 1] !== 0) break;
-        } // Update opt_len to include the bit length tree and counts
-
-
-        that.opt_len += 3 * (max_blindex + 1) + 5 + 5 + 4;
-        return max_blindex;
-      } // Output a byte on the stream.
-      // IN assertion: there is enough room in pending_buf.
-
-
-      function put_byte(p) {
-        that.pending_buf[that.pending++] = p;
-      }
-
-      function put_short(w) {
-        put_byte(w & 0xff);
-        put_byte(w >>> 8 & 0xff);
-      }
-
-      function putShortMSB(b) {
-        put_byte(b >> 8 & 0xff);
-        put_byte(b & 0xff & 0xff);
-      }
-
-      function send_bits(value, length) {
-        var val,
-            len = length;
-
-        if (bi_valid > Buf_size - len) {
-          val = value; // bi_buf |= (val << bi_valid);
-
-          bi_buf |= val << bi_valid & 0xffff;
-          put_short(bi_buf);
-          bi_buf = val >>> Buf_size - bi_valid;
-          bi_valid += len - Buf_size;
-        } else {
-          // bi_buf |= (value) << bi_valid;
-          bi_buf |= value << bi_valid & 0xffff;
-          bi_valid += len;
-        }
-      }
-
-      function send_code(c, tree) {
-        var c2 = c * 2;
-        send_bits(tree[c2] & 0xffff, tree[c2 + 1] & 0xffff);
-      } // Send a literal or distance tree in compressed form, using the codes in
-      // bl_tree.
-
-
-      function send_tree(tree, // the tree to be sent
-      max_code // and its largest code of non zero frequency
-      ) {
-        var n; // iterates over all tree elements
-
-        var prevlen = -1; // last emitted length
-
-        var curlen; // length of current code
-
-        var nextlen = tree[0 * 2 + 1]; // length of next code
-
-        var count = 0; // repeat count of the current code
-
-        var max_count = 7; // max repeat count
-
-        var min_count = 4; // min repeat count
-
-        if (nextlen === 0) {
-          max_count = 138;
-          min_count = 3;
-        }
-
-        for (n = 0; n <= max_code; n++) {
-          curlen = nextlen;
-          nextlen = tree[(n + 1) * 2 + 1];
-
-          if (++count < max_count && curlen == nextlen) {
-            continue;
-          } else if (count < min_count) {
-            do {
-              send_code(curlen, bl_tree);
-            } while (--count !== 0);
-          } else if (curlen !== 0) {
-            if (curlen != prevlen) {
-              send_code(curlen, bl_tree);
-              count--;
-            }
-
-            send_code(REP_3_6, bl_tree);
-            send_bits(count - 3, 2);
-          } else if (count <= 10) {
-            send_code(REPZ_3_10, bl_tree);
-            send_bits(count - 3, 3);
-          } else {
-            send_code(REPZ_11_138, bl_tree);
-            send_bits(count - 11, 7);
-          }
-
-          count = 0;
-          prevlen = curlen;
-
-          if (nextlen === 0) {
-            max_count = 138;
-            min_count = 3;
-          } else if (curlen == nextlen) {
-            max_count = 6;
-            min_count = 3;
-          } else {
-            max_count = 7;
-            min_count = 4;
-          }
-        }
-      } // Send the header for a block using dynamic Huffman trees: the counts, the
-      // lengths of the bit length codes, the literal tree and the distance tree.
-      // IN assertion: lcodes >= 257, dcodes >= 1, blcodes >= 4.
-
-
-      function send_all_trees(lcodes, dcodes, blcodes) {
-        var rank; // index in bl_order
-
-        send_bits(lcodes - 257, 5); // not +255 as stated in appnote.txt
-
-        send_bits(dcodes - 1, 5);
-        send_bits(blcodes - 4, 4); // not -3 as stated in appnote.txt
-
-        for (rank = 0; rank < blcodes; rank++) {
-          send_bits(bl_tree[Tree.bl_order[rank] * 2 + 1], 3);
-        }
-
-        send_tree(dyn_ltree, lcodes - 1); // literal tree
-
-        send_tree(dyn_dtree, dcodes - 1); // distance tree
-      } // Flush the bit buffer, keeping at most 7 bits in it.
-
-
-      function bi_flush() {
-        if (bi_valid == 16) {
-          put_short(bi_buf);
-          bi_buf = 0;
-          bi_valid = 0;
-        } else if (bi_valid >= 8) {
-          put_byte(bi_buf & 0xff);
-          bi_buf >>>= 8;
-          bi_valid -= 8;
-        }
-      } // Send one empty static block to give enough lookahead for inflate.
-      // This takes 10 bits, of which 7 may remain in the bit buffer.
-      // The current inflate code requires 9 bits of lookahead. If the
-      // last two codes for the previous block (real code plus EOB) were coded
-      // on 5 bits or less, inflate may have only 5+3 bits of lookahead to decode
-      // the last real code. In this case we send two empty static blocks instead
-      // of one. (There are no problems if the previous block is stored or fixed.)
-      // To simplify the code, we assume the worst case of last real code encoded
-      // on one bit only.
-
-
-      function _tr_align() {
-        send_bits(STATIC_TREES << 1, 3);
-        send_code(END_BLOCK, StaticTree.static_ltree);
-        bi_flush(); // Of the 10 bits for the empty block, we have already sent
-        // (10 - bi_valid) bits. The lookahead for the last real code (before
-        // the EOB of the previous block) was thus at least one plus the length
-        // of the EOB plus what we have just sent of the empty static block.
-
-        if (1 + last_eob_len + 10 - bi_valid < 9) {
-          send_bits(STATIC_TREES << 1, 3);
-          send_code(END_BLOCK, StaticTree.static_ltree);
-          bi_flush();
-        }
-
-        last_eob_len = 7;
-      } // Save the match info and tally the frequency counts. Return true if
-      // the current block must be flushed.
-
-
-      function _tr_tally(dist, // distance of matched string
-      lc // match length-MIN_MATCH or unmatched char (if dist==0)
-      ) {
-        var out_length, in_length, dcode;
-        that.pending_buf[d_buf + last_lit * 2] = dist >>> 8 & 0xff;
-        that.pending_buf[d_buf + last_lit * 2 + 1] = dist & 0xff;
-        that.pending_buf[l_buf + last_lit] = lc & 0xff;
-        last_lit++;
-
-        if (dist === 0) {
-          // lc is the unmatched char
-          dyn_ltree[lc * 2]++;
-        } else {
-          matches++; // Here, lc is the match length - MIN_MATCH
-
-          dist--; // dist = match distance - 1
-
-          dyn_ltree[(Tree._length_code[lc] + LITERALS + 1) * 2]++;
-          dyn_dtree[Tree.d_code(dist) * 2]++;
-        }
-
-        if ((last_lit & 0x1fff) === 0 && level > 2) {
-          // Compute an upper bound for the compressed length
-          out_length = last_lit * 8;
-          in_length = strstart - block_start;
-
-          for (dcode = 0; dcode < D_CODES; dcode++) {
-            out_length += dyn_dtree[dcode * 2] * (5 + Tree.extra_dbits[dcode]);
-          }
-
-          out_length >>>= 3;
-          if (matches < Math.floor(last_lit / 2) && out_length < Math.floor(in_length / 2)) return true;
-        }
-
-        return last_lit == lit_bufsize - 1; // We avoid equality with lit_bufsize because of wraparound at 64K
-        // on 16 bit machines and because stored blocks are restricted to
-        // 64K-1 bytes.
-      } // Send the block data compressed using the given Huffman trees
-
-
-      function compress_block(ltree, dtree) {
-        var dist; // distance of matched string
-
-        var lc; // match length or unmatched char (if dist === 0)
-
-        var lx = 0; // running index in l_buf
-
-        var code; // the code to send
-
-        var extra; // number of extra bits to send
-
-        if (last_lit !== 0) {
-          do {
-            dist = that.pending_buf[d_buf + lx * 2] << 8 & 0xff00 | that.pending_buf[d_buf + lx * 2 + 1] & 0xff;
-            lc = that.pending_buf[l_buf + lx] & 0xff;
-            lx++;
-
-            if (dist === 0) {
-              send_code(lc, ltree); // send a literal byte
-            } else {
-              // Here, lc is the match length - MIN_MATCH
-              code = Tree._length_code[lc];
-              send_code(code + LITERALS + 1, ltree); // send the length
-              // code
-
-              extra = Tree.extra_lbits[code];
-
-              if (extra !== 0) {
-                lc -= Tree.base_length[code];
-                send_bits(lc, extra); // send the extra length bits
+              for (u = 1 << r - c; 15 > r;) {
+                u -= m[r];
+                if (0 >= u) { break; }
+                ++r;
+                u <<= 1;
               }
 
-              dist--; // dist is now the match distance - 1
+              u = r - c;
+              w = 1 << u;
+              h += w;
+              r = t & q;
+              a[b + r].g = u + c;
+              a[b + r].value = g - b - r;
+            }
 
-              code = Tree.d_code(dist);
-              send_code(code, dtree); // send the distance code
+            d.g = k - c;
+            d.value = f[l++];
+            J(a, g + (t >> c), e, w, d);
+            t = L(t, k);
+          }
+        }
 
-              extra = Tree.extra_dbits[code];
+        return v != 2 * n[15] - 1 ? 0 : h;
+      }
 
-              if (extra !== 0) {
-                dist -= Tree.base_dist[code];
-                send_bits(dist, extra); // send the extra distance bits
+      function Z(a, b, c, d, e) {
+        x(2328 >= e);
+        if (512 >= e) { var f = V(512); }else if (f = V(e), null == f) { return 0; }
+        return H(a, b, c, d, e, f);
+      }
+
+      function O() {
+        this.value = this.g = 0;
+      }
+
+      function Fd() {
+        this.value = this.g = 0;
+      }
+
+      function Ub() {
+        this.G = wa(5, O);
+        this.H = V(5);
+        this.jc = this.Qb = this.qb = this.nd = 0;
+        this.pd = wa(xb, Fd);
+      }
+
+      function ma(a, b, c, d) {
+        x(null != a);
+        x(null != b);
+        x(2147483648 > d);
+        a.Ca = 254;
+        a.I = 0;
+        a.b = -8;
+        a.Ka = 0;
+        a.oa = b;
+        a.pa = c;
+        a.Jd = b;
+        a.Yc = c + d;
+        a.Zc = 4 <= d ? c + d - 4 + 1 : c;
+        Qa(a);
+      }
+
+      function na(a, b) {
+        for (var c = 0; 0 < b--;) {
+          c |= K(a, 128) << b;
+        }
+
+        return c;
+      }
+
+      function ca(a, b) {
+        var c = na(a, b);
+        return G(a) ? -c : c;
+      }
+
+      function cb(a, b, c, d) {
+        var e,
+            f = 0;
+        x(null != a);
+        x(null != b);
+        x(4294967288 > d);
+        a.Sb = d;
+        a.Ra = 0;
+        a.u = 0;
+        a.h = 0;
+        4 < d && (d = 4);
+
+        for (e = 0; e < d; ++e) {
+          f += b[c + e] << 8 * e;
+        }
+
+        a.Ra = f;
+        a.bb = d;
+        a.oa = b;
+        a.pa = c;
+      }
+
+      function Vb(a) {
+        for (; 8 <= a.u && a.bb < a.Sb;) {
+          a.Ra >>>= 8, a.Ra += a.oa[a.pa + a.bb] << ob - 8 >>> 0, ++a.bb, a.u -= 8;
+        }
+
+        db(a) && (a.h = 1, a.u = 0);
+      }
+
+      function D(a, b) {
+        x(0 <= b);
+
+        if (!a.h && b <= Gd) {
+          var c = pb(a) & Hd[b];
+          a.u += b;
+          Vb(a);
+          return c;
+        }
+
+        a.h = 1;
+        return a.u = 0;
+      }
+
+      function Wb() {
+        this.b = this.Ca = this.I = 0;
+        this.oa = [];
+        this.pa = 0;
+        this.Jd = [];
+        this.Yc = 0;
+        this.Zc = [];
+        this.Ka = 0;
+      }
+
+      function Ra() {
+        this.Ra = 0;
+        this.oa = [];
+        this.h = this.u = this.bb = this.Sb = this.pa = 0;
+      }
+
+      function pb(a) {
+        return a.Ra >>> (a.u & ob - 1) >>> 0;
+      }
+
+      function db(a) {
+        x(a.bb <= a.Sb);
+        return a.h || a.bb == a.Sb && a.u > ob;
+      }
+
+      function qb(a, b) {
+        a.u = b;
+        a.h = db(a);
+      }
+
+      function Sa(a) {
+        a.u >= Xb && (x(a.u >= Xb), Vb(a));
+      }
+
+      function Qa(a) {
+        x(null != a && null != a.oa);
+        a.pa < a.Zc ? (a.I = (a.oa[a.pa++] | a.I << 8) >>> 0, a.b += 8) : (x(null != a && null != a.oa), a.pa < a.Yc ? (a.b += 8, a.I = a.oa[a.pa++] | a.I << 8) : a.Ka ? a.b = 0 : (a.I <<= 8, a.b += 8, a.Ka = 1));
+      }
+
+      function G(a) {
+        return na(a, 1);
+      }
+
+      function K(a, b) {
+        var c = a.Ca;
+        0 > a.b && Qa(a);
+        var d = a.b,
+            e = c * b >>> 8,
+            f = (a.I >>> d > e) + 0;
+        f ? (c -= e, a.I -= e + 1 << d >>> 0) : c = e + 1;
+        d = c;
+
+        for (e = 0; 256 <= d;) {
+          e += 8, d >>= 8;
+        }
+
+        d = 7 ^ e + Id[d];
+        a.b -= d;
+        a.Ca = (c << d) - 1;
+        return f;
+      }
+
+      function ra(a, b, c) {
+        a[b + 0] = c >> 24 & 255;
+        a[b + 1] = c >> 16 & 255;
+        a[b + 2] = c >> 8 & 255;
+        a[b + 3] = c >> 0 & 255;
+      }
+
+      function Ta(a, b) {
+        return a[b + 0] << 0 | a[b + 1] << 8;
+      }
+
+      function Yb(a, b) {
+        return Ta(a, b) | a[b + 2] << 16;
+      }
+
+      function Ha(a, b) {
+        return Ta(a, b) | Ta(a, b + 2) << 16;
+      }
+
+      function Zb(a, b) {
+        var c = 1 << b;
+        x(null != a);
+        x(0 < b);
+        a.X = V(c);
+        if (null == a.X) { return 0; }
+        a.Mb = 32 - b;
+        a.Xa = b;
+        return 1;
+      }
+
+      function $b(a, b) {
+        x(null != a);
+        x(null != b);
+        x(a.Xa == b.Xa);
+        I(b.X, 0, a.X, 0, 1 << b.Xa);
+      }
+
+      function ac() {
+        this.X = [];
+        this.Xa = this.Mb = 0;
+      }
+
+      function bc(a, b, c, d) {
+        x(null != c);
+        x(null != d);
+        var e = c[0],
+            f = d[0];
+        0 == e && (e = (a * f + b / 2) / b);
+        0 == f && (f = (b * e + a / 2) / a);
+        if (0 >= e || 0 >= f) { return 0; }
+        c[0] = e;
+        d[0] = f;
+        return 1;
+      }
+
+      function xa(a, b) {
+        return a + (1 << b) - 1 >>> b;
+      }
+
+      function yb(a, b) {
+        return ((a & 4278255360) + (b & 4278255360) >>> 0 & 4278255360) + ((a & 16711935) + (b & 16711935) >>> 0 & 16711935) >>> 0;
+      }
+
+      function X(a, b) {
+        self[b] = function (b, d, e, f, g, h, k) {
+          var c;
+
+          for (c = 0; c < g; ++c) {
+            var m = self[a](h[k + c - 1], e, f + c);
+            h[k + c] = yb(b[d + c], m);
+          }
+        };
+      }
+
+      function Jd() {
+        this.ud = this.hd = this.jd = 0;
+      }
+
+      function aa(a, b) {
+        return (((a ^ b) & 4278124286) >>> 1) + (a & b) >>> 0;
+      }
+
+      function sa(a) {
+        if (0 <= a && 256 > a) { return a; }
+        if (0 > a) { return 0; }
+        if (255 < a) { return 255; }
+      }
+
+      function eb(a, b) {
+        return sa(a + (a - b + .5 >> 1));
+      }
+
+      function Ia(a, b, c) {
+        return Math.abs(b - c) - Math.abs(a - c);
+      }
+
+      function cc(a, b, c, d, e, f, g) {
+        d = f[g - 1];
+
+        for (c = 0; c < e; ++c) {
+          f[g + c] = d = yb(a[b + c], d);
+        }
+      }
+
+      function Kd(a, b, c, d, e) {
+        var f;
+
+        for (f = 0; f < c; ++f) {
+          var g = a[b + f],
+              h = g >> 8 & 255,
+              k = g & 16711935,
+              k = k + ((h << 16) + h),
+              k = k & 16711935;
+          d[e + f] = (g & 4278255360) + k >>> 0;
+        }
+      }
+
+      function dc(a, b) {
+        b.jd = a >> 0 & 255;
+        b.hd = a >> 8 & 255;
+        b.ud = a >> 16 & 255;
+      }
+
+      function Ld(a, b, c, d, e, f) {
+        var g;
+
+        for (g = 0; g < d; ++g) {
+          var h = b[c + g],
+              k = h >>> 8,
+              l = h >>> 16,
+              m = h,
+              l = l + ((a.jd << 24 >> 24) * (k << 24 >> 24) >>> 5),
+              l = l & 255,
+              m = m + ((a.hd << 24 >> 24) * (k << 24 >> 24) >>> 5),
+              m = m + ((a.ud << 24 >> 24) * (l << 24 >> 24) >>> 5),
+              m = m & 255;
+          e[f + g] = (h & 4278255360) + (l << 16) + m;
+        }
+      }
+
+      function ec(a, b, c, d, e) {
+        self[b] = function (a, b, c, k, l, m, n, r, q) {
+          for (k = n; k < r; ++k) {
+            for (n = 0; n < q; ++n) {
+              l[m++] = e(c[d(a[b++])]);
+            }
+          }
+        };
+
+        self[a] = function (a, b, h, k, l, m, n) {
+          var f = 8 >> a.b,
+              g = a.Ea,
+              t = a.K[0],
+              v = a.w;
+          if (8 > f) { for (a = (1 << a.b) - 1, v = (1 << f) - 1; b < h; ++b) {
+            var p = 0,
+                u;
+
+            for (u = 0; u < g; ++u) {
+              u & a || (p = d(k[l++])), m[n++] = e(t[p & v]), p >>= f;
+            }
+          } } else { self["VP8LMapColor" + c](k, l, t, v, m, n, b, h, g); }
+        };
+      }
+
+      function Md(a, b, c, d, e) {
+        for (c = b + c; b < c;) {
+          var f = a[b++];
+          d[e++] = f >> 16 & 255;
+          d[e++] = f >> 8 & 255;
+          d[e++] = f >> 0 & 255;
+        }
+      }
+
+      function Nd(a, b, c, d, e) {
+        for (c = b + c; b < c;) {
+          var f = a[b++];
+          d[e++] = f >> 16 & 255;
+          d[e++] = f >> 8 & 255;
+          d[e++] = f >> 0 & 255;
+          d[e++] = f >> 24 & 255;
+        }
+      }
+
+      function Od(a, b, c, d, e) {
+        for (c = b + c; b < c;) {
+          var f = a[b++],
+              g = f >> 16 & 240 | f >> 12 & 15,
+              f = f >> 0 & 240 | f >> 28 & 15;
+          d[e++] = g;
+          d[e++] = f;
+        }
+      }
+
+      function Pd(a, b, c, d, e) {
+        for (c = b + c; b < c;) {
+          var f = a[b++],
+              g = f >> 16 & 248 | f >> 13 & 7,
+              f = f >> 5 & 224 | f >> 3 & 31;
+          d[e++] = g;
+          d[e++] = f;
+        }
+      }
+
+      function Qd(a, b, c, d, e) {
+        for (c = b + c; b < c;) {
+          var f = a[b++];
+          d[e++] = f >> 0 & 255;
+          d[e++] = f >> 8 & 255;
+          d[e++] = f >> 16 & 255;
+        }
+      }
+
+      function fb(a, b, c, d, e, f) {
+        if (0 == f) { for (c = b + c; b < c;) {
+          f = a[b++], ra(d, (f[0] >> 24 | f[1] >> 8 & 65280 | f[2] << 8 & 16711680 | f[3] << 24) >>> 0), e += 32;
+        } } else { I(d, e, a, b, c); }
+      }
+
+      function gb(a, b) {
+        self[b][0] = self[a + "0"];
+        self[b][1] = self[a + "1"];
+        self[b][2] = self[a + "2"];
+        self[b][3] = self[a + "3"];
+        self[b][4] = self[a + "4"];
+        self[b][5] = self[a + "5"];
+        self[b][6] = self[a + "6"];
+        self[b][7] = self[a + "7"];
+        self[b][8] = self[a + "8"];
+        self[b][9] = self[a + "9"];
+        self[b][10] = self[a + "10"];
+        self[b][11] = self[a + "11"];
+        self[b][12] = self[a + "12"];
+        self[b][13] = self[a + "13"];
+        self[b][14] = self[a + "0"];
+        self[b][15] = self[a + "0"];
+      }
+
+      function hb(a) {
+        return a == zb || a == Ab || a == Ja || a == Bb;
+      }
+
+      function Rd() {
+        this.eb = [];
+        this.size = this.A = this.fb = 0;
+      }
+
+      function Sd() {
+        this.y = [];
+        this.f = [];
+        this.ea = [];
+        this.F = [];
+        this.Tc = this.Ed = this.Cd = this.Fd = this.lb = this.Db = this.Ab = this.fa = this.J = this.W = this.N = this.O = 0;
+      }
+
+      function Cb() {
+        this.Rd = this.height = this.width = this.S = 0;
+        this.f = {};
+        this.f.RGBA = new Rd();
+        this.f.kb = new Sd();
+        this.sd = null;
+      }
+
+      function Td() {
+        this.width = [0];
+        this.height = [0];
+        this.Pd = [0];
+        this.Qd = [0];
+        this.format = [0];
+      }
+
+      function Ud() {
+        this.Id = this.fd = this.Md = this.hb = this.ib = this.da = this.bd = this.cd = this.j = this.v = this.Da = this.Sd = this.ob = 0;
+      }
+
+      function Vd(a) {
+        alert("todo:WebPSamplerProcessPlane");
+        return a.T;
+      }
+
+      function Wd(a, b) {
+        var c = a.T,
+            d = b.ba.f.RGBA,
+            e = d.eb,
+            f = d.fb + a.ka * d.A,
+            g = P[b.ba.S],
+            h = a.y,
+            k = a.O,
+            l = a.f,
+            m = a.N,
+            n = a.ea,
+            r = a.W,
+            q = b.cc,
+            t = b.dc,
+            v = b.Mc,
+            p = b.Nc,
+            u = a.ka,
+            w = a.ka + a.T,
+            y = a.U,
+            A = y + 1 >> 1;
+        0 == u ? g(h, k, null, null, l, m, n, r, l, m, n, r, e, f, null, null, y) : (g(b.ec, b.fc, h, k, q, t, v, p, l, m, n, r, e, f - d.A, e, f, y), ++c);
+
+        for (; u + 2 < w; u += 2) {
+          q = l, t = m, v = n, p = r, m += a.Rc, r += a.Rc, f += 2 * d.A, k += 2 * a.fa, g(h, k - a.fa, h, k, q, t, v, p, l, m, n, r, e, f - d.A, e, f, y);
+        }
+
+        k += a.fa;
+        a.j + w < a.o ? (I(b.ec, b.fc, h, k, y), I(b.cc, b.dc, l, m, A), I(b.Mc, b.Nc, n, r, A), c--) : w & 1 || g(h, k, null, null, l, m, n, r, l, m, n, r, e, f + d.A, null, null, y);
+        return c;
+      }
+
+      function Xd(a, b, c) {
+        var d = a.F,
+            e = [a.J];
+
+        if (null != d) {
+          var f = a.U,
+              g = b.ba.S,
+              h = g == ya || g == Ja;
+          b = b.ba.f.RGBA;
+          var k = [0],
+              l = a.ka;
+          k[0] = a.T;
+          a.Kb && (0 == l ? --k[0] : (--l, e[0] -= a.width), a.j + a.ka + a.T == a.o && (k[0] = a.o - a.j - l));
+          var m = b.eb,
+              l = b.fb + l * b.A;
+          a = fc(d, e[0], a.width, f, k, m, l + (h ? 0 : 3), b.A);
+          x(c == k);
+          a && hb(g) && za(m, l, h, f, k, b.A);
+        }
+
+        return 0;
+      }
+
+      function gc(a) {
+        var b = a.ma,
+            c = b.ba.S,
+            d = 11 > c,
+            e = c == Ua || c == Va || c == ya || c == Db || 12 == c || hb(c);
+        b.memory = null;
+        b.Ib = null;
+        b.Jb = null;
+        b.Nd = null;
+        if (!hc(b.Oa, a, e ? 11 : 12)) { return 0; }
+        e && hb(c) && ic();
+        if (a.da) { alert("todo:use_scaling"); }else {
+          if (d) {
+            if (b.Ib = Vd, a.Kb) {
+              c = a.U + 1 >> 1;
+              b.memory = V(a.U + 2 * c);
+              if (null == b.memory) { return 0; }
+              b.ec = b.memory;
+              b.fc = 0;
+              b.cc = b.ec;
+              b.dc = b.fc + a.U;
+              b.Mc = b.cc;
+              b.Nc = b.dc + c;
+              b.Ib = Wd;
+              ic();
+            }
+          } else { alert("todo:EmitYUV"); }
+
+          e && (b.Jb = Xd, d && Aa());
+        }
+
+        if (d && !jc) {
+          for (a = 0; 256 > a; ++a) {
+            Yd[a] = 89858 * (a - 128) + Ba >> Wa, Zd[a] = -22014 * (a - 128) + Ba, $d[a] = -45773 * (a - 128), ae[a] = 113618 * (a - 128) + Ba >> Wa;
+          }
+
+          for (a = ta; a < Eb; ++a) {
+            b = 76283 * (a - 16) + Ba >> Wa, be[a - ta] = ga(b, 255), ce[a - ta] = ga(b + 8 >> 4, 15);
+          }
+
+          jc = 1;
+        }
+
+        return 1;
+      }
+
+      function kc(a) {
+        var b = a.ma,
+            c = a.U,
+            d = a.T;
+        x(!(a.ka & 1));
+        if (0 >= c || 0 >= d) { return 0; }
+        c = b.Ib(a, b);
+        null != b.Jb && b.Jb(a, b, c);
+        b.Dc += c;
+        return 1;
+      }
+
+      function lc(a) {
+        a.ma.memory = null;
+      }
+
+      function mc(a, b, c, d) {
+        if (47 != D(a, 8)) { return 0; }
+        b[0] = D(a, 14) + 1;
+        c[0] = D(a, 14) + 1;
+        d[0] = D(a, 1);
+        return 0 != D(a, 3) ? 0 : !a.h;
+      }
+
+      function ib(a, b) {
+        if (4 > a) { return a + 1; }
+        var c = a - 2 >> 1;
+        return (2 + (a & 1) << c) + D(b, c) + 1;
+      }
+
+      function nc(a, b) {
+        if (120 < b) { return b - 120; }
+        var c = de[b - 1],
+            c = (c >> 4) * a + (8 - (c & 15));
+        return 1 <= c ? c : 1;
+      }
+
+      function ua(a, b, c) {
+        var d = pb(c);
+        b += d & 255;
+        var e = a[b].g - 8;
+        0 < e && (qb(c, c.u + 8), d = pb(c), b += a[b].value, b += d & (1 << e) - 1);
+        qb(c, c.u + a[b].g);
+        return a[b].value;
+      }
+
+      function ub(a, b, c) {
+        c.g += a.g;
+        c.value += a.value << b >>> 0;
+        x(8 >= c.g);
+        return a.g;
+      }
+
+      function ha(a, b, c) {
+        var d = a.xc;
+        b = 0 == d ? 0 : a.vc[a.md * (c >> d) + (b >> d)];
+        x(b < a.Wb);
+        return a.Ya[b];
+      }
+
+      function oc(a, b, c, d) {
+        var e = a.ab,
+            f = a.c * b,
+            g = a.C;
+        b = g + b;
+        var h = c,
+            k = d;
+        d = a.Ta;
+
+        for (c = a.Ua; 0 < e--;) {
+          var l = a.gc[e],
+              m = g,
+              n = b,
+              r = h,
+              q = k,
+              k = d,
+              h = c,
+              t = l.Ea;
+          x(m < n);
+          x(n <= l.nc);
+
+          switch (l.hc) {
+            case 2:
+              pc(r, q, (n - m) * t, k, h);
+              break;
+
+            case 0:
+              var v = l,
+                  p = m,
+                  u = n,
+                  w = k,
+                  y = h,
+                  A = v.Ea;
+              0 == p && (ee(r, q, null, null, 1, w, y), cc(r, q + 1, 0, 0, A - 1, w, y + 1), q += A, y += A, ++p);
+
+              for (var E = 1 << v.b, B = E - 1, C = xa(A, v.b), N = v.K, v = v.w + (p >> v.b) * C; p < u;) {
+                var z = N,
+                    Q = v,
+                    S = 1;
+
+                for (fe(r, q, w, y - A, 1, w, y); S < A;) {
+                  var K = qc[z[Q++] >> 8 & 15],
+                      D = (S & ~B) + E;
+                  D > A && (D = A);
+                  K(r, q + +S, w, y + S - A, D - S, w, y + S);
+                  S = D;
+                }
+
+                q += A;
+                y += A;
+                ++p;
+                p & B || (v += C);
               }
-            } // literal or match pair ?
-            // Check that the overlay between pending_buf and d_buf+l_buf is
-            // ok:
 
-          } while (lx < last_lit);
-        }
-
-        send_code(END_BLOCK, ltree);
-        last_eob_len = ltree[END_BLOCK * 2 + 1];
-      } // Flush the bit buffer and align the output on a byte boundary
-
-
-      function bi_windup() {
-        if (bi_valid > 8) {
-          put_short(bi_buf);
-        } else if (bi_valid > 0) {
-          put_byte(bi_buf & 0xff);
-        }
-
-        bi_buf = 0;
-        bi_valid = 0;
-      } // Copy a stored block, storing first the length and its
-      // one's complement if requested.
-
-
-      function copy_block(buf, // the input data
-      len, // its length
-      header // true if block header must be written
-      ) {
-        bi_windup(); // align on byte boundary
-
-        last_eob_len = 8; // enough lookahead for inflate
-
-        if (header) {
-          put_short(len);
-          put_short(~len);
-        }
-
-        that.pending_buf.set(window.subarray(buf, buf + len), that.pending);
-        that.pending += len;
-      } // Send a stored block
-
-
-      function _tr_stored_block(buf, // input block
-      stored_len, // length of input block
-      eof // true if this is the last block for a file
-      ) {
-        send_bits((STORED_BLOCK << 1) + (eof ? 1 : 0), 3); // send block type
-
-        copy_block(buf, stored_len, true); // with header
-      } // Determine the best encoding for the current block: dynamic trees, static
-      // trees or store, and output the encoded block to the zip file.
-
-
-      function _tr_flush_block(buf, // input block, or NULL if too old
-      stored_len, // length of input block
-      eof // true if this is the last block for a file
-      ) {
-        var opt_lenb, static_lenb; // opt_len and static_len in bytes
-
-        var max_blindex = 0; // index of last bit length code of non zero freq
-        // Build the Huffman trees unless a stored block is forced
-
-        if (level > 0) {
-          // Construct the literal and distance trees
-          l_desc.build_tree(that);
-          d_desc.build_tree(that); // At this point, opt_len and static_len are the total bit lengths
-          // of
-          // the compressed block data, excluding the tree representations.
-          // Build the bit length tree for the above two trees, and get the
-          // index
-          // in bl_order of the last bit length code to send.
-
-          max_blindex = build_bl_tree(); // Determine the best encoding. Compute first the block length in
-          // bytes
-
-          opt_lenb = that.opt_len + 3 + 7 >>> 3;
-          static_lenb = that.static_len + 3 + 7 >>> 3;
-          if (static_lenb <= opt_lenb) opt_lenb = static_lenb;
-        } else {
-          opt_lenb = static_lenb = stored_len + 5; // force a stored block
-        }
-
-        if (stored_len + 4 <= opt_lenb && buf != -1) {
-          // 4: two words for the lengths
-          // The test buf != NULL is only necessary if LIT_BUFSIZE > WSIZE.
-          // Otherwise we can't have processed more than WSIZE input bytes
-          // since
-          // the last block flush, because compression would have been
-          // successful. If LIT_BUFSIZE <= WSIZE, it is never too late to
-          // transform a block into a stored block.
-          _tr_stored_block(buf, stored_len, eof);
-        } else if (static_lenb == opt_lenb) {
-          send_bits((STATIC_TREES << 1) + (eof ? 1 : 0), 3);
-          compress_block(StaticTree.static_ltree, StaticTree.static_dtree);
-        } else {
-          send_bits((DYN_TREES << 1) + (eof ? 1 : 0), 3);
-          send_all_trees(l_desc.max_code + 1, d_desc.max_code + 1, max_blindex + 1);
-          compress_block(dyn_ltree, dyn_dtree);
-        } // The above check is made mod 2^32, for files larger than 512 MB
-        // and uLong implemented on 32 bits.
-
-
-        init_block();
-
-        if (eof) {
-          bi_windup();
-        }
-      }
-
-      function flush_block_only(eof) {
-        _tr_flush_block(block_start >= 0 ? block_start : -1, strstart - block_start, eof);
-
-        block_start = strstart;
-        strm.flush_pending();
-      } // Fill the window when the lookahead becomes insufficient.
-      // Updates strstart and lookahead.
-      //
-      // IN assertion: lookahead < MIN_LOOKAHEAD
-      // OUT assertions: strstart <= window_size-MIN_LOOKAHEAD
-      // At least one byte has been read, or avail_in === 0; reads are
-      // performed for at least two bytes (required for the zip translate_eol
-      // option -- not supported here).
-
-
-      function fill_window() {
-        var n, m;
-        var p;
-        var more; // Amount of free space at the end of the window.
-
-        do {
-          more = window_size - lookahead - strstart; // Deal with !@#$% 64K limit:
-
-          if (more === 0 && strstart === 0 && lookahead === 0) {
-            more = w_size;
-          } else if (more == -1) {
-            // Very unlikely, but possible on 16 bit machine if strstart ==
-            // 0
-            // and lookahead == 1 (input done one byte at time)
-            more--; // If the window is almost full and there is insufficient
-            // lookahead,
-            // move the upper half to the lower one to make room in the
-            // upper half.
-          } else if (strstart >= w_size + w_size - MIN_LOOKAHEAD) {
-            window.set(window.subarray(w_size, w_size + w_size), 0);
-            match_start -= w_size;
-            strstart -= w_size; // we now have strstart >= MAX_DIST
-
-            block_start -= w_size; // Slide the hash table (could be avoided with 32 bit values
-            // at the expense of memory usage). We slide even when level ==
-            // 0
-            // to keep the hash table consistent if we switch back to level
-            // > 0
-            // later. (Using level 0 permanently is not an optimal usage of
-            // zlib, so we don't care about this pathological case.)
-
-            n = hash_size;
-            p = n;
-
-            do {
-              m = head[--p] & 0xffff;
-              head[p] = m >= w_size ? m - w_size : 0;
-            } while (--n !== 0);
-
-            n = w_size;
-            p = n;
-
-            do {
-              m = prev[--p] & 0xffff;
-              prev[p] = m >= w_size ? m - w_size : 0; // If n is not on any hash chain, prev[n] is garbage but
-              // its value will never be used.
-            } while (--n !== 0);
-
-            more += w_size;
-          }
-
-          if (strm.avail_in === 0) return; // If there was no sliding:
-          // strstart <= WSIZE+MAX_DIST-1 && lookahead <= MIN_LOOKAHEAD - 1 &&
-          // more == window_size - lookahead - strstart
-          // => more >= window_size - (MIN_LOOKAHEAD-1 + WSIZE + MAX_DIST-1)
-          // => more >= window_size - 2*WSIZE + 2
-          // In the BIG_MEM or MMAP case (not yet supported),
-          // window_size == input_size + MIN_LOOKAHEAD &&
-          // strstart + s->lookahead <= input_size => more >= MIN_LOOKAHEAD.
-          // Otherwise, window_size == 2*WSIZE so more >= 2.
-          // If there was sliding, more >= WSIZE. So in all cases, more >= 2.
-
-          n = strm.read_buf(window, strstart + lookahead, more);
-          lookahead += n; // Initialize the hash value now that we have some input:
-
-          if (lookahead >= MIN_MATCH) {
-            ins_h = window[strstart] & 0xff;
-            ins_h = (ins_h << hash_shift ^ window[strstart + 1] & 0xff) & hash_mask;
-          } // If the whole input has less than MIN_MATCH bytes, ins_h is
-          // garbage,
-          // but this is not important since only literal bytes will be
-          // emitted.
-
-        } while (lookahead < MIN_LOOKAHEAD && strm.avail_in !== 0);
-      } // Copy without compression as much as possible from the input stream,
-      // return
-      // the current block state.
-      // This function does not insert new strings in the dictionary since
-      // uncompressible data is probably not useful. This function is used
-      // only for the level=0 compression option.
-      // NOTE: this function should be optimized to avoid extra copying from
-      // window to pending_buf.
-
-
-      function deflate_stored(flush) {
-        // Stored blocks are limited to 0xffff bytes, pending_buf is limited
-        // to pending_buf_size, and each stored block has a 5 byte header:
-        var max_block_size = 0xffff;
-        var max_start;
-
-        if (max_block_size > pending_buf_size - 5) {
-          max_block_size = pending_buf_size - 5;
-        } // Copy as much as possible from input to output:
-
-
-        while (true) {
-          // Fill the window as much as possible:
-          if (lookahead <= 1) {
-            fill_window();
-            if (lookahead === 0 && flush == Z_NO_FLUSH) return NeedMore;
-            if (lookahead === 0) break; // flush the current block
-          }
-
-          strstart += lookahead;
-          lookahead = 0; // Emit a stored block if pending_buf will be full:
-
-          max_start = block_start + max_block_size;
-
-          if (strstart === 0 || strstart >= max_start) {
-            // strstart === 0 is possible when wraparound on 16-bit machine
-            lookahead = strstart - max_start;
-            strstart = max_start;
-            flush_block_only(false);
-            if (strm.avail_out === 0) return NeedMore;
-          } // Flush if we may have to slide, otherwise block_start may become
-          // negative and the data will be gone:
-
-
-          if (strstart - block_start >= w_size - MIN_LOOKAHEAD) {
-            flush_block_only(false);
-            if (strm.avail_out === 0) return NeedMore;
-          }
-        }
-
-        flush_block_only(flush == Z_FINISH);
-        if (strm.avail_out === 0) return flush == Z_FINISH ? FinishStarted : NeedMore;
-        return flush == Z_FINISH ? FinishDone : BlockDone;
-      }
-
-      function longest_match(cur_match) {
-        var chain_length = max_chain_length; // max hash chain length
-
-        var scan = strstart; // current string
-
-        var match; // matched string
-
-        var len; // length of current match
-
-        var best_len = prev_length; // best match length so far
-
-        var limit = strstart > w_size - MIN_LOOKAHEAD ? strstart - (w_size - MIN_LOOKAHEAD) : 0;
-        var _nice_match = nice_match; // Stop when cur_match becomes <= limit. To simplify the code,
-        // we prevent matches with the string of window index 0.
-
-        var wmask = w_mask;
-        var strend = strstart + MAX_MATCH;
-        var scan_end1 = window[scan + best_len - 1];
-        var scan_end = window[scan + best_len]; // The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of
-        // 16.
-        // It is easy to get rid of this optimization if necessary.
-        // Do not waste too much time if we already have a good match:
-
-        if (prev_length >= good_match) {
-          chain_length >>= 2;
-        } // Do not look for matches beyond the end of the input. This is
-        // necessary
-        // to make deflate deterministic.
-
-
-        if (_nice_match > lookahead) _nice_match = lookahead;
-
-        do {
-          match = cur_match; // Skip to next match if the match length cannot increase
-          // or if the match length is less than 2:
-
-          if (window[match + best_len] != scan_end || window[match + best_len - 1] != scan_end1 || window[match] != window[scan] || window[++match] != window[scan + 1]) continue; // The check at best_len-1 can be removed because it will be made
-          // again later. (This heuristic is not always a win.)
-          // It is not necessary to compare scan[2] and match[2] since they
-          // are always equal when the other bytes match, given that
-          // the hash keys are equal and that HASH_BITS >= 8.
-
-          scan += 2;
-          match++; // We check for insufficient lookahead only every 8th comparison;
-          // the 256th check will be made at strstart+258.
-
-          do {} while (window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && window[++scan] == window[++match] && scan < strend);
-
-          len = MAX_MATCH - (strend - scan);
-          scan = strend - MAX_MATCH;
-
-          if (len > best_len) {
-            match_start = cur_match;
-            best_len = len;
-            if (len >= _nice_match) break;
-            scan_end1 = window[scan + best_len - 1];
-            scan_end = window[scan + best_len];
-          }
-        } while ((cur_match = prev[cur_match & wmask] & 0xffff) > limit && --chain_length !== 0);
-
-        if (best_len <= lookahead) return best_len;
-        return lookahead;
-      } // Compress as much as possible from the input stream, return the current
-      // block state.
-      // This function does not perform lazy evaluation of matches and inserts
-      // new strings in the dictionary only for unmatched strings or for short
-      // matches. It is used only for the fast compression options.
-
-
-      function deflate_fast(flush) {
-        // short hash_head = 0; // head of the hash chain
-        var hash_head = 0; // head of the hash chain
-
-        var bflush; // set if current block must be flushed
-
-        while (true) {
-          // Make sure that we always have enough lookahead, except
-          // at the end of the input file. We need MAX_MATCH bytes
-          // for the next match, plus MIN_MATCH bytes to insert the
-          // string following the next match.
-          if (lookahead < MIN_LOOKAHEAD) {
-            fill_window();
-
-            if (lookahead < MIN_LOOKAHEAD && flush == Z_NO_FLUSH) {
-              return NeedMore;
-            }
-
-            if (lookahead === 0) break; // flush the current block
-          } // Insert the string window[strstart .. strstart+2] in the
-          // dictionary, and set hash_head to the head of the hash chain:
-
-
-          if (lookahead >= MIN_MATCH) {
-            ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask; // prev[strstart&w_mask]=hash_head=head[ins_h];
-
-            hash_head = head[ins_h] & 0xffff;
-            prev[strstart & w_mask] = head[ins_h];
-            head[ins_h] = strstart;
-          } // Find the longest match, discarding those <= prev_length.
-          // At this point we have always match_length < MIN_MATCH
-
-
-          if (hash_head !== 0 && (strstart - hash_head & 0xffff) <= w_size - MIN_LOOKAHEAD) {
-            // To simplify the code, we prevent matches with the string
-            // of window index 0 (in particular we have to avoid a match
-            // of the string with itself at the start of the input file).
-            if (strategy != Z_HUFFMAN_ONLY) {
-              match_length = longest_match(hash_head);
-            } // longest_match() sets match_start
-
-          }
-
-          if (match_length >= MIN_MATCH) {
-            // check_match(strstart, match_start, match_length);
-            bflush = _tr_tally(strstart - match_start, match_length - MIN_MATCH);
-            lookahead -= match_length; // Insert new strings in the hash table only if the match length
-            // is not too large. This saves time but degrades compression.
-
-            if (match_length <= max_lazy_match && lookahead >= MIN_MATCH) {
-              match_length--; // string at strstart already in hash table
-
-              do {
-                strstart++;
-                ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask; // prev[strstart&w_mask]=hash_head=head[ins_h];
-
-                hash_head = head[ins_h] & 0xffff;
-                prev[strstart & w_mask] = head[ins_h];
-                head[ins_h] = strstart; // strstart never exceeds WSIZE-MAX_MATCH, so there are
-                // always MIN_MATCH bytes ahead.
-              } while (--match_length !== 0);
-
-              strstart++;
-            } else {
-              strstart += match_length;
-              match_length = 0;
-              ins_h = window[strstart] & 0xff;
-              ins_h = (ins_h << hash_shift ^ window[strstart + 1] & 0xff) & hash_mask; // If lookahead < MIN_MATCH, ins_h is garbage, but it does
-              // not
-              // matter since it will be recomputed at next deflate call.
-            }
-          } else {
-            // No match, output a literal byte
-            bflush = _tr_tally(0, window[strstart] & 0xff);
-            lookahead--;
-            strstart++;
-          }
-
-          if (bflush) {
-            flush_block_only(false);
-            if (strm.avail_out === 0) return NeedMore;
-          }
-        }
-
-        flush_block_only(flush == Z_FINISH);
-
-        if (strm.avail_out === 0) {
-          if (flush == Z_FINISH) return FinishStarted;else return NeedMore;
-        }
-
-        return flush == Z_FINISH ? FinishDone : BlockDone;
-      } // Same as above, but achieves better compression. We use a lazy
-      // evaluation for matches: a match is finally adopted only if there is
-      // no better match at the next window position.
-
-
-      function deflate_slow(flush) {
-        // short hash_head = 0; // head of hash chain
-        var hash_head = 0; // head of hash chain
-
-        var bflush; // set if current block must be flushed
-
-        var max_insert; // Process the input block.
-
-        while (true) {
-          // Make sure that we always have enough lookahead, except
-          // at the end of the input file. We need MAX_MATCH bytes
-          // for the next match, plus MIN_MATCH bytes to insert the
-          // string following the next match.
-          if (lookahead < MIN_LOOKAHEAD) {
-            fill_window();
-
-            if (lookahead < MIN_LOOKAHEAD && flush == Z_NO_FLUSH) {
-              return NeedMore;
-            }
-
-            if (lookahead === 0) break; // flush the current block
-          } // Insert the string window[strstart .. strstart+2] in the
-          // dictionary, and set hash_head to the head of the hash chain:
-
-
-          if (lookahead >= MIN_MATCH) {
-            ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask; // prev[strstart&w_mask]=hash_head=head[ins_h];
-
-            hash_head = head[ins_h] & 0xffff;
-            prev[strstart & w_mask] = head[ins_h];
-            head[ins_h] = strstart;
-          } // Find the longest match, discarding those <= prev_length.
-
-
-          prev_length = match_length;
-          prev_match = match_start;
-          match_length = MIN_MATCH - 1;
-
-          if (hash_head !== 0 && prev_length < max_lazy_match && (strstart - hash_head & 0xffff) <= w_size - MIN_LOOKAHEAD) {
-            // To simplify the code, we prevent matches with the string
-            // of window index 0 (in particular we have to avoid a match
-            // of the string with itself at the start of the input file).
-            if (strategy != Z_HUFFMAN_ONLY) {
-              match_length = longest_match(hash_head);
-            } // longest_match() sets match_start
-
-
-            if (match_length <= 5 && (strategy == Z_FILTERED || match_length == MIN_MATCH && strstart - match_start > 4096)) {
-              // If prev_match is also MIN_MATCH, match_start is garbage
-              // but we will ignore the current match anyway.
-              match_length = MIN_MATCH - 1;
-            }
-          } // If there was a match at the previous step and the current
-          // match is not better, output the previous match:
-
-
-          if (prev_length >= MIN_MATCH && match_length <= prev_length) {
-            max_insert = strstart + lookahead - MIN_MATCH; // Do not insert strings in hash table beyond this.
-            // check_match(strstart-1, prev_match, prev_length);
-
-            bflush = _tr_tally(strstart - 1 - prev_match, prev_length - MIN_MATCH); // Insert in hash table all strings up to the end of the match.
-            // strstart-1 and strstart are already inserted. If there is not
-            // enough lookahead, the last two strings are not inserted in
-            // the hash table.
-
-            lookahead -= prev_length - 1;
-            prev_length -= 2;
-
-            do {
-              if (++strstart <= max_insert) {
-                ins_h = (ins_h << hash_shift ^ window[strstart + (MIN_MATCH - 1)] & 0xff) & hash_mask; // prev[strstart&w_mask]=hash_head=head[ins_h];
-
-                hash_head = head[ins_h] & 0xffff;
-                prev[strstart & w_mask] = head[ins_h];
-                head[ins_h] = strstart;
+              n != l.nc && I(k, h - t, k, h + (n - m - 1) * t, t);
+              break;
+
+            case 1:
+              t = r;
+              u = q;
+              r = l.Ea;
+              q = 1 << l.b;
+              w = q - 1;
+              y = r & ~w;
+              A = r - y;
+              p = xa(r, l.b);
+              E = l.K;
+
+              for (l = l.w + (m >> l.b) * p; m < n;) {
+                B = E;
+                C = l;
+                N = new Jd();
+                v = u + y;
+
+                for (z = u + r; u < v;) {
+                  dc(B[C++], N), Fb(N, t, u, q, k, h), u += q, h += q;
+                }
+
+                u < z && (dc(B[C++], N), Fb(N, t, u, A, k, h), u += A, h += A);
+                ++m;
+                m & w || (l += p);
               }
-            } while (--prev_length !== 0);
 
-            match_available = 0;
-            match_length = MIN_MATCH - 1;
-            strstart++;
+              break;
 
-            if (bflush) {
-              flush_block_only(false);
-              if (strm.avail_out === 0) return NeedMore;
-            }
-          } else if (match_available !== 0) {
-            // If there was no match at the previous position, output a
-            // single literal. If there was a match but the current match
-            // is longer, truncate the previous match to a single literal.
-            bflush = _tr_tally(0, window[strstart - 1] & 0xff);
+            case 3:
+              if (r == k && q == h && 0 < l.b) {
+                y = (n - m) * xa(l.Ea, l.b);
+                t = h + (n - m) * t - y;
+                u = k;
+                r = t;
+                q = k;
+                w = h;
+                A = y;
+                p = [];
 
-            if (bflush) {
-              flush_block_only(false);
-            }
+                for (y = A - 1; 0 <= y; --y) {
+                  p[y] = q[w + y];
+                }
 
-            strstart++;
-            lookahead--;
-            if (strm.avail_out === 0) return NeedMore;
-          } else {
-            // There is no previous match to compare with, wait for
-            // the next step to decide.
-            match_available = 1;
-            strstart++;
-            lookahead--;
+                for (y = A - 1; 0 <= y; --y) {
+                  u[r + y] = p[y];
+                }
+
+                rc(l, m, n, k, t, k, h);
+              } else { rc(l, m, n, r, q, k, h); }
+
           }
+
+          h = d;
+          k = c;
         }
 
-        if (match_available !== 0) {
-          bflush = _tr_tally(0, window[strstart - 1] & 0xff);
-          match_available = 0;
-        }
-
-        flush_block_only(flush == Z_FINISH);
-
-        if (strm.avail_out === 0) {
-          if (flush == Z_FINISH) return FinishStarted;else return NeedMore;
-        }
-
-        return flush == Z_FINISH ? FinishDone : BlockDone;
+        k != c && I(d, c, h, k, f);
       }
 
-      function deflateReset(strm) {
-        strm.total_in = strm.total_out = 0;
-        strm.msg = null; //
+      function ge(a, b) {
+        var c = a.V,
+            d = a.Ba + a.c * a.C,
+            e = b - a.C;
+        x(b <= a.l.o);
+        x(16 >= e);
 
-        that.pending = 0;
-        that.pending_out = 0;
-        status = BUSY_STATE;
-        last_flush = Z_NO_FLUSH;
-        tr_init();
-        lm_init();
-        return Z_OK;
+        if (0 < e) {
+          var f = a.l,
+              g = a.Ta,
+              h = a.Ua,
+              k = f.width;
+          oc(a, e, c, d);
+          h = [h];
+          c = a.C;
+          d = b;
+          e = h;
+          x(c < d);
+          x(f.v < f.va);
+          d > f.o && (d = f.o);
+
+          if (c < f.j) {
+            var l = f.j - c,
+                c = f.j;
+            e[0] += l * k;
+          }
+
+          c >= d ? c = 0 : (e[0] += 4 * f.v, f.ka = c - f.j, f.U = f.va - f.v, f.T = d - c, c = 1);
+
+          if (c) {
+            h = h[0];
+            c = a.ca;
+
+            if (11 > c.S) {
+              for (var m = c.f.RGBA, d = c.S, e = f.U, f = f.T, l = m.eb, n = m.A, r = f, m = m.fb + a.Ma * m.A; 0 < r--;) {
+                var q = g,
+                    t = h,
+                    v = e,
+                    p = l,
+                    u = m;
+
+                switch (d) {
+                  case Ca:
+                    sc(q, t, v, p, u);
+                    break;
+
+                  case Ua:
+                    Gb(q, t, v, p, u);
+                    break;
+
+                  case zb:
+                    Gb(q, t, v, p, u);
+                    za(p, u, 0, v, 1, 0);
+                    break;
+
+                  case tc:
+                    uc(q, t, v, p, u);
+                    break;
+
+                  case Va:
+                    fb(q, t, v, p, u, 1);
+                    break;
+
+                  case Ab:
+                    fb(q, t, v, p, u, 1);
+                    za(p, u, 0, v, 1, 0);
+                    break;
+
+                  case ya:
+                    fb(q, t, v, p, u, 0);
+                    break;
+
+                  case Ja:
+                    fb(q, t, v, p, u, 0);
+                    za(p, u, 1, v, 1, 0);
+                    break;
+
+                  case Db:
+                    Hb(q, t, v, p, u);
+                    break;
+
+                  case Bb:
+                    Hb(q, t, v, p, u);
+                    vc(p, u, v, 1, 0);
+                    break;
+
+                  case wc:
+                    xc(q, t, v, p, u);
+                    break;
+
+                  default:
+                    x(0);
+                }
+
+                h += k;
+                m += n;
+              }
+
+              a.Ma += f;
+            } else { alert("todo:EmitRescaledRowsYUVA"); }
+
+            x(a.Ma <= c.height);
+          }
+        }
+
+        a.C = b;
+        x(a.C <= a.i);
       }
 
-      that.deflateInit = function (strm, _level, bits, _method, memLevel, _strategy) {
-        if (!_method) _method = Z_DEFLATED;
-        if (!memLevel) memLevel = DEF_MEM_LEVEL;
-        if (!_strategy) _strategy = Z_DEFAULT_STRATEGY; // byte[] my_version=ZLIB_VERSION;
-        //
-        // if (!version || version[0] != my_version[0]
-        // || stream_size != sizeof(z_stream)) {
-        // return Z_VERSION_ERROR;
-        // }
+      function yc(a) {
+        var b;
+        if (0 < a.ua) { return 0; }
 
-        strm.msg = null;
-        if (_level == Z_DEFAULT_COMPRESSION) _level = 6;
-
-        if (memLevel < 1 || memLevel > MAX_MEM_LEVEL || _method != Z_DEFLATED || bits < 9 || bits > 15 || _level < 0 || _level > 9 || _strategy < 0 || _strategy > Z_HUFFMAN_ONLY) {
-          return Z_STREAM_ERROR;
+        for (b = 0; b < a.Wb; ++b) {
+          var c = a.Ya[b].G,
+              d = a.Ya[b].H;
+          if (0 < c[1][d[1] + 0].g || 0 < c[2][d[2] + 0].g || 0 < c[3][d[3] + 0].g) { return 0; }
         }
 
-        strm.dstate = that;
-        w_bits = bits;
-        w_size = 1 << w_bits;
-        w_mask = w_size - 1;
-        hash_bits = memLevel + 7;
-        hash_size = 1 << hash_bits;
-        hash_mask = hash_size - 1;
-        hash_shift = Math.floor((hash_bits + MIN_MATCH - 1) / MIN_MATCH);
-        window = new Uint8Array(w_size * 2);
-        prev = [];
-        head = [];
-        lit_bufsize = 1 << memLevel + 6; // 16K elements by default
-        // We overlay pending_buf and d_buf+l_buf. This works since the average
-        // output size for (length,distance) codes is <= 24 bits.
+        return 1;
+      }
 
-        that.pending_buf = new Uint8Array(lit_bufsize * 4);
-        pending_buf_size = lit_bufsize * 4;
-        d_buf = Math.floor(lit_bufsize / 2);
-        l_buf = (1 + 2) * lit_bufsize;
-        level = _level;
-        strategy = _strategy;
-        return deflateReset(strm);
-      };
+      function zc(a, b, c, d, e, f) {
+        if (0 != a.Z) {
+          var g = a.qd,
+              h = a.rd;
 
-      that.deflateEnd = function () {
-        if (status != INIT_STATE && status != BUSY_STATE && status != FINISH_STATE) {
-          return Z_STREAM_ERROR;
-        } // Deallocate in reverse order of allocations:
-
-
-        that.pending_buf = null;
-        head = null;
-        prev = null;
-        window = null; // free
-
-        that.dstate = null;
-        return status == BUSY_STATE ? Z_DATA_ERROR : Z_OK;
-      };
-
-      that.deflateParams = function (strm, _level, _strategy) {
-        var err = Z_OK;
-
-        if (_level == Z_DEFAULT_COMPRESSION) {
-          _level = 6;
-        }
-
-        if (_level < 0 || _level > 9 || _strategy < 0 || _strategy > Z_HUFFMAN_ONLY) {
-          return Z_STREAM_ERROR;
-        }
-
-        if (config_table[level].func != config_table[_level].func && strm.total_in !== 0) {
-          // Flush the last buffer:
-          err = strm.deflate(Z_PARTIAL_FLUSH);
-        }
-
-        if (level != _level) {
-          level = _level;
-          max_lazy_match = config_table[level].max_lazy;
-          good_match = config_table[level].good_length;
-          nice_match = config_table[level].nice_length;
-          max_chain_length = config_table[level].max_chain;
-        }
-
-        strategy = _strategy;
-        return err;
-      };
-
-      that.deflateSetDictionary = function (strm, dictionary, dictLength) {
-        var length = dictLength;
-        var n,
-            index = 0;
-        if (!dictionary || status != INIT_STATE) return Z_STREAM_ERROR;
-        if (length < MIN_MATCH) return Z_OK;
-
-        if (length > w_size - MIN_LOOKAHEAD) {
-          length = w_size - MIN_LOOKAHEAD;
-          index = dictLength - length; // use the tail of the dictionary
-        }
-
-        window.set(dictionary.subarray(index, index + length), 0);
-        strstart = length;
-        block_start = length; // Insert all strings in the hash table (except for the last two bytes).
-        // s->lookahead stays null, so s->ins_h will be recomputed at the next
-        // call of fill_window.
-
-        ins_h = window[0] & 0xff;
-        ins_h = (ins_h << hash_shift ^ window[1] & 0xff) & hash_mask;
-
-        for (n = 0; n <= length - MIN_MATCH; n++) {
-          ins_h = (ins_h << hash_shift ^ window[n + (MIN_MATCH - 1)] & 0xff) & hash_mask;
-          prev[n & w_mask] = head[ins_h];
-          head[ins_h] = n;
-        }
-
-        return Z_OK;
-      };
-
-      that.deflate = function (_strm, flush) {
-        var i, header, level_flags, old_flush, bstate;
-
-        if (flush > Z_FINISH || flush < 0) {
-          return Z_STREAM_ERROR;
-        }
-
-        if (!_strm.next_out || !_strm.next_in && _strm.avail_in !== 0 || status == FINISH_STATE && flush != Z_FINISH) {
-          _strm.msg = z_errmsg[Z_NEED_DICT - Z_STREAM_ERROR];
-          return Z_STREAM_ERROR;
-        }
-
-        if (_strm.avail_out === 0) {
-          _strm.msg = z_errmsg[Z_NEED_DICT - Z_BUF_ERROR];
-          return Z_BUF_ERROR;
-        }
-
-        strm = _strm; // just in case
-
-        old_flush = last_flush;
-        last_flush = flush; // Write the zlib header
-
-        if (status == INIT_STATE) {
-          header = Z_DEFLATED + (w_bits - 8 << 4) << 8;
-          level_flags = (level - 1 & 0xff) >> 1;
-          if (level_flags > 3) level_flags = 3;
-          header |= level_flags << 6;
-          if (strstart !== 0) header |= PRESET_DICT;
-          header += 31 - header % 31;
-          status = BUSY_STATE;
-          putShortMSB(header);
-        } // Flush as much pending output as possible
-
-
-        if (that.pending !== 0) {
-          strm.flush_pending();
-
-          if (strm.avail_out === 0) {
-            // console.log(" avail_out==0");
-            // Since avail_out is 0, deflate will be called again with
-            // more output space, but possibly with both pending and
-            // avail_in equal to zero. There won't be anything to do,
-            // but this is not an error situation so make sure we
-            // return OK instead of BUF_ERROR at next call of deflate:
-            last_flush = -1;
-            return Z_OK;
-          } // Make sure there is something to do and avoid duplicate
-          // consecutive
-          // flushes. For repeated and useless calls with Z_FINISH, we keep
-          // returning Z_STREAM_END instead of Z_BUFF_ERROR.
-
-        } else if (strm.avail_in === 0 && flush <= old_flush && flush != Z_FINISH) {
-          strm.msg = z_errmsg[Z_NEED_DICT - Z_BUF_ERROR];
-          return Z_BUF_ERROR;
-        } // User must not provide more input after the first FINISH:
-
-
-        if (status == FINISH_STATE && strm.avail_in !== 0) {
-          _strm.msg = z_errmsg[Z_NEED_DICT - Z_BUF_ERROR];
-          return Z_BUF_ERROR;
-        } // Start a new block or continue the current one.
-
-
-        if (strm.avail_in !== 0 || lookahead !== 0 || flush != Z_NO_FLUSH && status != FINISH_STATE) {
-          bstate = -1;
-
-          switch (config_table[level].func) {
-            case STORED:
-              bstate = deflate_stored(flush);
-              break;
-
-            case FAST:
-              bstate = deflate_fast(flush);
-              break;
-
-            case SLOW:
-              bstate = deflate_slow(flush);
-              break;
-
-            default:
+          for (x(null != ia[a.Z]); b < c; ++b) {
+            ia[a.Z](g, h, d, e, d, e, f), g = d, h = e, e += f;
           }
 
-          if (bstate == FinishStarted || bstate == FinishDone) {
-            status = FINISH_STATE;
-          }
+          a.qd = g;
+          a.rd = h;
+        }
+      }
 
-          if (bstate == NeedMore || bstate == FinishStarted) {
-            if (strm.avail_out === 0) {
-              last_flush = -1; // avoid BUF_ERROR next call, see above
+      function Ib(a, b) {
+        var c = a.l.ma,
+            d = 0 == c.Z || 1 == c.Z ? a.l.j : a.C,
+            d = a.C < d ? d : a.C;
+        x(b <= a.l.o);
+
+        if (b > d) {
+          var e = a.l.width,
+              f = c.ca,
+              g = c.tb + e * d,
+              h = a.V,
+              k = a.Ba + a.c * d,
+              l = a.gc;
+          x(1 == a.ab);
+          x(3 == l[0].hc);
+          he(l[0], d, b, h, k, f, g);
+          zc(c, d, b, f, g, e);
+        }
+
+        a.C = a.Ma = b;
+      }
+
+      function Jb(a, b, c, d, e, f, g) {
+        var h = a.$ / d,
+            k = a.$ % d,
+            l = a.m,
+            m = a.s,
+            n = c + a.$,
+            r = n;
+        e = c + d * e;
+        var q = c + d * f,
+            t = 280 + m.ua,
+            v = a.Pb ? h : 16777216,
+            p = 0 < m.ua ? m.Wa : null,
+            u = m.wc,
+            w = n < q ? ha(m, k, h) : null;
+        x(a.C < f);
+        x(q <= e);
+        var y = !1;
+
+        a: for (;;) {
+          for (; y || n < q;) {
+            var A = 0;
+
+            if (h >= v) {
+              var v = a,
+                  E = n - c;
+              x(v.Pb);
+              v.wd = v.m;
+              v.xd = E;
+              0 < v.s.ua && $b(v.s.Wa, v.s.vb);
+              v = h + ie;
             }
 
-            return Z_OK; // If flush != Z_NO_FLUSH && avail_out === 0, the next call
-            // of deflate should use the same flush parameter to make sure
-            // that the flush is complete. So we don't have to output an
-            // empty block here, this will be done at next call. This also
-            // ensures that for a very small output buffer, we emit at most
-            // one empty block.
+            k & u || (w = ha(m, k, h));
+            x(null != w);
+            w.Qb && (b[n] = w.qb, y = !0);
+            if (!y) { if (Sa(l), w.jc) {
+              var A = l,
+                  E = b,
+                  B = n,
+                  C = w.pd[pb(A) & xb - 1];
+              x(w.jc);
+              256 > C.g ? (qb(A, A.u + C.g), E[B] = C.value, A = 0) : (qb(A, A.u + C.g - 256), x(256 <= C.value), A = C.value);
+              0 == A && (y = !0);
+            } else { A = ua(w.G[0], w.H[0], l); } }
+            if (l.h) { break; }
+
+            if (y || 256 > A) {
+              if (!y) { if (w.nd) { b[n] = (w.qb | A << 8) >>> 0; }else {
+                Sa(l);
+                y = ua(w.G[1], w.H[1], l);
+                Sa(l);
+                E = ua(w.G[2], w.H[2], l);
+                B = ua(w.G[3], w.H[3], l);
+                if (l.h) { break; }
+                b[n] = (B << 24 | y << 16 | A << 8 | E) >>> 0;
+              } }
+              y = !1;
+              ++n;
+              ++k;
+              if (k >= d && (k = 0, ++h, null != g && h <= f && !(h % 16) && g(a, h), null != p)) { for (; r < n;) {
+                A = b[r++], p.X[(506832829 * A & 4294967295) >>> p.Mb] = A;
+              } }
+            } else if (280 > A) {
+              A = ib(A - 256, l);
+              E = ua(w.G[4], w.H[4], l);
+              Sa(l);
+              E = ib(E, l);
+              E = nc(d, E);
+              if (l.h) { break; }
+              if (n - c < E || e - n < A) { break a; }else { for (B = 0; B < A; ++B) {
+                b[n + B] = b[n + B - E];
+              } }
+              n += A;
+
+              for (k += A; k >= d;) {
+                k -= d, ++h, null != g && h <= f && !(h % 16) && g(a, h);
+              }
+
+              x(n <= e);
+              k & u && (w = ha(m, k, h));
+              if (null != p) { for (; r < n;) {
+                A = b[r++], p.X[(506832829 * A & 4294967295) >>> p.Mb] = A;
+              } }
+            } else if (A < t) {
+              y = A - 280;
+
+              for (x(null != p); r < n;) {
+                A = b[r++], p.X[(506832829 * A & 4294967295) >>> p.Mb] = A;
+              }
+
+              A = n;
+              E = p;
+              x(!(y >>> E.Xa));
+              b[A] = E.X[y];
+              y = !0;
+            } else { break a; }
+
+            y || x(l.h == db(l));
           }
 
-          if (bstate == BlockDone) {
-            if (flush == Z_PARTIAL_FLUSH) {
-              _tr_align();
-            } else {
-              // FULL_FLUSH or SYNC_FLUSH
-              _tr_stored_block(0, 0, false); // For a full flush, this empty block will be recognized
-              // as a special marker by inflate_sync().
+          if (a.Pb && l.h && n < e) { x(a.m.h), a.a = 5, a.m = a.wd, a.$ = a.xd, 0 < a.s.ua && $b(a.s.vb, a.s.Wa); }else if (l.h) { break a; }else { null != g && g(a, h > f ? f : h), a.a = 0, a.$ = n - c; }
+          return 1;
+        }
 
+        a.a = 3;
+        return 0;
+      }
 
-              if (flush == Z_FULL_FLUSH) {
-                // state.head[s.hash_size-1]=0;
-                for (i = 0; i < hash_size
-                /*-1*/
-                ; i++) {
-                  // forget history
-                  head[i] = 0;
+      function Ac(a) {
+        x(null != a);
+        a.vc = null;
+        a.yc = null;
+        a.Ya = null;
+        var b = a.Wa;
+        null != b && (b.X = null);
+        a.vb = null;
+        x(null != a);
+      }
+
+      function Bc() {
+        var a = new je();
+        if (null == a) { return null; }
+        a.a = 0;
+        a.xb = Cc;
+        gb("Predictor", "VP8LPredictors");
+        gb("Predictor", "VP8LPredictors_C");
+        gb("PredictorAdd", "VP8LPredictorsAdd");
+        gb("PredictorAdd", "VP8LPredictorsAdd_C");
+        pc = Kd;
+        Fb = Ld;
+        sc = Md;
+        Gb = Nd;
+        Hb = Od;
+        xc = Pd;
+        uc = Qd;
+        self.VP8LMapColor32b = ke;
+        self.VP8LMapColor8b = le;
+        return a;
+      }
+
+      function rb(a, b, c, d, e) {
+        var f = 1,
+            g = [a],
+            h = [b],
+            k = d.m,
+            l = d.s,
+            m = null,
+            n = 0;
+
+        a: for (;;) {
+          if (c) { for (; f && D(k, 1);) {
+            var r = g,
+                q = h,
+                t = d,
+                v = 1,
+                p = t.m,
+                u = t.gc[t.ab],
+                w = D(p, 2);
+            if (t.Oc & 1 << w) { f = 0; }else {
+              t.Oc |= 1 << w;
+              u.hc = w;
+              u.Ea = r[0];
+              u.nc = q[0];
+              u.K = [null];
+              ++t.ab;
+              x(4 >= t.ab);
+
+              switch (w) {
+                case 0:
+                case 1:
+                  u.b = D(p, 3) + 2;
+                  v = rb(xa(u.Ea, u.b), xa(u.nc, u.b), 0, t, u.K);
+                  u.K = u.K[0];
+                  break;
+
+                case 3:
+                  var y = D(p, 8) + 1,
+                      A = 16 < y ? 0 : 4 < y ? 1 : 2 < y ? 2 : 3;
+                  r[0] = xa(u.Ea, A);
+                  u.b = A;
+                  var v = rb(y, 1, 0, t, u.K),
+                      E;
+
+                  if (E = v) {
+                    var B,
+                        C = y,
+                        N = u,
+                        z = 1 << (8 >> N.b),
+                        Q = V(z);
+                    if (null == Q) { E = 0; }else {
+                      var S = N.K[0],
+                          K = N.w;
+                      Q[0] = N.K[0][0];
+
+                      for (B = 1; B < 1 * C; ++B) {
+                        Q[B] = yb(S[K + B], Q[B - 1]);
+                      }
+
+                      for (; B < 4 * z; ++B) {
+                        Q[B] = 0;
+                      }
+
+                      N.K[0] = null;
+                      N.K[0] = Q;
+                      E = 1;
+                    }
+                  }
+
+                  v = E;
+                  break;
+
+                case 2:
+                  break;
+
+                default:
+                  x(0);
+              }
+
+              f = v;
+            }
+          } }
+          g = g[0];
+          h = h[0];
+
+          if (f && D(k, 1) && (n = D(k, 4), f = 1 <= n && 11 >= n, !f)) {
+            d.a = 3;
+            break a;
+          }
+
+          var H;
+          if (H = f) { b: {
+            var F = d,
+                G = g,
+                L = h,
+                J = n,
+                T = c,
+                Da,
+                ba,
+                X = F.m,
+                R = F.s,
+                P = [null],
+                U,
+                W = 1,
+                aa = 0,
+                na = me[J];
+
+            c: for (;;) {
+              if (T && D(X, 1)) {
+                var ca = D(X, 3) + 2,
+                    ga = xa(G, ca),
+                    ka = xa(L, ca),
+                    qa = ga * ka;
+                if (!rb(ga, ka, 0, F, P)) { break c; }
+                P = P[0];
+                R.xc = ca;
+
+                for (Da = 0; Da < qa; ++Da) {
+                  var ia = P[Da] >> 8 & 65535;
+                  P[Da] = ia;
+                  ia >= W && (W = ia + 1);
                 }
               }
+
+              if (X.h) { break c; }
+
+              for (ba = 0; 5 > ba; ++ba) {
+                var Y = Dc[ba];
+                !ba && 0 < J && (Y += 1 << J);
+                aa < Y && (aa = Y);
+              }
+
+              var ma = wa(W * na, O);
+              var ua = W,
+                  va = wa(ua, Ub);
+              if (null == va) { var la = null; }else { x(65536 >= ua), la = va; }
+              var ha = V(aa);
+
+              if (null == la || null == ha || null == ma) {
+                F.a = 1;
+                break c;
+              }
+
+              var pa = ma;
+
+              for (Da = U = 0; Da < W; ++Da) {
+                var ja = la[Da],
+                    da = ja.G,
+                    ea = ja.H,
+                    Fa = 0,
+                    ra = 1,
+                    Ha = 0;
+
+                for (ba = 0; 5 > ba; ++ba) {
+                  Y = Dc[ba];
+                  da[ba] = pa;
+                  ea[ba] = U;
+                  !ba && 0 < J && (Y += 1 << J);
+
+                  d: {
+                    var sa,
+                        za = Y,
+                        ta = F,
+                        oa = ha,
+                        db = pa,
+                        eb = U,
+                        Ia = 0,
+                        Ka = ta.m,
+                        fb = D(Ka, 1);
+                    M(oa, 0, 0, za);
+
+                    if (fb) {
+                      var gb = D(Ka, 1) + 1,
+                          hb = D(Ka, 1),
+                          Ja = D(Ka, 0 == hb ? 1 : 8);
+                      oa[Ja] = 1;
+                      2 == gb && (Ja = D(Ka, 8), oa[Ja] = 1);
+                      var ya = 1;
+                    } else {
+                      var Ua = V(19),
+                          Va = D(Ka, 4) + 4;
+
+                      if (19 < Va) {
+                        ta.a = 3;
+                        var Aa = 0;
+                        break d;
+                      }
+
+                      for (sa = 0; sa < Va; ++sa) {
+                        Ua[ne[sa]] = D(Ka, 3);
+                      }
+
+                      var Ba = void 0,
+                          sb = void 0,
+                          Wa = ta,
+                          ib = Ua,
+                          Ca = za,
+                          Xa = oa,
+                          Oa = 0,
+                          La = Wa.m,
+                          Ya = 8,
+                          Za = wa(128, O);
+
+                      e: for (;;) {
+                        if (!Z(Za, 0, 7, ib, 19)) { break e; }
+
+                        if (D(La, 1)) {
+                          var kb = 2 + 2 * D(La, 3),
+                              Ba = 2 + D(La, kb);
+                          if (Ba > Ca) { break e; }
+                        } else { Ba = Ca; }
+
+                        for (sb = 0; sb < Ca && Ba--;) {
+                          Sa(La);
+                          var $a = Za[0 + (pb(La) & 127)];
+                          qb(La, La.u + $a.g);
+                          var jb = $a.value;
+                          if (16 > jb) { Xa[sb++] = jb, 0 != jb && (Ya = jb); }else {
+                            var lb = 16 == jb,
+                                ab = jb - 16,
+                                mb = oe[ab],
+                                bb = D(La, pe[ab]) + mb;
+                            if (sb + bb > Ca) { break e; }else { for (var nb = lb ? Ya : 0; 0 < bb--;) {
+                              Xa[sb++] = nb;
+                            } }
+                          }
+                        }
+
+                        Oa = 1;
+                        break e;
+                      }
+
+                      Oa || (Wa.a = 3);
+                      ya = Oa;
+                    }
+
+                    (ya = ya && !Ka.h) && (Ia = Z(db, eb, 8, oa, za));
+                    ya && 0 != Ia ? Aa = Ia : (ta.a = 3, Aa = 0);
+                  }
+
+                  if (0 == Aa) { break c; }
+                  ra && 1 == qe[ba] && (ra = 0 == pa[U].g);
+                  Fa += pa[U].g;
+                  U += Aa;
+
+                  if (3 >= ba) {
+                    var Pa = ha[0],
+                        tb;
+
+                    for (tb = 1; tb < Y; ++tb) {
+                      ha[tb] > Pa && (Pa = ha[tb]);
+                    }
+
+                    Ha += Pa;
+                  }
+                }
+
+                ja.nd = ra;
+                ja.Qb = 0;
+                ra && (ja.qb = (da[3][ea[3] + 0].value << 24 | da[1][ea[1] + 0].value << 16 | da[2][ea[2] + 0].value) >>> 0, 0 == Fa && 256 > da[0][ea[0] + 0].value && (ja.Qb = 1, ja.qb += da[0][ea[0] + 0].value << 8));
+                ja.jc = !ja.Qb && 6 > Ha;
+
+                if (ja.jc) {
+                  var Ga,
+                      Ea = ja;
+
+                  for (Ga = 0; Ga < xb; ++Ga) {
+                    var Ma = Ga,
+                        Na = Ea.pd[Ma],
+                        vb = Ea.G[0][Ea.H[0] + Ma];
+                    256 <= vb.value ? (Na.g = vb.g + 256, Na.value = vb.value) : (Na.g = 0, Na.value = 0, Ma >>= ub(vb, 8, Na), Ma >>= ub(Ea.G[1][Ea.H[1] + Ma], 16, Na), Ma >>= ub(Ea.G[2][Ea.H[2] + Ma], 0, Na), ub(Ea.G[3][Ea.H[3] + Ma], 24, Na));
+                  }
+                }
+              }
+
+              R.vc = P;
+              R.Wb = W;
+              R.Ya = la;
+              R.yc = ma;
+              H = 1;
+              break b;
             }
 
-            strm.flush_pending();
+            H = 0;
+          } }
+          f = H;
 
-            if (strm.avail_out === 0) {
-              last_flush = -1; // avoid BUF_ERROR at next call, see above
+          if (!f) {
+            d.a = 3;
+            break a;
+          }
 
-              return Z_OK;
+          if (0 < n) {
+            if (l.ua = 1 << n, !Zb(l.Wa, n)) {
+              d.a = 1;
+              f = 0;
+              break a;
             }
+          } else { l.ua = 0; }
+
+          var Qa = d,
+              cb = g,
+              ob = h,
+              Ra = Qa.s,
+              Ta = Ra.xc;
+          Qa.c = cb;
+          Qa.i = ob;
+          Ra.md = xa(cb, Ta);
+          Ra.wc = 0 == Ta ? -1 : (1 << Ta) - 1;
+
+          if (c) {
+            d.xb = re;
+            break a;
+          }
+
+          m = V(g * h);
+
+          if (null == m) {
+            d.a = 1;
+            f = 0;
+            break a;
+          }
+
+          f = (f = Jb(d, m, 0, g, h, h, null)) && !k.h;
+          break a;
+        }
+
+        f ? (null != e ? e[0] = m : (x(null == m), x(c)), d.$ = 0, c || Ac(l)) : Ac(l);
+        return f;
+      }
+
+      function Ec(a, b) {
+        var c = a.c * a.i,
+            d = c + b + 16 * b;
+        x(a.c <= b);
+        a.V = V(d);
+        if (null == a.V) { return a.Ta = null, a.Ua = 0, a.a = 1, 0; }
+        a.Ta = a.V;
+        a.Ua = a.Ba + c + b;
+        return 1;
+      }
+
+      function se(a, b) {
+        var c = a.C,
+            d = b - c,
+            e = a.V,
+            f = a.Ba + a.c * c;
+
+        for (x(b <= a.l.o); 0 < d;) {
+          var g = 16 < d ? 16 : d,
+              h = a.l.ma,
+              k = a.l.width,
+              l = k * g,
+              m = h.ca,
+              n = h.tb + k * c,
+              r = a.Ta,
+              q = a.Ua;
+          oc(a, g, e, f);
+          Fc(r, q, m, n, l);
+          zc(h, c, c + g, m, n, k);
+          d -= g;
+          e += g * a.c;
+          c += g;
+        }
+
+        x(c == b);
+        a.C = a.Ma = b;
+      }
+
+      function te(a, b) {
+        var c = [0],
+            d = [0],
+            e = [0];
+
+        a: for (;;) {
+          if (null == a) { return 0; }
+          if (null == b) { return a.a = 2, 0; }
+          a.l = b;
+          a.a = 0;
+          cb(a.m, b.data, b.w, b.ha);
+
+          if (!mc(a.m, c, d, e)) {
+            a.a = 3;
+            break a;
+          }
+
+          a.xb = Cc;
+          b.width = c[0];
+          b.height = d[0];
+          if (!rb(c[0], d[0], 1, a, null)) { break a; }
+          return 1;
+        }
+
+        x(0 != a.a);
+        return 0;
+      }
+
+      function ue() {
+        this.ub = this.yd = this.td = this.Rb = 0;
+      }
+
+      function ve() {
+        this.Kd = this.Ld = this.Ud = this.Td = this.i = this.c = 0;
+      }
+
+      function we() {
+        this.Fb = this.Bb = this.Cb = 0;
+        this.Zb = V(4);
+        this.Lb = V(4);
+      }
+
+      function Gc() {
+        this.Yb = wb();
+      }
+
+      function xe() {
+        this.jb = V(3);
+        this.Wc = Ed([4, 8], Gc);
+        this.Xc = Ed([4, 17], Gc);
+      }
+
+      function ye() {
+        this.Pc = this.wb = this.Tb = this.zd = 0;
+        this.vd = new V(4);
+        this.od = new V(4);
+      }
+
+      function Xa() {
+        this.ld = this.La = this.dd = this.tc = 0;
+      }
+
+      function Hc() {
+        this.Na = this.la = 0;
+      }
+
+      function ze() {
+        this.Sc = [0, 0];
+        this.Eb = [0, 0];
+        this.Qc = [0, 0];
+        this.ia = this.lc = 0;
+      }
+
+      function Kb() {
+        this.ad = V(384);
+        this.Za = 0;
+        this.Ob = V(16);
+        this.$b = this.Ad = this.ia = this.Gc = this.Hc = this.Dd = 0;
+      }
+
+      function Ae() {
+        this.uc = this.M = this.Nb = 0;
+        this.wa = Array(new Xa());
+        this.Y = 0;
+        this.ya = Array(new Kb());
+        this.aa = 0;
+        this.l = new Oa();
+      }
+
+      function Ic() {
+        this.y = V(16);
+        this.f = V(8);
+        this.ea = V(8);
+      }
+
+      function Be() {
+        this.cb = this.a = 0;
+        this.sc = "";
+        this.m = new Wb();
+        this.Od = new ue();
+        this.Kc = new ve();
+        this.ed = new ye();
+        this.Qa = new we();
+        this.Ic = this.$c = this.Aa = 0;
+        this.D = new Ae();
+        this.Xb = this.Va = this.Hb = this.zb = this.yb = this.Ub = this.za = 0;
+        this.Jc = wa(8, Wb);
+        this.ia = 0;
+        this.pb = wa(4, ze);
+        this.Pa = new xe();
+        this.Bd = this.kc = 0;
+        this.Ac = [];
+        this.Bc = 0;
+        this.zc = [0, 0, 0, 0];
+        this.Gd = Array(new Ic());
+        this.Hd = 0;
+        this.rb = Array(new Hc());
+        this.sb = 0;
+        this.wa = Array(new Xa());
+        this.Y = 0;
+        this.oc = [];
+        this.pc = 0;
+        this.sa = [];
+        this.ta = 0;
+        this.qa = [];
+        this.ra = 0;
+        this.Ha = [];
+        this.B = this.R = this.Ia = 0;
+        this.Ec = [];
+        this.M = this.ja = this.Vb = this.Fc = 0;
+        this.ya = Array(new Kb());
+        this.L = this.aa = 0;
+        this.gd = Ed([4, 2], Xa);
+        this.ga = null;
+        this.Fa = [];
+        this.Cc = this.qc = this.P = 0;
+        this.Gb = [];
+        this.Uc = 0;
+        this.mb = [];
+        this.nb = 0;
+        this.rc = [];
+        this.Ga = this.Vc = 0;
+      }
+
+      function ga(a, b) {
+        return 0 > a ? 0 : a > b ? b : a;
+      }
+
+      function Oa() {
+        this.T = this.U = this.ka = this.height = this.width = 0;
+        this.y = [];
+        this.f = [];
+        this.ea = [];
+        this.Rc = this.fa = this.W = this.N = this.O = 0;
+        this.ma = "void";
+        this.put = "VP8IoPutHook";
+        this.ac = "VP8IoSetupHook";
+        this.bc = "VP8IoTeardownHook";
+        this.ha = this.Kb = 0;
+        this.data = [];
+        this.hb = this.ib = this.da = this.o = this.j = this.va = this.v = this.Da = this.ob = this.w = 0;
+        this.F = [];
+        this.J = 0;
+      }
+
+      function Ce() {
+        var a = new Be();
+        null != a && (a.a = 0, a.sc = "OK", a.cb = 0, a.Xb = 0, oa || (oa = De));
+        return a;
+      }
+
+      function T(a, b, c) {
+        0 == a.a && (a.a = b, a.sc = c, a.cb = 0);
+        return 0;
+      }
+
+      function Jc(a, b, c) {
+        return 3 <= c && 157 == a[b + 0] && 1 == a[b + 1] && 42 == a[b + 2];
+      }
+
+      function Kc(a, b) {
+        if (null == a) { return 0; }
+        a.a = 0;
+        a.sc = "OK";
+        if (null == b) { return T(a, 2, "null VP8Io passed to VP8GetHeaders()"); }
+        var c = b.data;
+        var d = b.w;
+        var e = b.ha;
+        if (4 > e) { return T(a, 7, "Truncated header."); }
+        var f = c[d + 0] | c[d + 1] << 8 | c[d + 2] << 16;
+        var g = a.Od;
+        g.Rb = !(f & 1);
+        g.td = f >> 1 & 7;
+        g.yd = f >> 4 & 1;
+        g.ub = f >> 5;
+        if (3 < g.td) { return T(a, 3, "Incorrect keyframe parameters."); }
+        if (!g.yd) { return T(a, 4, "Frame not displayable."); }
+        d += 3;
+        e -= 3;
+        var h = a.Kc;
+
+        if (g.Rb) {
+          if (7 > e) { return T(a, 7, "cannot parse picture header"); }
+          if (!Jc(c, d, e)) { return T(a, 3, "Bad code word"); }
+          h.c = (c[d + 4] << 8 | c[d + 3]) & 16383;
+          h.Td = c[d + 4] >> 6;
+          h.i = (c[d + 6] << 8 | c[d + 5]) & 16383;
+          h.Ud = c[d + 6] >> 6;
+          d += 7;
+          e -= 7;
+          a.za = h.c + 15 >> 4;
+          a.Ub = h.i + 15 >> 4;
+          b.width = h.c;
+          b.height = h.i;
+          b.Da = 0;
+          b.j = 0;
+          b.v = 0;
+          b.va = b.width;
+          b.o = b.height;
+          b.da = 0;
+          b.ib = b.width;
+          b.hb = b.height;
+          b.U = b.width;
+          b.T = b.height;
+          f = a.Pa;
+          M(f.jb, 0, 255, f.jb.length);
+          f = a.Qa;
+          x(null != f);
+          f.Cb = 0;
+          f.Bb = 0;
+          f.Fb = 1;
+          M(f.Zb, 0, 0, f.Zb.length);
+          M(f.Lb, 0, 0, f.Lb);
+        }
+
+        if (g.ub > e) { return T(a, 7, "bad partition length"); }
+        f = a.m;
+        ma(f, c, d, g.ub);
+        d += g.ub;
+        e -= g.ub;
+        g.Rb && (h.Ld = G(f), h.Kd = G(f));
+        h = a.Qa;
+        var k = a.Pa,
+            l;
+        x(null != f);
+        x(null != h);
+        h.Cb = G(f);
+
+        if (h.Cb) {
+          h.Bb = G(f);
+
+          if (G(f)) {
+            h.Fb = G(f);
+
+            for (l = 0; 4 > l; ++l) {
+              h.Zb[l] = G(f) ? ca(f, 7) : 0;
+            }
+
+            for (l = 0; 4 > l; ++l) {
+              h.Lb[l] = G(f) ? ca(f, 6) : 0;
+            }
+          }
+
+          if (h.Bb) { for (l = 0; 3 > l; ++l) {
+            k.jb[l] = G(f) ? na(f, 8) : 255;
+          } }
+        } else { h.Bb = 0; }
+
+        if (f.Ka) { return T(a, 3, "cannot parse segment header"); }
+        h = a.ed;
+        h.zd = G(f);
+        h.Tb = na(f, 6);
+        h.wb = na(f, 3);
+        h.Pc = G(f);
+
+        if (h.Pc && G(f)) {
+          for (k = 0; 4 > k; ++k) {
+            G(f) && (h.vd[k] = ca(f, 6));
+          }
+
+          for (k = 0; 4 > k; ++k) {
+            G(f) && (h.od[k] = ca(f, 6));
           }
         }
 
-        if (flush != Z_FINISH) return Z_OK;
-        return Z_STREAM_END;
-      };
-    } // ZStream
+        a.L = 0 == h.Tb ? 0 : h.zd ? 1 : 2;
+        if (f.Ka) { return T(a, 3, "cannot parse filter header"); }
+        l = d;
+        var m = e;
+        e = l;
+        d = l + m;
+        h = m;
+        a.Xb = (1 << na(a.m, 2)) - 1;
+        k = a.Xb;
+        if (m < 3 * k) { c = 7; }else {
+          l += 3 * k;
+          h -= 3 * k;
 
+          for (m = 0; m < k; ++m) {
+            var n = c[e + 0] | c[e + 1] << 8 | c[e + 2] << 16;
+            n > h && (n = h);
+            ma(a.Jc[+m], c, l, n);
+            l += n;
+            h -= n;
+            e += 3;
+          }
 
-    function ZStream() {
-      var that = this;
-      that.next_in_index = 0;
-      that.next_out_index = 0; // that.next_in; // next input byte
+          ma(a.Jc[+k], c, l, h);
+          c = l < d ? 0 : 5;
+        }
+        if (0 != c) { return T(a, c, "cannot parse partitions"); }
+        l = a.m;
+        c = na(l, 7);
+        e = G(l) ? ca(l, 4) : 0;
+        d = G(l) ? ca(l, 4) : 0;
+        h = G(l) ? ca(l, 4) : 0;
+        k = G(l) ? ca(l, 4) : 0;
+        l = G(l) ? ca(l, 4) : 0;
+        m = a.Qa;
 
-      that.avail_in = 0; // number of bytes available at next_in
+        for (n = 0; 4 > n; ++n) {
+          if (m.Cb) {
+            var r = m.Zb[n];
+            m.Fb || (r += c);
+          } else if (0 < n) {
+            a.pb[n] = a.pb[0];
+            continue;
+          } else { r = c; }
 
-      that.total_in = 0; // total nb of input bytes read so far
-      // that.next_out; // next output byte should be put there
-
-      that.avail_out = 0; // remaining free space at next_out
-
-      that.total_out = 0; // total nb of bytes output so far
-      // that.msg;
-      // that.dstate;
-    }
-
-    ZStream.prototype = {
-      deflateInit: function deflateInit(level, bits) {
-        var that = this;
-        that.dstate = new Deflate();
-        if (!bits) bits = MAX_BITS;
-        return that.dstate.deflateInit(that, level, bits);
-      },
-      deflate: function deflate(flush) {
-        var that = this;
-
-        if (!that.dstate) {
-          return Z_STREAM_ERROR;
+          var q = a.pb[n];
+          q.Sc[0] = Lb[ga(r + e, 127)];
+          q.Sc[1] = Mb[ga(r + 0, 127)];
+          q.Eb[0] = 2 * Lb[ga(r + d, 127)];
+          q.Eb[1] = 101581 * Mb[ga(r + h, 127)] >> 16;
+          8 > q.Eb[1] && (q.Eb[1] = 8);
+          q.Qc[0] = Lb[ga(r + k, 117)];
+          q.Qc[1] = Mb[ga(r + l, 127)];
+          q.lc = r + l;
         }
 
-        return that.dstate.deflate(that, flush);
-      },
-      deflateEnd: function deflateEnd() {
-        var that = this;
-        if (!that.dstate) return Z_STREAM_ERROR;
-        var ret = that.dstate.deflateEnd();
-        that.dstate = null;
-        return ret;
-      },
-      deflateParams: function deflateParams(level, strategy) {
-        var that = this;
-        if (!that.dstate) return Z_STREAM_ERROR;
-        return that.dstate.deflateParams(that, level, strategy);
-      },
-      deflateSetDictionary: function deflateSetDictionary(dictionary, dictLength) {
-        var that = this;
-        if (!that.dstate) return Z_STREAM_ERROR;
-        return that.dstate.deflateSetDictionary(that, dictionary, dictLength);
-      },
-      // Read a new buffer from the current input stream, update the
-      // total number of bytes read. All deflate() input goes through
-      // this function so some applications may wish to modify it to avoid
-      // allocating a large strm->next_in buffer and copying from it.
-      // (See also flush_pending()).
-      read_buf: function read_buf(buf, start, size) {
-        var that = this;
-        var len = that.avail_in;
-        if (len > size) len = size;
-        if (len === 0) return 0;
-        that.avail_in -= len;
-        buf.set(that.next_in.subarray(that.next_in_index, that.next_in_index + len), start);
-        that.next_in_index += len;
-        that.total_in += len;
-        return len;
-      },
-      // Flush as much pending output as possible. All deflate() output goes
-      // through this function so some applications may wish to modify it
-      // to avoid allocating a large strm->next_out buffer and copying into it.
-      // (See also read_buf()).
-      flush_pending: function flush_pending() {
-        var that = this;
-        var len = that.dstate.pending;
-        if (len > that.avail_out) len = that.avail_out;
-        if (len === 0) return; // if (that.dstate.pending_buf.length <= that.dstate.pending_out || that.next_out.length <= that.next_out_index
-        // || that.dstate.pending_buf.length < (that.dstate.pending_out + len) || that.next_out.length < (that.next_out_index +
-        // len)) {
-        // console.log(that.dstate.pending_buf.length + ", " + that.dstate.pending_out + ", " + that.next_out.length + ", " +
-        // that.next_out_index + ", " + len);
-        // console.log("avail_out=" + that.avail_out);
-        // }
+        if (!g.Rb) { return T(a, 4, "Not a key frame."); }
+        G(f);
+        g = a.Pa;
 
-        that.next_out.set(that.dstate.pending_buf.subarray(that.dstate.pending_out, that.dstate.pending_out + len), that.next_out_index);
-        that.next_out_index += len;
-        that.dstate.pending_out += len;
-        that.total_out += len;
-        that.avail_out -= len;
-        that.dstate.pending -= len;
+        for (c = 0; 4 > c; ++c) {
+          for (e = 0; 8 > e; ++e) {
+            for (d = 0; 3 > d; ++d) {
+              for (h = 0; 11 > h; ++h) {
+                k = K(f, Ee[c][e][d][h]) ? na(f, 8) : Fe[c][e][d][h], g.Wc[c][e].Yb[d][h] = k;
+              }
+            }
+          }
 
-        if (that.dstate.pending === 0) {
-          that.dstate.pending_out = 0;
+          for (e = 0; 17 > e; ++e) {
+            g.Xc[c][e] = g.Wc[c][Ge[e]];
+          }
+        }
+
+        a.kc = G(f);
+        a.kc && (a.Bd = na(f, 8));
+        return a.cb = 1;
+      }
+
+      function De(a, b, c, d, e, f, g) {
+        var h = b[e].Yb[c];
+
+        for (c = 0; 16 > e; ++e) {
+          if (!K(a, h[c + 0])) { return e; }
+
+          for (; !K(a, h[c + 1]);) {
+            if (h = b[++e].Yb[0], c = 0, 16 == e) { return 16; }
+          }
+
+          var k = b[e + 1].Yb;
+
+          if (K(a, h[c + 2])) {
+            var l = a,
+                m = h,
+                n = c;
+            var r = 0;
+            if (K(l, m[n + 3])) {
+              if (K(l, m[n + 6])) {
+                h = 0;
+                r = K(l, m[n + 8]);
+                m = K(l, m[n + 9 + r]);
+                n = 2 * r + m;
+                r = 0;
+
+                for (m = He[n]; m[h]; ++h) {
+                  r += r + K(l, m[h]);
+                }
+
+                r += 3 + (8 << n);
+              } else { K(l, m[n + 7]) ? (r = 7 + 2 * K(l, 165), r += K(l, 145)) : r = 5 + K(l, 159); }
+            } else { K(l, m[n + 4]) ? r = 3 + K(l, m[n + 5]) : r = 2; }
+            h = k[2];
+          } else { r = 1, h = k[1]; }
+
+          k = g + Ie[e];
+          l = a;
+          0 > l.b && Qa(l);
+          var m = l.b,
+              n = l.Ca >> 1,
+              q = n - (l.I >> m) >> 31;
+          --l.b;
+          l.Ca += q;
+          l.Ca |= 1;
+          l.I -= (n + 1 & q) << m;
+          f[k] = ((r ^ q) - q) * d[(0 < e) + 0];
+        }
+
+        return 16;
+      }
+
+      function Lc(a) {
+        var b = a.rb[a.sb - 1];
+        b.la = 0;
+        b.Na = 0;
+        M(a.zc, 0, 0, a.zc.length);
+        a.ja = 0;
+      }
+
+      function Je(a, b) {
+        for (a.M = 0; a.M < a.Va; ++a.M) {
+          var c = a.Jc[a.M & a.Xb],
+              d = a.m,
+              e = a,
+              f;
+
+          for (f = 0; f < e.za; ++f) {
+            var g = d;
+            var h = e;
+            var k = h.Ac,
+                l = h.Bc + 4 * f,
+                m = h.zc,
+                n = h.ya[h.aa + f];
+            h.Qa.Bb ? n.$b = K(g, h.Pa.jb[0]) ? 2 + K(g, h.Pa.jb[2]) : K(g, h.Pa.jb[1]) : n.$b = 0;
+            h.kc && (n.Ad = K(g, h.Bd));
+            n.Za = !K(g, 145) + 0;
+
+            if (n.Za) {
+              var r = n.Ob,
+                  q = 0;
+
+              for (h = 0; 4 > h; ++h) {
+                var t = m[0 + h];
+                var v;
+
+                for (v = 0; 4 > v; ++v) {
+                  t = Ke[k[l + v]][t];
+
+                  for (var p = Mc[K(g, t[0])]; 0 < p;) {
+                    p = Mc[2 * p + K(g, t[p])];
+                  }
+
+                  t = -p;
+                  k[l + v] = t;
+                }
+
+                I(r, q, k, l, 4);
+                q += 4;
+                m[0 + h] = t;
+              }
+            } else { t = K(g, 156) ? K(g, 128) ? 1 : 3 : K(g, 163) ? 2 : 0, n.Ob[0] = t, M(k, l, t, 4), M(m, 0, t, 4); }
+
+            n.Dd = K(g, 142) ? K(g, 114) ? K(g, 183) ? 1 : 3 : 2 : 0;
+          }
+
+          if (e.m.Ka) { return T(a, 7, "Premature end-of-partition0 encountered."); }
+
+          for (; a.ja < a.za; ++a.ja) {
+            d = a;
+            e = c;
+            g = d.rb[d.sb - 1];
+            k = d.rb[d.sb + d.ja];
+            f = d.ya[d.aa + d.ja];
+            if (l = d.kc ? f.Ad : 0) { g.la = k.la = 0, f.Za || (g.Na = k.Na = 0), f.Hc = 0, f.Gc = 0, f.ia = 0; }else {
+              var u,
+                  w,
+                  g = k,
+                  k = e,
+                  l = d.Pa.Xc,
+                  m = d.ya[d.aa + d.ja],
+                  n = d.pb[m.$b];
+              h = m.ad;
+              r = 0;
+              q = d.rb[d.sb - 1];
+              t = v = 0;
+              M(h, r, 0, 384);
+
+              if (m.Za) {
+                var y = 0;
+                var A = l[3];
+              } else {
+                p = V(16);
+                var E = g.Na + q.Na;
+                E = oa(k, l[1], E, n.Eb, 0, p, 0);
+                g.Na = q.Na = (0 < E) + 0;
+                if (1 < E) { Nc(p, 0, h, r); }else {
+                  var B = p[0] + 3 >> 3;
+
+                  for (p = 0; 256 > p; p += 16) {
+                    h[r + p] = B;
+                  }
+                }
+                y = 1;
+                A = l[0];
+              }
+
+              var C = g.la & 15;
+              var N = q.la & 15;
+
+              for (p = 0; 4 > p; ++p) {
+                var z = N & 1;
+
+                for (B = w = 0; 4 > B; ++B) {
+                  E = z + (C & 1), E = oa(k, A, E, n.Sc, y, h, r), z = E > y, C = C >> 1 | z << 7, w = w << 2 | (3 < E ? 3 : 1 < E ? 2 : 0 != h[r + 0]), r += 16;
+                }
+
+                C >>= 4;
+                N = N >> 1 | z << 7;
+                v = (v << 8 | w) >>> 0;
+              }
+
+              A = C;
+              y = N >> 4;
+
+              for (u = 0; 4 > u; u += 2) {
+                w = 0;
+                C = g.la >> 4 + u;
+                N = q.la >> 4 + u;
+
+                for (p = 0; 2 > p; ++p) {
+                  z = N & 1;
+
+                  for (B = 0; 2 > B; ++B) {
+                    E = z + (C & 1), E = oa(k, l[2], E, n.Qc, 0, h, r), z = 0 < E, C = C >> 1 | z << 3, w = w << 2 | (3 < E ? 3 : 1 < E ? 2 : 0 != h[r + 0]), r += 16;
+                  }
+
+                  C >>= 2;
+                  N = N >> 1 | z << 5;
+                }
+
+                t |= w << 4 * u;
+                A |= C << 4 << u;
+                y |= (N & 240) << u;
+              }
+
+              g.la = A;
+              q.la = y;
+              m.Hc = v;
+              m.Gc = t;
+              m.ia = t & 43690 ? 0 : n.ia;
+              l = !(v | t);
+            }
+            0 < d.L && (d.wa[d.Y + d.ja] = d.gd[f.$b][f.Za], d.wa[d.Y + d.ja].La |= !l);
+            if (e.Ka) { return T(a, 7, "Premature end-of-file encountered."); }
+          }
+
+          Lc(a);
+          c = a;
+          d = b;
+          e = 1;
+          f = c.D;
+          g = 0 < c.L && c.M >= c.zb && c.M <= c.Va;
+          if (0 == c.Aa) { a: {
+            f.M = c.M, f.uc = g, Oc(c, f), e = 1;
+            w = c.D;
+            f = w.Nb;
+            t = Ya[c.L];
+            g = t * c.R;
+            k = t / 2 * c.B;
+            p = 16 * f * c.R;
+            B = 8 * f * c.B;
+            l = c.sa;
+            m = c.ta - g + p;
+            n = c.qa;
+            h = c.ra - k + B;
+            r = c.Ha;
+            q = c.Ia - k + B;
+            C = w.M;
+            N = 0 == C;
+            v = C >= c.Va - 1;
+            2 == c.Aa && Oc(c, w);
+            if (w.uc) { for (E = c, z = E.D.M, x(E.D.uc), w = E.yb; w < E.Hb; ++w) {
+              var Q = E;
+              y = w;
+              A = z;
+              var S = Q.D,
+                  D = S.Nb;
+              u = Q.R;
+              var S = S.wa[S.Y + y],
+                  F = Q.sa,
+                  H = Q.ta + 16 * D * u + 16 * y,
+                  J = S.dd,
+                  G = S.tc;
+              if (0 != G) { if (x(3 <= G), 1 == Q.L) { 0 < y && Pc(F, H, u, G + 4), S.La && Qc(F, H, u, G), 0 < A && Rc(F, H, u, G + 4), S.La && Sc(F, H, u, G); }else {
+                var L = Q.B,
+                    O = Q.qa,
+                    P = Q.ra + 8 * D * L + 8 * y,
+                    R = Q.Ha,
+                    Q = Q.Ia + 8 * D * L + 8 * y,
+                    D = S.ld;
+                0 < y && (Tc(F, H, u, G + 4, J, D), Uc(O, P, R, Q, L, G + 4, J, D));
+                S.La && (Vc(F, H, u, G, J, D), Wc(O, P, R, Q, L, G, J, D));
+                0 < A && (Xc(F, H, u, G + 4, J, D), Yc(O, P, R, Q, L, G + 4, J, D));
+                S.La && (Zc(F, H, u, G, J, D), $c(O, P, R, Q, L, G, J, D));
+              } }
+            } }
+            c.ia && alert("todo:DitherRow");
+
+            if (null != d.put) {
+              w = 16 * C;
+              C = 16 * (C + 1);
+              N ? (d.y = c.sa, d.O = c.ta + p, d.f = c.qa, d.N = c.ra + B, d.ea = c.Ha, d.W = c.Ia + B) : (w -= t, d.y = l, d.O = m, d.f = n, d.N = h, d.ea = r, d.W = q);
+              v || (C -= t);
+              C > d.o && (C = d.o);
+              d.F = null;
+              d.J = null;
+
+              if (null != c.Fa && 0 < c.Fa.length && w < C && (d.J = Le(c, d, w, C - w), d.F = c.mb, null == d.F && 0 == d.F.length)) {
+                e = T(c, 3, "Could not decode alpha data.");
+                break a;
+              }
+
+              w < d.j && (t = d.j - w, w = d.j, x(!(t & 1)), d.O += c.R * t, d.N += c.B * (t >> 1), d.W += c.B * (t >> 1), null != d.F && (d.J += d.width * t));
+              w < C && (d.O += d.v, d.N += d.v >> 1, d.W += d.v >> 1, null != d.F && (d.J += d.v), d.ka = w - d.j, d.U = d.va - d.v, d.T = C - w, e = d.put(d));
+            }
+
+            f + 1 != c.Ic || v || (I(c.sa, c.ta - g, l, m + 16 * c.R, g), I(c.qa, c.ra - k, n, h + 8 * c.B, k), I(c.Ha, c.Ia - k, r, q + 8 * c.B, k));
+          } }
+          if (!e) { return T(a, 6, "Output aborted."); }
+        }
+
+        return 1;
+      }
+
+      function Me(a, b) {
+        if (null == a) { return 0; }
+        if (null == b) { return T(a, 2, "NULL VP8Io parameter in VP8Decode()."); }
+        if (!a.cb && !Kc(a, b)) { return 0; }
+        x(a.cb);
+
+        if (null == b.ac || b.ac(b)) {
+          b.ob && (a.L = 0);
+          var c = Ya[a.L];
+          2 == a.L ? (a.yb = 0, a.zb = 0) : (a.yb = b.v - c >> 4, a.zb = b.j - c >> 4, 0 > a.yb && (a.yb = 0), 0 > a.zb && (a.zb = 0));
+          a.Va = b.o + 15 + c >> 4;
+          a.Hb = b.va + 15 + c >> 4;
+          a.Hb > a.za && (a.Hb = a.za);
+          a.Va > a.Ub && (a.Va = a.Ub);
+
+          if (0 < a.L) {
+            var d = a.ed;
+
+            for (c = 0; 4 > c; ++c) {
+              var e;
+
+              if (a.Qa.Cb) {
+                var f = a.Qa.Lb[c];
+                a.Qa.Fb || (f += d.Tb);
+              } else { f = d.Tb; }
+
+              for (e = 0; 1 >= e; ++e) {
+                var g = a.gd[c][e],
+                    h = f;
+                d.Pc && (h += d.vd[0], e && (h += d.od[0]));
+                h = 0 > h ? 0 : 63 < h ? 63 : h;
+
+                if (0 < h) {
+                  var k = h;
+                  0 < d.wb && (k = 4 < d.wb ? k >> 2 : k >> 1, k > 9 - d.wb && (k = 9 - d.wb));
+                  1 > k && (k = 1);
+                  g.dd = k;
+                  g.tc = 2 * h + k;
+                  g.ld = 40 <= h ? 2 : 15 <= h ? 1 : 0;
+                } else { g.tc = 0; }
+
+                g.La = e;
+              }
+            }
+          }
+
+          c = 0;
+        } else { T(a, 6, "Frame setup failed"), c = a.a; }
+
+        if (c = 0 == c) {
+          if (c) {
+            a.$c = 0;
+            0 < a.Aa || (a.Ic = Ne);
+
+            b: {
+              c = a.Ic;
+              var k = a.za,
+                  d = 4 * k,
+                  l = 32 * k,
+                  m = k + 1,
+                  n = 0 < a.L ? k * (0 < a.Aa ? 2 : 1) : 0,
+                  r = (2 == a.Aa ? 2 : 1) * k;
+              e = 3 * (16 * c + Ya[a.L]) / 2 * l;
+              f = null != a.Fa && 0 < a.Fa.length ? a.Kc.c * a.Kc.i : 0;
+              g = d + 832 + e + f;
+              if (g != g) { c = 0; }else {
+                if (g > a.Vb) {
+                  a.Vb = 0;
+                  a.Ec = V(g);
+                  a.Fc = 0;
+
+                  if (null == a.Ec) {
+                    c = T(a, 1, "no memory during frame initialization.");
+                    break b;
+                  }
+
+                  a.Vb = g;
+                }
+
+                g = a.Ec;
+                h = a.Fc;
+                a.Ac = g;
+                a.Bc = h;
+                h += d;
+                a.Gd = wa(l, Ic);
+                a.Hd = 0;
+                a.rb = wa(m + 1, Hc);
+                a.sb = 1;
+                a.wa = n ? wa(n, Xa) : null;
+                a.Y = 0;
+                a.D.Nb = 0;
+                a.D.wa = a.wa;
+                a.D.Y = a.Y;
+                0 < a.Aa && (a.D.Y += k);
+                x(!0);
+                a.oc = g;
+                a.pc = h;
+                h += 832;
+                a.ya = wa(r, Kb);
+                a.aa = 0;
+                a.D.ya = a.ya;
+                a.D.aa = a.aa;
+                2 == a.Aa && (a.D.aa += k);
+                a.R = 16 * k;
+                a.B = 8 * k;
+                l = Ya[a.L];
+                k = l * a.R;
+                l = l / 2 * a.B;
+                a.sa = g;
+                a.ta = h + k;
+                a.qa = a.sa;
+                a.ra = a.ta + 16 * c * a.R + l;
+                a.Ha = a.qa;
+                a.Ia = a.ra + 8 * c * a.B + l;
+                a.$c = 0;
+                h += e;
+                a.mb = f ? g : null;
+                a.nb = f ? h : null;
+                x(h + f <= a.Fc + a.Vb);
+                Lc(a);
+                M(a.Ac, a.Bc, 0, d);
+                c = 1;
+              }
+            }
+
+            if (c) {
+              b.ka = 0;
+              b.y = a.sa;
+              b.O = a.ta;
+              b.f = a.qa;
+              b.N = a.ra;
+              b.ea = a.Ha;
+              b.Vd = a.Ia;
+              b.fa = a.R;
+              b.Rc = a.B;
+              b.F = null;
+              b.J = 0;
+
+              if (!ad) {
+                for (c = -255; 255 >= c; ++c) {
+                  bd[255 + c] = 0 > c ? -c : c;
+                }
+
+                for (c = -1020; 1020 >= c; ++c) {
+                  cd[1020 + c] = -128 > c ? -128 : 127 < c ? 127 : c;
+                }
+
+                for (c = -112; 112 >= c; ++c) {
+                  dd[112 + c] = -16 > c ? -16 : 15 < c ? 15 : c;
+                }
+
+                for (c = -255; 510 >= c; ++c) {
+                  ed[255 + c] = 0 > c ? 0 : 255 < c ? 255 : c;
+                }
+
+                ad = 1;
+              }
+
+              Nc = Oe;
+              Za = Pe;
+              Nb = Qe;
+              pa = Re;
+              Ob = Se;
+              fd = Te;
+              Xc = Ue;
+              Tc = Ve;
+              Yc = We;
+              Uc = Xe;
+              Zc = Ye;
+              Vc = Ze;
+              $c = $e;
+              Wc = af;
+              Rc = gd;
+              Pc = hd;
+              Sc = bf;
+              Qc = cf;
+              W[0] = df;
+              W[1] = ef;
+              W[2] = ff;
+              W[3] = gf;
+              W[4] = hf;
+              W[5] = jf;
+              W[6] = kf;
+              W[7] = lf;
+              W[8] = mf;
+              W[9] = nf;
+              Y[0] = of;
+              Y[1] = pf;
+              Y[2] = qf;
+              Y[3] = rf;
+              Y[4] = sf;
+              Y[5] = tf;
+              Y[6] = uf;
+              ka[0] = vf;
+              ka[1] = wf;
+              ka[2] = xf;
+              ka[3] = yf;
+              ka[4] = zf;
+              ka[5] = Af;
+              ka[6] = Bf;
+              c = 1;
+            } else { c = 0; }
+          }
+
+          c && (c = Je(a, b));
+          null != b.bc && b.bc(b);
+          c &= 1;
+        }
+
+        if (!c) { return 0; }
+        a.cb = 0;
+        return c;
+      }
+
+      function qa(a, b, c, d, e) {
+        e = a[b + c + 32 * d] + (e >> 3);
+        a[b + c + 32 * d] = e & -256 ? 0 > e ? 0 : 255 : e;
+      }
+
+      function kb(a, b, c, d, e, f) {
+        qa(a, b, 0, c, d + e);
+        qa(a, b, 1, c, d + f);
+        qa(a, b, 2, c, d - f);
+        qa(a, b, 3, c, d - e);
+      }
+
+      function da(a) {
+        return (20091 * a >> 16) + a;
+      }
+
+      function id(a, b, c, d) {
+        var e = 0,
+            f;
+        var g = V(16);
+
+        for (f = 0; 4 > f; ++f) {
+          var h = a[b + 0] + a[b + 8];
+          var k = a[b + 0] - a[b + 8];
+          var l = (35468 * a[b + 4] >> 16) - da(a[b + 12]);
+          var m = da(a[b + 4]) + (35468 * a[b + 12] >> 16);
+          g[e + 0] = h + m;
+          g[e + 1] = k + l;
+          g[e + 2] = k - l;
+          g[e + 3] = h - m;
+          e += 4;
+          b++;
+        }
+
+        for (f = e = 0; 4 > f; ++f) {
+          a = g[e + 0] + 4, h = a + g[e + 8], k = a - g[e + 8], l = (35468 * g[e + 4] >> 16) - da(g[e + 12]), m = da(g[e + 4]) + (35468 * g[e + 12] >> 16), qa(c, d, 0, 0, h + m), qa(c, d, 1, 0, k + l), qa(c, d, 2, 0, k - l), qa(c, d, 3, 0, h - m), e++, d += 32;
         }
       }
-    }; // Deflater
 
-    function Deflater(options) {
-      var that = this;
-      var z = new ZStream();
-      var bufsize = 512;
-      var flush = Z_NO_FLUSH;
-      var buf = new Uint8Array(bufsize);
-      var level = options ? options.level : Z_DEFAULT_COMPRESSION;
-      if (typeof level == "undefined") level = Z_DEFAULT_COMPRESSION;
-      z.deflateInit(level);
-      z.next_out = buf;
+      function Te(a, b, c, d) {
+        var e = a[b + 0] + 4,
+            f = 35468 * a[b + 4] >> 16,
+            g = da(a[b + 4]),
+            h = 35468 * a[b + 1] >> 16;
+        a = da(a[b + 1]);
+        kb(c, d, 0, e + g, a, h);
+        kb(c, d, 1, e + f, a, h);
+        kb(c, d, 2, e - f, a, h);
+        kb(c, d, 3, e - g, a, h);
+      }
 
-      that.append = function (data, onprogress) {
-        var err,
-            buffers = [],
-            lastIndex = 0,
-            bufferIndex = 0,
-            bufferSize = 0,
-            array;
-        if (!data.length) return;
-        z.next_in_index = 0;
-        z.next_in = data;
-        z.avail_in = data.length;
+      function Pe(a, b, c, d, e) {
+        id(a, b, c, d);
+        e && id(a, b + 16, c, d + 4);
+      }
 
-        do {
-          z.next_out_index = 0;
-          z.avail_out = bufsize;
-          err = z.deflate(flush);
-          if (err != Z_OK) throw new Error("deflating: " + z.msg);
-          if (z.next_out_index) if (z.next_out_index == bufsize) buffers.push(new Uint8Array(buf));else buffers.push(new Uint8Array(buf.subarray(0, z.next_out_index)));
-          bufferSize += z.next_out_index;
+      function Qe(a, b, c, d) {
+        Za(a, b + 0, c, d, 1);
+        Za(a, b + 32, c, d + 128, 1);
+      }
 
-          if (onprogress && z.next_in_index > 0 && z.next_in_index != lastIndex) {
-            onprogress(z.next_in_index);
-            lastIndex = z.next_in_index;
+      function Re(a, b, c, d) {
+        a = a[b + 0] + 4;
+        var e;
+
+        for (e = 0; 4 > e; ++e) {
+          for (b = 0; 4 > b; ++b) {
+            qa(c, d, b, e, a);
           }
-        } while (z.avail_in > 0 || z.avail_out === 0);
+        }
+      }
 
-        array = new Uint8Array(bufferSize);
-        buffers.forEach(function (chunk) {
-          array.set(chunk, bufferIndex);
-          bufferIndex += chunk.length;
-        });
-        return array;
+      function Se(a, b, c, d) {
+        a[b + 0] && pa(a, b + 0, c, d);
+        a[b + 16] && pa(a, b + 16, c, d + 4);
+        a[b + 32] && pa(a, b + 32, c, d + 128);
+        a[b + 48] && pa(a, b + 48, c, d + 128 + 4);
+      }
+
+      function Oe(a, b, c, d) {
+        var e = V(16),
+            f;
+
+        for (f = 0; 4 > f; ++f) {
+          var g = a[b + 0 + f] + a[b + 12 + f];
+          var h = a[b + 4 + f] + a[b + 8 + f];
+          var k = a[b + 4 + f] - a[b + 8 + f];
+          var l = a[b + 0 + f] - a[b + 12 + f];
+          e[0 + f] = g + h;
+          e[8 + f] = g - h;
+          e[4 + f] = l + k;
+          e[12 + f] = l - k;
+        }
+
+        for (f = 0; 4 > f; ++f) {
+          a = e[0 + 4 * f] + 3, g = a + e[3 + 4 * f], h = e[1 + 4 * f] + e[2 + 4 * f], k = e[1 + 4 * f] - e[2 + 4 * f], l = a - e[3 + 4 * f], c[d + 0] = g + h >> 3, c[d + 16] = l + k >> 3, c[d + 32] = g - h >> 3, c[d + 48] = l - k >> 3, d += 64;
+        }
+      }
+
+      function Pb(a, b, c) {
+        var d = b - 32,
+            e = R,
+            f = 255 - a[d - 1],
+            g;
+
+        for (g = 0; g < c; ++g) {
+          var h = e,
+              k = f + a[b - 1],
+              l;
+
+          for (l = 0; l < c; ++l) {
+            a[b + l] = h[k + a[d + l]];
+          }
+
+          b += 32;
+        }
+      }
+
+      function ef(a, b) {
+        Pb(a, b, 4);
+      }
+
+      function wf(a, b) {
+        Pb(a, b, 8);
+      }
+
+      function pf(a, b) {
+        Pb(a, b, 16);
+      }
+
+      function qf(a, b) {
+        var c;
+
+        for (c = 0; 16 > c; ++c) {
+          I(a, b + 32 * c, a, b - 32, 16);
+        }
+      }
+
+      function rf(a, b) {
+        var c;
+
+        for (c = 16; 0 < c; --c) {
+          M(a, b, a[b - 1], 16), b += 32;
+        }
+      }
+
+      function $a(a, b, c) {
+        var d;
+
+        for (d = 0; 16 > d; ++d) {
+          M(b, c + 32 * d, a, 16);
+        }
+      }
+
+      function of(a, b) {
+        var c = 16,
+            d;
+
+        for (d = 0; 16 > d; ++d) {
+          c += a[b - 1 + 32 * d] + a[b + d - 32];
+        }
+
+        $a(c >> 5, a, b);
+      }
+
+      function sf(a, b) {
+        var c = 8,
+            d;
+
+        for (d = 0; 16 > d; ++d) {
+          c += a[b - 1 + 32 * d];
+        }
+
+        $a(c >> 4, a, b);
+      }
+
+      function tf(a, b) {
+        var c = 8,
+            d;
+
+        for (d = 0; 16 > d; ++d) {
+          c += a[b + d - 32];
+        }
+
+        $a(c >> 4, a, b);
+      }
+
+      function uf(a, b) {
+        $a(128, a, b);
+      }
+
+      function z(a, b, c) {
+        return a + 2 * b + c + 2 >> 2;
+      }
+
+      function ff(a, b) {
+        var c = b - 32,
+            c = new Uint8Array([z(a[c - 1], a[c + 0], a[c + 1]), z(a[c + 0], a[c + 1], a[c + 2]), z(a[c + 1], a[c + 2], a[c + 3]), z(a[c + 2], a[c + 3], a[c + 4])]),
+            d;
+
+        for (d = 0; 4 > d; ++d) {
+          I(a, b + 32 * d, c, 0, c.length);
+        }
+      }
+
+      function gf(a, b) {
+        var c = a[b - 1],
+            d = a[b - 1 + 32],
+            e = a[b - 1 + 64],
+            f = a[b - 1 + 96];
+        ra(a, b + 0, 16843009 * z(a[b - 1 - 32], c, d));
+        ra(a, b + 32, 16843009 * z(c, d, e));
+        ra(a, b + 64, 16843009 * z(d, e, f));
+        ra(a, b + 96, 16843009 * z(e, f, f));
+      }
+
+      function df(a, b) {
+        var c = 4,
+            d;
+
+        for (d = 0; 4 > d; ++d) {
+          c += a[b + d - 32] + a[b - 1 + 32 * d];
+        }
+
+        c >>= 3;
+
+        for (d = 0; 4 > d; ++d) {
+          M(a, b + 32 * d, c, 4);
+        }
+      }
+
+      function hf(a, b) {
+        var c = a[b - 1 + 0],
+            d = a[b - 1 + 32],
+            e = a[b - 1 + 64],
+            f = a[b - 1 - 32],
+            g = a[b + 0 - 32],
+            h = a[b + 1 - 32],
+            k = a[b + 2 - 32],
+            l = a[b + 3 - 32];
+        a[b + 0 + 96] = z(d, e, a[b - 1 + 96]);
+        a[b + 1 + 96] = a[b + 0 + 64] = z(c, d, e);
+        a[b + 2 + 96] = a[b + 1 + 64] = a[b + 0 + 32] = z(f, c, d);
+        a[b + 3 + 96] = a[b + 2 + 64] = a[b + 1 + 32] = a[b + 0 + 0] = z(g, f, c);
+        a[b + 3 + 64] = a[b + 2 + 32] = a[b + 1 + 0] = z(h, g, f);
+        a[b + 3 + 32] = a[b + 2 + 0] = z(k, h, g);
+        a[b + 3 + 0] = z(l, k, h);
+      }
+
+      function kf(a, b) {
+        var c = a[b + 1 - 32],
+            d = a[b + 2 - 32],
+            e = a[b + 3 - 32],
+            f = a[b + 4 - 32],
+            g = a[b + 5 - 32],
+            h = a[b + 6 - 32],
+            k = a[b + 7 - 32];
+        a[b + 0 + 0] = z(a[b + 0 - 32], c, d);
+        a[b + 1 + 0] = a[b + 0 + 32] = z(c, d, e);
+        a[b + 2 + 0] = a[b + 1 + 32] = a[b + 0 + 64] = z(d, e, f);
+        a[b + 3 + 0] = a[b + 2 + 32] = a[b + 1 + 64] = a[b + 0 + 96] = z(e, f, g);
+        a[b + 3 + 32] = a[b + 2 + 64] = a[b + 1 + 96] = z(f, g, h);
+        a[b + 3 + 64] = a[b + 2 + 96] = z(g, h, k);
+        a[b + 3 + 96] = z(h, k, k);
+      }
+
+      function jf(a, b) {
+        var c = a[b - 1 + 0],
+            d = a[b - 1 + 32],
+            e = a[b - 1 + 64],
+            f = a[b - 1 - 32],
+            g = a[b + 0 - 32],
+            h = a[b + 1 - 32],
+            k = a[b + 2 - 32],
+            l = a[b + 3 - 32];
+        a[b + 0 + 0] = a[b + 1 + 64] = f + g + 1 >> 1;
+        a[b + 1 + 0] = a[b + 2 + 64] = g + h + 1 >> 1;
+        a[b + 2 + 0] = a[b + 3 + 64] = h + k + 1 >> 1;
+        a[b + 3 + 0] = k + l + 1 >> 1;
+        a[b + 0 + 96] = z(e, d, c);
+        a[b + 0 + 64] = z(d, c, f);
+        a[b + 0 + 32] = a[b + 1 + 96] = z(c, f, g);
+        a[b + 1 + 32] = a[b + 2 + 96] = z(f, g, h);
+        a[b + 2 + 32] = a[b + 3 + 96] = z(g, h, k);
+        a[b + 3 + 32] = z(h, k, l);
+      }
+
+      function lf(a, b) {
+        var c = a[b + 0 - 32],
+            d = a[b + 1 - 32],
+            e = a[b + 2 - 32],
+            f = a[b + 3 - 32],
+            g = a[b + 4 - 32],
+            h = a[b + 5 - 32],
+            k = a[b + 6 - 32],
+            l = a[b + 7 - 32];
+        a[b + 0 + 0] = c + d + 1 >> 1;
+        a[b + 1 + 0] = a[b + 0 + 64] = d + e + 1 >> 1;
+        a[b + 2 + 0] = a[b + 1 + 64] = e + f + 1 >> 1;
+        a[b + 3 + 0] = a[b + 2 + 64] = f + g + 1 >> 1;
+        a[b + 0 + 32] = z(c, d, e);
+        a[b + 1 + 32] = a[b + 0 + 96] = z(d, e, f);
+        a[b + 2 + 32] = a[b + 1 + 96] = z(e, f, g);
+        a[b + 3 + 32] = a[b + 2 + 96] = z(f, g, h);
+        a[b + 3 + 64] = z(g, h, k);
+        a[b + 3 + 96] = z(h, k, l);
+      }
+
+      function nf(a, b) {
+        var c = a[b - 1 + 0],
+            d = a[b - 1 + 32],
+            e = a[b - 1 + 64],
+            f = a[b - 1 + 96];
+        a[b + 0 + 0] = c + d + 1 >> 1;
+        a[b + 2 + 0] = a[b + 0 + 32] = d + e + 1 >> 1;
+        a[b + 2 + 32] = a[b + 0 + 64] = e + f + 1 >> 1;
+        a[b + 1 + 0] = z(c, d, e);
+        a[b + 3 + 0] = a[b + 1 + 32] = z(d, e, f);
+        a[b + 3 + 32] = a[b + 1 + 64] = z(e, f, f);
+        a[b + 3 + 64] = a[b + 2 + 64] = a[b + 0 + 96] = a[b + 1 + 96] = a[b + 2 + 96] = a[b + 3 + 96] = f;
+      }
+
+      function mf(a, b) {
+        var c = a[b - 1 + 0],
+            d = a[b - 1 + 32],
+            e = a[b - 1 + 64],
+            f = a[b - 1 + 96],
+            g = a[b - 1 - 32],
+            h = a[b + 0 - 32],
+            k = a[b + 1 - 32],
+            l = a[b + 2 - 32];
+        a[b + 0 + 0] = a[b + 2 + 32] = c + g + 1 >> 1;
+        a[b + 0 + 32] = a[b + 2 + 64] = d + c + 1 >> 1;
+        a[b + 0 + 64] = a[b + 2 + 96] = e + d + 1 >> 1;
+        a[b + 0 + 96] = f + e + 1 >> 1;
+        a[b + 3 + 0] = z(h, k, l);
+        a[b + 2 + 0] = z(g, h, k);
+        a[b + 1 + 0] = a[b + 3 + 32] = z(c, g, h);
+        a[b + 1 + 32] = a[b + 3 + 64] = z(d, c, g);
+        a[b + 1 + 64] = a[b + 3 + 96] = z(e, d, c);
+        a[b + 1 + 96] = z(f, e, d);
+      }
+
+      function xf(a, b) {
+        var c;
+
+        for (c = 0; 8 > c; ++c) {
+          I(a, b + 32 * c, a, b - 32, 8);
+        }
+      }
+
+      function yf(a, b) {
+        var c;
+
+        for (c = 0; 8 > c; ++c) {
+          M(a, b, a[b - 1], 8), b += 32;
+        }
+      }
+
+      function lb(a, b, c) {
+        var d;
+
+        for (d = 0; 8 > d; ++d) {
+          M(b, c + 32 * d, a, 8);
+        }
+      }
+
+      function vf(a, b) {
+        var c = 8,
+            d;
+
+        for (d = 0; 8 > d; ++d) {
+          c += a[b + d - 32] + a[b - 1 + 32 * d];
+        }
+
+        lb(c >> 4, a, b);
+      }
+
+      function Af(a, b) {
+        var c = 4,
+            d;
+
+        for (d = 0; 8 > d; ++d) {
+          c += a[b + d - 32];
+        }
+
+        lb(c >> 3, a, b);
+      }
+
+      function zf(a, b) {
+        var c = 4,
+            d;
+
+        for (d = 0; 8 > d; ++d) {
+          c += a[b - 1 + 32 * d];
+        }
+
+        lb(c >> 3, a, b);
+      }
+
+      function Bf(a, b) {
+        lb(128, a, b);
+      }
+
+      function ab(a, b, c) {
+        var d = a[b - c],
+            e = a[b + 0],
+            f = 3 * (e - d) + Qb[1020 + a[b - 2 * c] - a[b + c]],
+            g = mb[112 + (f + 4 >> 3)];
+        a[b - c] = R[255 + d + mb[112 + (f + 3 >> 3)]];
+        a[b + 0] = R[255 + e - g];
+      }
+
+      function jd(a, b, c, d) {
+        var e = a[b + 0],
+            f = a[b + c];
+        return U[255 + a[b - 2 * c] - a[b - c]] > d || U[255 + f - e] > d;
+      }
+
+      function kd(a, b, c, d) {
+        return 4 * U[255 + a[b - c] - a[b + 0]] + U[255 + a[b - 2 * c] - a[b + c]] <= d;
+      }
+
+      function ld(a, b, c, d, e) {
+        var f = a[b - 3 * c],
+            g = a[b - 2 * c],
+            h = a[b - c],
+            k = a[b + 0],
+            l = a[b + c],
+            m = a[b + 2 * c],
+            n = a[b + 3 * c];
+        return 4 * U[255 + h - k] + U[255 + g - l] > d ? 0 : U[255 + a[b - 4 * c] - f] <= e && U[255 + f - g] <= e && U[255 + g - h] <= e && U[255 + n - m] <= e && U[255 + m - l] <= e && U[255 + l - k] <= e;
+      }
+
+      function gd(a, b, c, d) {
+        var e = 2 * d + 1;
+
+        for (d = 0; 16 > d; ++d) {
+          kd(a, b + d, c, e) && ab(a, b + d, c);
+        }
+      }
+
+      function hd(a, b, c, d) {
+        var e = 2 * d + 1;
+
+        for (d = 0; 16 > d; ++d) {
+          kd(a, b + d * c, 1, e) && ab(a, b + d * c, 1);
+        }
+      }
+
+      function bf(a, b, c, d) {
+        var e;
+
+        for (e = 3; 0 < e; --e) {
+          b += 4 * c, gd(a, b, c, d);
+        }
+      }
+
+      function cf(a, b, c, d) {
+        var e;
+
+        for (e = 3; 0 < e; --e) {
+          b += 4, hd(a, b, c, d);
+        }
+      }
+
+      function ea(a, b, c, d, e, f, g, h) {
+        for (f = 2 * f + 1; 0 < e--;) {
+          if (ld(a, b, c, f, g)) { if (jd(a, b, c, h)) { ab(a, b, c); }else {
+            var k = a,
+                l = b,
+                m = c,
+                n = k[l - 2 * m],
+                r = k[l - m],
+                q = k[l + 0],
+                t = k[l + m],
+                v = k[l + 2 * m],
+                p = Qb[1020 + 3 * (q - r) + Qb[1020 + n - t]],
+                u = 27 * p + 63 >> 7,
+                w = 18 * p + 63 >> 7,
+                p = 9 * p + 63 >> 7;
+            k[l - 3 * m] = R[255 + k[l - 3 * m] + p];
+            k[l - 2 * m] = R[255 + n + w];
+            k[l - m] = R[255 + r + u];
+            k[l + 0] = R[255 + q - u];
+            k[l + m] = R[255 + t - w];
+            k[l + 2 * m] = R[255 + v - p];
+          } }
+          b += d;
+        }
+      }
+
+      function Fa(a, b, c, d, e, f, g, h) {
+        for (f = 2 * f + 1; 0 < e--;) {
+          if (ld(a, b, c, f, g)) { if (jd(a, b, c, h)) { ab(a, b, c); }else {
+            var k = a,
+                l = b,
+                m = c,
+                n = k[l - m],
+                r = k[l + 0],
+                q = k[l + m],
+                t = 3 * (r - n),
+                v = mb[112 + (t + 4 >> 3)],
+                t = mb[112 + (t + 3 >> 3)],
+                p = v + 1 >> 1;
+            k[l - 2 * m] = R[255 + k[l - 2 * m] + p];
+            k[l - m] = R[255 + n + t];
+            k[l + 0] = R[255 + r - v];
+            k[l + m] = R[255 + q - p];
+          } }
+          b += d;
+        }
+      }
+
+      function Ue(a, b, c, d, e, f) {
+        ea(a, b, c, 1, 16, d, e, f);
+      }
+
+      function Ve(a, b, c, d, e, f) {
+        ea(a, b, 1, c, 16, d, e, f);
+      }
+
+      function Ye(a, b, c, d, e, f) {
+        var g;
+
+        for (g = 3; 0 < g; --g) {
+          b += 4 * c, Fa(a, b, c, 1, 16, d, e, f);
+        }
+      }
+
+      function Ze(a, b, c, d, e, f) {
+        var g;
+
+        for (g = 3; 0 < g; --g) {
+          b += 4, Fa(a, b, 1, c, 16, d, e, f);
+        }
+      }
+
+      function We(a, b, c, d, e, f, g, h) {
+        ea(a, b, e, 1, 8, f, g, h);
+        ea(c, d, e, 1, 8, f, g, h);
+      }
+
+      function Xe(a, b, c, d, e, f, g, h) {
+        ea(a, b, 1, e, 8, f, g, h);
+        ea(c, d, 1, e, 8, f, g, h);
+      }
+
+      function $e(a, b, c, d, e, f, g, h) {
+        Fa(a, b + 4 * e, e, 1, 8, f, g, h);
+        Fa(c, d + 4 * e, e, 1, 8, f, g, h);
+      }
+
+      function af(a, b, c, d, e, f, g, h) {
+        Fa(a, b + 4, 1, e, 8, f, g, h);
+        Fa(c, d + 4, 1, e, 8, f, g, h);
+      }
+
+      function Cf() {
+        this.ba = new Cb();
+        this.ec = [];
+        this.cc = [];
+        this.Mc = [];
+        this.Dc = this.Nc = this.dc = this.fc = 0;
+        this.Oa = new Ud();
+        this.memory = 0;
+        this.Ib = "OutputFunc";
+        this.Jb = "OutputAlphaFunc";
+        this.Nd = "OutputRowFunc";
+      }
+
+      function md() {
+        this.data = [];
+        this.offset = this.kd = this.ha = this.w = 0;
+        this.na = [];
+        this.xa = this.gb = this.Ja = this.Sa = this.P = 0;
+      }
+
+      function Df() {
+        this.nc = this.Ea = this.b = this.hc = 0;
+        this.K = [];
+        this.w = 0;
+      }
+
+      function Ef() {
+        this.ua = 0;
+        this.Wa = new ac();
+        this.vb = new ac();
+        this.md = this.xc = this.wc = 0;
+        this.vc = [];
+        this.Wb = 0;
+        this.Ya = new Ub();
+        this.yc = new O();
+      }
+
+      function je() {
+        this.xb = this.a = 0;
+        this.l = new Oa();
+        this.ca = new Cb();
+        this.V = [];
+        this.Ba = 0;
+        this.Ta = [];
+        this.Ua = 0;
+        this.m = new Ra();
+        this.Pb = 0;
+        this.wd = new Ra();
+        this.Ma = this.$ = this.C = this.i = this.c = this.xd = 0;
+        this.s = new Ef();
+        this.ab = 0;
+        this.gc = wa(4, Df);
+        this.Oc = 0;
+      }
+
+      function Ff() {
+        this.Lc = this.Z = this.$a = this.i = this.c = 0;
+        this.l = new Oa();
+        this.ic = 0;
+        this.ca = [];
+        this.tb = 0;
+        this.qd = null;
+        this.rd = 0;
+      }
+
+      function Rb(a, b, c, d, e, f, g) {
+        a = null == a ? 0 : a[b + 0];
+
+        for (b = 0; b < g; ++b) {
+          e[f + b] = a + c[d + b] & 255, a = e[f + b];
+        }
+      }
+
+      function Gf(a, b, c, d, e, f, g) {
+        if (null == a) { Rb(null, null, c, d, e, f, g); }else {
+          var h;
+
+          for (h = 0; h < g; ++h) {
+            e[f + h] = a[b + h] + c[d + h] & 255;
+          }
+        }
+      }
+
+      function Hf(a, b, c, d, e, f, g) {
+        if (null == a) { Rb(null, null, c, d, e, f, g); }else {
+          var h = a[b + 0],
+              k = h,
+              l = h,
+              m;
+
+          for (m = 0; m < g; ++m) {
+            h = a[b + m], k = l + h - k, l = c[d + m] + (k & -256 ? 0 > k ? 0 : 255 : k) & 255, k = h, e[f + m] = l;
+          }
+        }
+      }
+
+      function Le(a, b, c, d) {
+        var e = b.width,
+            f = b.o;
+        x(null != a && null != b);
+        if (0 > c || 0 >= d || c + d > f) { return null; }
+
+        if (!a.Cc) {
+          if (null == a.ga) {
+            a.ga = new Ff();
+            var g;
+            (g = null == a.ga) || (g = b.width * b.o, x(0 == a.Gb.length), a.Gb = V(g), a.Uc = 0, null == a.Gb ? g = 0 : (a.mb = a.Gb, a.nb = a.Uc, a.rc = null, g = 1), g = !g);
+
+            if (!g) {
+              g = a.ga;
+              var h = a.Fa,
+                  k = a.P,
+                  l = a.qc,
+                  m = a.mb,
+                  n = a.nb,
+                  r = k + 1,
+                  q = l - 1,
+                  t = g.l;
+              x(null != h && null != m && null != b);
+              ia[0] = null;
+              ia[1] = Rb;
+              ia[2] = Gf;
+              ia[3] = Hf;
+              g.ca = m;
+              g.tb = n;
+              g.c = b.width;
+              g.i = b.height;
+              x(0 < g.c && 0 < g.i);
+              if (1 >= l) { b = 0; }else if (g.$a = h[k + 0] >> 0 & 3, g.Z = h[k + 0] >> 2 & 3, g.Lc = h[k + 0] >> 4 & 3, k = h[k + 0] >> 6 & 3, 0 > g.$a || 1 < g.$a || 4 <= g.Z || 1 < g.Lc || k) { b = 0; }else if (t.put = kc, t.ac = gc, t.bc = lc, t.ma = g, t.width = b.width, t.height = b.height, t.Da = b.Da, t.v = b.v, t.va = b.va, t.j = b.j, t.o = b.o, g.$a) { b: {
+                x(1 == g.$a), b = Bc();
+
+                c: for (;;) {
+                  if (null == b) {
+                    b = 0;
+                    break b;
+                  }
+
+                  x(null != g);
+                  g.mc = b;
+                  b.c = g.c;
+                  b.i = g.i;
+                  b.l = g.l;
+                  b.l.ma = g;
+                  b.l.width = g.c;
+                  b.l.height = g.i;
+                  b.a = 0;
+                  cb(b.m, h, r, q);
+                  if (!rb(g.c, g.i, 1, b, null)) { break c; }
+                  1 == b.ab && 3 == b.gc[0].hc && yc(b.s) ? (g.ic = 1, h = b.c * b.i, b.Ta = null, b.Ua = 0, b.V = V(h), b.Ba = 0, null == b.V ? (b.a = 1, b = 0) : b = 1) : (g.ic = 0, b = Ec(b, g.c));
+                  if (!b) { break c; }
+                  b = 1;
+                  break b;
+                }
+
+                g.mc = null;
+                b = 0;
+              } } else { b = q >= g.c * g.i; }
+              g = !b;
+            }
+
+            if (g) { return null; }
+            1 != a.ga.Lc ? a.Ga = 0 : d = f - c;
+          }
+
+          x(null != a.ga);
+          x(c + d <= f);
+
+          a: {
+            h = a.ga;
+            b = h.c;
+            f = h.l.o;
+
+            if (0 == h.$a) {
+              r = a.rc;
+              q = a.Vc;
+              t = a.Fa;
+              k = a.P + 1 + c * b;
+              l = a.mb;
+              m = a.nb + c * b;
+              x(k <= a.P + a.qc);
+              if (0 != h.Z) { for (x(null != ia[h.Z]), g = 0; g < d; ++g) {
+                ia[h.Z](r, q, t, k, l, m, b), r = l, q = m, m += b, k += b;
+              } } else { for (g = 0; g < d; ++g) {
+                I(l, m, t, k, b), r = l, q = m, m += b, k += b;
+              } }
+              a.rc = r;
+              a.Vc = q;
+            } else {
+              x(null != h.mc);
+              b = c + d;
+              g = h.mc;
+              x(null != g);
+              x(b <= g.i);
+              if (g.C >= b) { b = 1; }else if (h.ic || Aa(), h.ic) {
+                var h = g.V,
+                    r = g.Ba,
+                    q = g.c,
+                    v = g.i,
+                    t = 1,
+                    k = g.$ / q,
+                    l = g.$ % q,
+                    m = g.m,
+                    n = g.s,
+                    p = g.$,
+                    u = q * v,
+                    w = q * b,
+                    y = n.wc,
+                    A = p < w ? ha(n, l, k) : null;
+                x(p <= u);
+                x(b <= v);
+                x(yc(n));
+
+                c: for (;;) {
+                  for (; !m.h && p < w;) {
+                    l & y || (A = ha(n, l, k));
+                    x(null != A);
+                    Sa(m);
+                    v = ua(A.G[0], A.H[0], m);
+                    if (256 > v) { h[r + p] = v, ++p, ++l, l >= q && (l = 0, ++k, k <= b && !(k % 16) && Ib(g, k)); }else if (280 > v) {
+                      var v = ib(v - 256, m);
+                      var E = ua(A.G[4], A.H[4], m);
+                      Sa(m);
+                      E = ib(E, m);
+                      E = nc(q, E);
+
+                      if (p >= E && u - p >= v) {
+                        var B;
+
+                        for (B = 0; B < v; ++B) {
+                          h[r + p + B] = h[r + p + B - E];
+                        }
+                      } else {
+                        t = 0;
+                        break c;
+                      }
+
+                      p += v;
+
+                      for (l += v; l >= q;) {
+                        l -= q, ++k, k <= b && !(k % 16) && Ib(g, k);
+                      }
+
+                      p < w && l & y && (A = ha(n, l, k));
+                    } else {
+                      t = 0;
+                      break c;
+                    }
+                    x(m.h == db(m));
+                  }
+
+                  Ib(g, k > b ? b : k);
+                  break c;
+                }
+
+                !t || m.h && p < u ? (t = 0, g.a = m.h ? 5 : 3) : g.$ = p;
+                b = t;
+              } else { b = Jb(g, g.V, g.Ba, g.c, g.i, b, se); }
+
+              if (!b) {
+                d = 0;
+                break a;
+              }
+            }
+
+            c + d >= f && (a.Cc = 1);
+            d = 1;
+          }
+
+          if (!d) { return null; }
+          if (a.Cc && (d = a.ga, null != d && (d.mc = null), a.ga = null, 0 < a.Ga)) { return alert("todo:WebPDequantizeLevels"), null; }
+        }
+
+        return a.nb + c * e;
+      }
+
+      function If(a, b, c, d, e, f) {
+        for (; 0 < e--;) {
+          var g = a,
+              h = b + (c ? 1 : 0),
+              k = a,
+              l = b + (c ? 0 : 3),
+              m;
+
+          for (m = 0; m < d; ++m) {
+            var n = k[l + 4 * m];
+            255 != n && (n *= 32897, g[h + 4 * m + 0] = g[h + 4 * m + 0] * n >> 23, g[h + 4 * m + 1] = g[h + 4 * m + 1] * n >> 23, g[h + 4 * m + 2] = g[h + 4 * m + 2] * n >> 23);
+          }
+
+          b += f;
+        }
+      }
+
+      function Jf(a, b, c, d, e) {
+        for (; 0 < d--;) {
+          var f;
+
+          for (f = 0; f < c; ++f) {
+            var g = a[b + 2 * f + 0],
+                h = a[b + 2 * f + 1],
+                k = h & 15,
+                l = 4369 * k,
+                h = (h & 240 | h >> 4) * l >> 16;
+            a[b + 2 * f + 0] = (g & 240 | g >> 4) * l >> 16 & 240 | (g & 15 | g << 4) * l >> 16 >> 4 & 15;
+            a[b + 2 * f + 1] = h & 240 | k;
+          }
+
+          b += e;
+        }
+      }
+
+      function Kf(a, b, c, d, e, f, g, h) {
+        var k = 255,
+            l,
+            m;
+
+        for (m = 0; m < e; ++m) {
+          for (l = 0; l < d; ++l) {
+            var n = a[b + l];
+            f[g + 4 * l] = n;
+            k &= n;
+          }
+
+          b += c;
+          g += h;
+        }
+
+        return 255 != k;
+      }
+
+      function Lf(a, b, c, d, e) {
+        var f;
+
+        for (f = 0; f < e; ++f) {
+          c[d + f] = a[b + f] >> 8;
+        }
+      }
+
+      function Aa() {
+        za = If;
+        vc = Jf;
+        fc = Kf;
+        Fc = Lf;
+      }
+
+      function va(a, b, c) {
+        self[a] = function (a, e, f, g, h, k, l, m, n, r, q, t, v, p, u, w, y) {
+          var d,
+              E = y - 1 >> 1;
+          var B = h[k + 0] | l[m + 0] << 16;
+          var C = n[r + 0] | q[t + 0] << 16;
+          x(null != a);
+          var z = 3 * B + C + 131074 >> 2;
+          b(a[e + 0], z & 255, z >> 16, v, p);
+          null != f && (z = 3 * C + B + 131074 >> 2, b(f[g + 0], z & 255, z >> 16, u, w));
+
+          for (d = 1; d <= E; ++d) {
+            var D = h[k + d] | l[m + d] << 16;
+            var G = n[r + d] | q[t + d] << 16;
+            var F = B + D + C + G + 524296;
+            var H = F + 2 * (D + C) >> 3;
+            F = F + 2 * (B + G) >> 3;
+            z = H + B >> 1;
+            B = F + D >> 1;
+            b(a[e + 2 * d - 1], z & 255, z >> 16, v, p + (2 * d - 1) * c);
+            b(a[e + 2 * d - 0], B & 255, B >> 16, v, p + (2 * d - 0) * c);
+            null != f && (z = F + C >> 1, B = H + G >> 1, b(f[g + 2 * d - 1], z & 255, z >> 16, u, w + (2 * d - 1) * c), b(f[g + 2 * d + 0], B & 255, B >> 16, u, w + (2 * d + 0) * c));
+            B = D;
+            C = G;
+          }
+
+          y & 1 || (z = 3 * B + C + 131074 >> 2, b(a[e + y - 1], z & 255, z >> 16, v, p + (y - 1) * c), null != f && (z = 3 * C + B + 131074 >> 2, b(f[g + y - 1], z & 255, z >> 16, u, w + (y - 1) * c)));
+        };
+      }
+
+      function ic() {
+        P[Ca] = Mf;
+        P[Ua] = nd;
+        P[tc] = Nf;
+        P[Va] = od;
+        P[ya] = pd;
+        P[Db] = qd;
+        P[wc] = Of;
+        P[zb] = nd;
+        P[Ab] = od;
+        P[Ja] = pd;
+        P[Bb] = qd;
+      }
+
+      function Sb(a) {
+        return a & ~Pf ? 0 > a ? 0 : 255 : a >> rd;
+      }
+
+      function bb(a, b) {
+        return Sb((19077 * a >> 8) + (26149 * b >> 8) - 14234);
+      }
+
+      function nb(a, b, c) {
+        return Sb((19077 * a >> 8) - (6419 * b >> 8) - (13320 * c >> 8) + 8708);
+      }
+
+      function Pa(a, b) {
+        return Sb((19077 * a >> 8) + (33050 * b >> 8) - 17685);
+      }
+
+      function Ga(a, b, c, d, e) {
+        d[e + 0] = bb(a, c);
+        d[e + 1] = nb(a, b, c);
+        d[e + 2] = Pa(a, b);
+      }
+
+      function Tb(a, b, c, d, e) {
+        d[e + 0] = Pa(a, b);
+        d[e + 1] = nb(a, b, c);
+        d[e + 2] = bb(a, c);
+      }
+
+      function sd(a, b, c, d, e) {
+        var f = nb(a, b, c);
+        b = f << 3 & 224 | Pa(a, b) >> 3;
+        d[e + 0] = bb(a, c) & 248 | f >> 5;
+        d[e + 1] = b;
+      }
+
+      function td(a, b, c, d, e) {
+        var f = Pa(a, b) & 240 | 15;
+        d[e + 0] = bb(a, c) & 240 | nb(a, b, c) >> 4;
+        d[e + 1] = f;
+      }
+
+      function ud(a, b, c, d, e) {
+        d[e + 0] = 255;
+        Ga(a, b, c, d, e + 1);
+      }
+
+      function vd(a, b, c, d, e) {
+        Tb(a, b, c, d, e);
+        d[e + 3] = 255;
+      }
+
+      function wd(a, b, c, d, e) {
+        Ga(a, b, c, d, e);
+        d[e + 3] = 255;
+      }
+
+      function ga(a, b) {
+        return 0 > a ? 0 : a > b ? b : a;
+      }
+
+      function la(a, b, c) {
+        self[a] = function (a, e, f, g, h, k, l, m, n) {
+          for (var d = m + (n & -2) * c; m != d;) {
+            b(a[e + 0], f[g + 0], h[k + 0], l, m), b(a[e + 1], f[g + 0], h[k + 0], l, m + c), e += 2, ++g, ++k, m += 2 * c;
+          }
+
+          n & 1 && b(a[e + 0], f[g + 0], h[k + 0], l, m);
+        };
+      }
+
+      function xd(a, b, c) {
+        return 0 == c ? 0 == a ? 0 == b ? 6 : 5 : 0 == b ? 4 : 0 : c;
+      }
+
+      function yd(a, b, c, d, e) {
+        switch (a >>> 30) {
+          case 3:
+            Za(b, c, d, e, 0);
+            break;
+
+          case 2:
+            fd(b, c, d, e);
+            break;
+
+          case 1:
+            pa(b, c, d, e);
+        }
+      }
+
+      function Oc(a, b) {
+        var c,
+            d,
+            e = b.M,
+            f = b.Nb,
+            g = a.oc,
+            h = a.pc + 40,
+            k = a.oc,
+            l = a.pc + 584,
+            m = a.oc,
+            n = a.pc + 600;
+
+        for (c = 0; 16 > c; ++c) {
+          g[h + 32 * c - 1] = 129;
+        }
+
+        for (c = 0; 8 > c; ++c) {
+          k[l + 32 * c - 1] = 129, m[n + 32 * c - 1] = 129;
+        }
+
+        0 < e ? g[h - 1 - 32] = k[l - 1 - 32] = m[n - 1 - 32] = 129 : (M(g, h - 32 - 1, 127, 21), M(k, l - 32 - 1, 127, 9), M(m, n - 32 - 1, 127, 9));
+
+        for (d = 0; d < a.za; ++d) {
+          var r = b.ya[b.aa + d];
+
+          if (0 < d) {
+            for (c = -1; 16 > c; ++c) {
+              I(g, h + 32 * c - 4, g, h + 32 * c + 12, 4);
+            }
+
+            for (c = -1; 8 > c; ++c) {
+              I(k, l + 32 * c - 4, k, l + 32 * c + 4, 4), I(m, n + 32 * c - 4, m, n + 32 * c + 4, 4);
+            }
+          }
+
+          var q = a.Gd,
+              t = a.Hd + d,
+              v = r.ad,
+              p = r.Hc;
+          0 < e && (I(g, h - 32, q[t].y, 0, 16), I(k, l - 32, q[t].f, 0, 8), I(m, n - 32, q[t].ea, 0, 8));
+
+          if (r.Za) {
+            var u = g;
+            var w = h - 32 + 16;
+            0 < e && (d >= a.za - 1 ? M(u, w, q[t].y[15], 4) : I(u, w, q[t + 1].y, 0, 4));
+
+            for (c = 0; 4 > c; c++) {
+              u[w + 128 + c] = u[w + 256 + c] = u[w + 384 + c] = u[w + 0 + c];
+            }
+
+            for (c = 0; 16 > c; ++c, p <<= 2) {
+              u = g, w = h + zd[c], W[r.Ob[c]](u, w), yd(p, v, 16 * +c, u, w);
+            }
+          } else if (u = xd(d, e, r.Ob[0]), Y[u](g, h), 0 != p) { for (c = 0; 16 > c; ++c, p <<= 2) {
+            yd(p, v, 16 * +c, g, h + zd[c]);
+          } }
+
+          c = r.Gc;
+          u = xd(d, e, r.Dd);
+          ka[u](k, l);
+          ka[u](m, n);
+          r = c >> 0;
+          p = v;
+          u = k;
+          w = l;
+          r & 255 && (r & 170 ? Nb(p, 256, u, w) : Ob(p, 256, u, w));
+          c >>= 8;
+          r = m;
+          p = n;
+          c & 255 && (c & 170 ? Nb(v, 320, r, p) : Ob(v, 320, r, p));
+          e < a.Ub - 1 && (I(q[t].y, 0, g, h + 480, 16), I(q[t].f, 0, k, l + 224, 8), I(q[t].ea, 0, m, n + 224, 8));
+          c = 8 * f * a.B;
+          q = a.sa;
+          t = a.ta + 16 * d + 16 * f * a.R;
+          v = a.qa;
+          r = a.ra + 8 * d + c;
+          p = a.Ha;
+          u = a.Ia + 8 * d + c;
+
+          for (c = 0; 16 > c; ++c) {
+            I(q, t + c * a.R, g, h + 32 * c, 16);
+          }
+
+          for (c = 0; 8 > c; ++c) {
+            I(v, r + c * a.B, k, l + 32 * c, 8), I(p, u + c * a.B, m, n + 32 * c, 8);
+          }
+        }
+      }
+
+      function Ad(a, b, c, d, e, f, g, h, k) {
+        var l = [0],
+            m = [0],
+            n = 0,
+            r = null != k ? k.kd : 0,
+            q = null != k ? k : new md();
+        if (null == a || 12 > c) { return 7; }
+        q.data = a;
+        q.w = b;
+        q.ha = c;
+        b = [b];
+        c = [c];
+        q.gb = [q.gb];
+
+        a: {
+          var t = b;
+          var v = c;
+          var p = q.gb;
+          x(null != a);
+          x(null != v);
+          x(null != p);
+          p[0] = 0;
+
+          if (12 <= v[0] && !fa(a, t[0], "RIFF")) {
+            if (fa(a, t[0] + 8, "WEBP")) {
+              p = 3;
+              break a;
+            }
+
+            var u = Ha(a, t[0] + 4);
+
+            if (12 > u || 4294967286 < u) {
+              p = 3;
+              break a;
+            }
+
+            if (r && u > v[0] - 8) {
+              p = 7;
+              break a;
+            }
+
+            p[0] = u;
+            t[0] += 12;
+            v[0] -= 12;
+          }
+
+          p = 0;
+        }
+
+        if (0 != p) { return p; }
+        u = 0 < q.gb[0];
+
+        for (c = c[0];;) {
+          t = [0];
+          n = [n];
+
+          a: {
+            var w = a;
+            v = b;
+            p = c;
+            var y = n,
+                A = l,
+                z = m,
+                B = t;
+            y[0] = 0;
+            if (8 > p[0]) { p = 7; }else {
+              if (!fa(w, v[0], "VP8X")) {
+                if (10 != Ha(w, v[0] + 4)) {
+                  p = 3;
+                  break a;
+                }
+
+                if (18 > p[0]) {
+                  p = 7;
+                  break a;
+                }
+
+                var C = Ha(w, v[0] + 8);
+                var D = 1 + Yb(w, v[0] + 12);
+                w = 1 + Yb(w, v[0] + 15);
+
+                if (2147483648 <= D * w) {
+                  p = 3;
+                  break a;
+                }
+
+                null != B && (B[0] = C);
+                null != A && (A[0] = D);
+                null != z && (z[0] = w);
+                v[0] += 18;
+                p[0] -= 18;
+                y[0] = 1;
+              }
+
+              p = 0;
+            }
+          }
+
+          n = n[0];
+          t = t[0];
+          if (0 != p) { return p; }
+          v = !!(t & 2);
+          if (!u && n) { return 3; }
+          null != f && (f[0] = !!(t & 16));
+          null != g && (g[0] = v);
+          null != h && (h[0] = 0);
+          g = l[0];
+          t = m[0];
+
+          if (n && v && null == k) {
+            p = 0;
+            break;
+          }
+
+          if (4 > c) {
+            p = 7;
+            break;
+          }
+
+          if (u && n || !u && !n && !fa(a, b[0], "ALPH")) {
+            c = [c];
+            q.na = [q.na];
+            q.P = [q.P];
+            q.Sa = [q.Sa];
+
+            a: {
+              C = a;
+              p = b;
+              u = c;
+              var y = q.gb,
+                  A = q.na,
+                  z = q.P,
+                  B = q.Sa;
+              D = 22;
+              x(null != C);
+              x(null != u);
+              w = p[0];
+              var F = u[0];
+              x(null != A);
+              x(null != B);
+              A[0] = null;
+              z[0] = null;
+
+              for (B[0] = 0;;) {
+                p[0] = w;
+                u[0] = F;
+
+                if (8 > F) {
+                  p = 7;
+                  break a;
+                }
+
+                var G = Ha(C, w + 4);
+
+                if (4294967286 < G) {
+                  p = 3;
+                  break a;
+                }
+
+                var H = 8 + G + 1 & -2;
+                D += H;
+
+                if (0 < y && D > y) {
+                  p = 3;
+                  break a;
+                }
+
+                if (!fa(C, w, "VP8 ") || !fa(C, w, "VP8L")) {
+                  p = 0;
+                  break a;
+                }
+
+                if (F[0] < H) {
+                  p = 7;
+                  break a;
+                }
+
+                fa(C, w, "ALPH") || (A[0] = C, z[0] = w + 8, B[0] = G);
+                w += H;
+                F -= H;
+              }
+            }
+
+            c = c[0];
+            q.na = q.na[0];
+            q.P = q.P[0];
+            q.Sa = q.Sa[0];
+            if (0 != p) { break; }
+          }
+
+          c = [c];
+          q.Ja = [q.Ja];
+          q.xa = [q.xa];
+
+          a: if (y = a, p = b, u = c, A = q.gb[0], z = q.Ja, B = q.xa, C = p[0], w = !fa(y, C, "VP8 "), D = !fa(y, C, "VP8L"), x(null != y), x(null != u), x(null != z), x(null != B), 8 > u[0]) { p = 7; }else {
+            if (w || D) {
+              y = Ha(y, C + 4);
+
+              if (12 <= A && y > A - 12) {
+                p = 3;
+                break a;
+              }
+
+              if (r && y > u[0] - 8) {
+                p = 7;
+                break a;
+              }
+
+              z[0] = y;
+              p[0] += 8;
+              u[0] -= 8;
+              B[0] = D;
+            } else { B[0] = 5 <= u[0] && 47 == y[C + 0] && !(y[C + 4] >> 5), z[0] = u[0]; }
+
+            p = 0;
+          }
+
+          c = c[0];
+          q.Ja = q.Ja[0];
+          q.xa = q.xa[0];
+          b = b[0];
+          if (0 != p) { break; }
+          if (4294967286 < q.Ja) { return 3; }
+          null == h || v || (h[0] = q.xa ? 2 : 1);
+          g = [g];
+          t = [t];
+
+          if (q.xa) {
+            if (5 > c) {
+              p = 7;
+              break;
+            }
+
+            h = g;
+            r = t;
+            v = f;
+            null == a || 5 > c ? a = 0 : 5 <= c && 47 == a[b + 0] && !(a[b + 4] >> 5) ? (u = [0], y = [0], A = [0], z = new Ra(), cb(z, a, b, c), mc(z, u, y, A) ? (null != h && (h[0] = u[0]), null != r && (r[0] = y[0]), null != v && (v[0] = A[0]), a = 1) : a = 0) : a = 0;
+          } else {
+            if (10 > c) {
+              p = 7;
+              break;
+            }
+
+            h = t;
+            null == a || 10 > c || !Jc(a, b + 3, c - 3) ? a = 0 : (r = a[b + 0] | a[b + 1] << 8 | a[b + 2] << 16, v = (a[b + 7] << 8 | a[b + 6]) & 16383, a = (a[b + 9] << 8 | a[b + 8]) & 16383, r & 1 || 3 < (r >> 1 & 7) || !(r >> 4 & 1) || r >> 5 >= q.Ja || !v || !a ? a = 0 : (g && (g[0] = v), h && (h[0] = a), a = 1));
+          }
+
+          if (!a) { return 3; }
+          g = g[0];
+          t = t[0];
+          if (n && (l[0] != g || m[0] != t)) { return 3; }
+          null != k && (k[0] = q, k.offset = b - k.w, x(4294967286 > b - k.w), x(k.offset == k.ha - c));
+          break;
+        }
+
+        return 0 == p || 7 == p && n && null == k ? (null != f && (f[0] |= null != q.na && 0 < q.na.length), null != d && (d[0] = g), null != e && (e[0] = t), 0) : p;
+      }
+
+      function hc(a, b, c) {
+        var d = b.width,
+            e = b.height,
+            f = 0,
+            g = 0,
+            h = d,
+            k = e;
+        b.Da = null != a && 0 < a.Da;
+        if (b.Da && (h = a.cd, k = a.bd, f = a.v, g = a.j, 11 > c || (f &= -2, g &= -2), 0 > f || 0 > g || 0 >= h || 0 >= k || f + h > d || g + k > e)) { return 0; }
+        b.v = f;
+        b.j = g;
+        b.va = f + h;
+        b.o = g + k;
+        b.U = h;
+        b.T = k;
+        b.da = null != a && 0 < a.da;
+
+        if (b.da) {
+          c = [a.ib];
+          f = [a.hb];
+          if (!bc(h, k, c, f)) { return 0; }
+          b.ib = c[0];
+          b.hb = f[0];
+        }
+
+        b.ob = null != a && a.ob;
+        b.Kb = null == a || !a.Sd;
+        b.da && (b.ob = b.ib < 3 * d / 4 && b.hb < 3 * e / 4, b.Kb = 0);
+        return 1;
+      }
+
+      function Bd(a) {
+        if (null == a) { return 2; }
+
+        if (11 > a.S) {
+          var b = a.f.RGBA;
+          b.fb += (a.height - 1) * b.A;
+          b.A = -b.A;
+        } else { b = a.f.kb, a = a.height, b.O += (a - 1) * b.fa, b.fa = -b.fa, b.N += (a - 1 >> 1) * b.Ab, b.Ab = -b.Ab, b.W += (a - 1 >> 1) * b.Db, b.Db = -b.Db, null != b.F && (b.J += (a - 1) * b.lb, b.lb = -b.lb); }
+
+        return 0;
+      }
+
+      function Cd(a, b, c, d) {
+        if (null == d || 0 >= a || 0 >= b) { return 2; }
+
+        if (null != c) {
+          if (c.Da) {
+            var e = c.cd,
+                f = c.bd,
+                g = c.v & -2,
+                h = c.j & -2;
+            if (0 > g || 0 > h || 0 >= e || 0 >= f || g + e > a || h + f > b) { return 2; }
+            a = e;
+            b = f;
+          }
+
+          if (c.da) {
+            e = [c.ib];
+            f = [c.hb];
+            if (!bc(a, b, e, f)) { return 2; }
+            a = e[0];
+            b = f[0];
+          }
+        }
+
+        d.width = a;
+        d.height = b;
+
+        a: {
+          var k = d.width;
+          var l = d.height;
+          a = d.S;
+          if (0 >= k || 0 >= l || !(a >= Ca && 13 > a)) { a = 2; }else {
+            if (0 >= d.Rd && null == d.sd) {
+              var g = f = e = b = 0,
+                  h = k * Dd[a],
+                  m = h * l;
+              11 > a || (b = (k + 1) / 2, f = (l + 1) / 2 * b, 12 == a && (e = k, g = e * l));
+              l = V(m + 2 * f + g);
+
+              if (null == l) {
+                a = 1;
+                break a;
+              }
+
+              d.sd = l;
+              11 > a ? (k = d.f.RGBA, k.eb = l, k.fb = 0, k.A = h, k.size = m) : (k = d.f.kb, k.y = l, k.O = 0, k.fa = h, k.Fd = m, k.f = l, k.N = 0 + m, k.Ab = b, k.Cd = f, k.ea = l, k.W = 0 + m + f, k.Db = b, k.Ed = f, 12 == a && (k.F = l, k.J = 0 + m + 2 * f), k.Tc = g, k.lb = e);
+            }
+
+            b = 1;
+            e = d.S;
+            f = d.width;
+            g = d.height;
+            if (e >= Ca && 13 > e) {
+              if (11 > e) { a = d.f.RGBA, h = Math.abs(a.A), b &= h * (g - 1) + f <= a.size, b &= h >= f * Dd[e], b &= null != a.eb; }else {
+                a = d.f.kb;
+                h = (f + 1) / 2;
+                m = (g + 1) / 2;
+                k = Math.abs(a.fa);
+                var l = Math.abs(a.Ab),
+                    n = Math.abs(a.Db),
+                    r = Math.abs(a.lb),
+                    q = r * (g - 1) + f;
+                b &= k * (g - 1) + f <= a.Fd;
+                b &= l * (m - 1) + h <= a.Cd;
+                b &= n * (m - 1) + h <= a.Ed;
+                b = b & k >= f & l >= h & n >= h;
+                b &= null != a.y;
+                b &= null != a.f;
+                b &= null != a.ea;
+                12 == e && (b &= r >= f, b &= q <= a.Tc, b &= null != a.F);
+              }
+            } else { b = 0; }
+            a = b ? 0 : 2;
+          }
+        }
+
+        if (0 != a) { return a; }
+        null != c && c.fd && (a = Bd(d));
+        return a;
+      }
+
+      var xb = 64,
+          Hd = [0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535, 131071, 262143, 524287, 1048575, 2097151, 4194303, 8388607, 16777215],
+          Gd = 24,
+          ob = 32,
+          Xb = 8,
+          Id = [0, 0, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7];
+      X("Predictor0", "PredictorAdd0");
+
+      self.Predictor0 = function () {
+        return 4278190080;
       };
 
-      that.flush = function () {
-        var err,
-            buffers = [],
-            bufferIndex = 0,
-            bufferSize = 0,
-            array;
-
-        do {
-          z.next_out_index = 0;
-          z.avail_out = bufsize;
-          err = z.deflate(Z_FINISH);
-          if (err != Z_STREAM_END && err != Z_OK) throw new Error("deflating: " + z.msg);
-          if (bufsize - z.avail_out > 0) buffers.push(new Uint8Array(buf.subarray(0, z.next_out_index)));
-          bufferSize += z.next_out_index;
-        } while (z.avail_in > 0 || z.avail_out === 0);
-
-        z.deflateEnd();
-        array = new Uint8Array(bufferSize);
-        buffers.forEach(function (chunk) {
-          array.set(chunk, bufferIndex);
-          bufferIndex += chunk.length;
-        });
-        return array;
+      self.Predictor1 = function (a) {
+        return a;
       };
-    } // 'zip' may not be defined in z-worker and some tests
 
+      self.Predictor2 = function (a, b, c) {
+        return b[c + 0];
+      };
 
-    var env = global.zip || global;
-    env.Deflater = env._jzlib_Deflater = Deflater;
-  })(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function('return typeof this === "object" && this.content')() || Function('return this')()); // `self` is undefined in Firefox for Android content script context
-  // while `this` is nsIContentFrameMessageManager
-  // with an attribute `content` that corresponds to the window
+      self.Predictor3 = function (a, b, c) {
+        return b[c + 1];
+      };
+
+      self.Predictor4 = function (a, b, c) {
+        return b[c - 1];
+      };
+
+      self.Predictor5 = function (a, b, c) {
+        return aa(aa(a, b[c + 1]), b[c + 0]);
+      };
+
+      self.Predictor6 = function (a, b, c) {
+        return aa(a, b[c - 1]);
+      };
+
+      self.Predictor7 = function (a, b, c) {
+        return aa(a, b[c + 0]);
+      };
+
+      self.Predictor8 = function (a, b, c) {
+        return aa(b[c - 1], b[c + 0]);
+      };
+
+      self.Predictor9 = function (a, b, c) {
+        return aa(b[c + 0], b[c + 1]);
+      };
+
+      self.Predictor10 = function (a, b, c) {
+        return aa(aa(a, b[c - 1]), aa(b[c + 0], b[c + 1]));
+      };
+
+      self.Predictor11 = function (a, b, c) {
+        var d = b[c + 0];
+        b = b[c - 1];
+        return 0 >= Ia(d >> 24 & 255, a >> 24 & 255, b >> 24 & 255) + Ia(d >> 16 & 255, a >> 16 & 255, b >> 16 & 255) + Ia(d >> 8 & 255, a >> 8 & 255, b >> 8 & 255) + Ia(d & 255, a & 255, b & 255) ? d : a;
+      };
+
+      self.Predictor12 = function (a, b, c) {
+        var d = b[c + 0];
+        b = b[c - 1];
+        return (sa((a >> 24 & 255) + (d >> 24 & 255) - (b >> 24 & 255)) << 24 | sa((a >> 16 & 255) + (d >> 16 & 255) - (b >> 16 & 255)) << 16 | sa((a >> 8 & 255) + (d >> 8 & 255) - (b >> 8 & 255)) << 8 | sa((a & 255) + (d & 255) - (b & 255))) >>> 0;
+      };
+
+      self.Predictor13 = function (a, b, c) {
+        var d = b[c - 1];
+        a = aa(a, b[c + 0]);
+        return (eb(a >> 24 & 255, d >> 24 & 255) << 24 | eb(a >> 16 & 255, d >> 16 & 255) << 16 | eb(a >> 8 & 255, d >> 8 & 255) << 8 | eb(a >> 0 & 255, d >> 0 & 255)) >>> 0;
+      };
+
+      var ee = self.PredictorAdd0;
+      self.PredictorAdd1 = cc;
+      X("Predictor2", "PredictorAdd2");
+      X("Predictor3", "PredictorAdd3");
+      X("Predictor4", "PredictorAdd4");
+      X("Predictor5", "PredictorAdd5");
+      X("Predictor6", "PredictorAdd6");
+      X("Predictor7", "PredictorAdd7");
+      X("Predictor8", "PredictorAdd8");
+      X("Predictor9", "PredictorAdd9");
+      X("Predictor10", "PredictorAdd10");
+      X("Predictor11", "PredictorAdd11");
+      X("Predictor12", "PredictorAdd12");
+      X("Predictor13", "PredictorAdd13");
+      var fe = self.PredictorAdd2;
+      ec("ColorIndexInverseTransform", "MapARGB", "32b", function (a) {
+        return a >> 8 & 255;
+      }, function (a) {
+        return a;
+      });
+      ec("VP8LColorIndexInverseTransformAlpha", "MapAlpha", "8b", function (a) {
+        return a;
+      }, function (a) {
+        return a >> 8 & 255;
+      });
+      var rc = self.ColorIndexInverseTransform,
+          ke = self.MapARGB,
+          he = self.VP8LColorIndexInverseTransformAlpha,
+          le = self.MapAlpha,
+          pc,
+          qc = self.VP8LPredictorsAdd = [];
+      qc.length = 16;
+      (self.VP8LPredictors = []).length = 16;
+      (self.VP8LPredictorsAdd_C = []).length = 16;
+      (self.VP8LPredictors_C = []).length = 16;
+      var Fb,
+          sc,
+          Gb,
+          Hb,
+          xc,
+          uc,
+          bd = V(511),
+          cd = V(2041),
+          dd = V(225),
+          ed = V(767),
+          ad = 0,
+          Qb = cd,
+          mb = dd,
+          R = ed,
+          U = bd,
+          Ca = 0,
+          Ua = 1,
+          tc = 2,
+          Va = 3,
+          ya = 4,
+          Db = 5,
+          wc = 6,
+          zb = 7,
+          Ab = 8,
+          Ja = 9,
+          Bb = 10,
+          pe = [2, 3, 7],
+          oe = [3, 3, 11],
+          Dc = [280, 256, 256, 256, 40],
+          qe = [0, 1, 1, 1, 0],
+          ne = [17, 18, 0, 1, 2, 3, 4, 5, 16, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+          de = [24, 7, 23, 25, 40, 6, 39, 41, 22, 26, 38, 42, 56, 5, 55, 57, 21, 27, 54, 58, 37, 43, 72, 4, 71, 73, 20, 28, 53, 59, 70, 74, 36, 44, 88, 69, 75, 52, 60, 3, 87, 89, 19, 29, 86, 90, 35, 45, 68, 76, 85, 91, 51, 61, 104, 2, 103, 105, 18, 30, 102, 106, 34, 46, 84, 92, 67, 77, 101, 107, 50, 62, 120, 1, 119, 121, 83, 93, 17, 31, 100, 108, 66, 78, 118, 122, 33, 47, 117, 123, 49, 63, 99, 109, 82, 94, 0, 116, 124, 65, 79, 16, 32, 98, 110, 48, 115, 125, 81, 95, 64, 114, 126, 97, 111, 80, 113, 127, 96, 112],
+          me = [2954, 2956, 2958, 2962, 2970, 2986, 3018, 3082, 3212, 3468, 3980, 5004],
+          ie = 8,
+          Lb = [4, 5, 6, 7, 8, 9, 10, 10, 11, 12, 13, 14, 15, 16, 17, 17, 18, 19, 20, 20, 21, 21, 22, 22, 23, 23, 24, 25, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 91, 93, 95, 96, 98, 100, 101, 102, 104, 106, 108, 110, 112, 114, 116, 118, 122, 124, 126, 128, 130, 132, 134, 136, 138, 140, 143, 145, 148, 151, 154, 157],
+          Mb = [4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 60, 62, 64, 66, 68, 70, 72, 74, 76, 78, 80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110, 112, 114, 116, 119, 122, 125, 128, 131, 134, 137, 140, 143, 146, 149, 152, 155, 158, 161, 164, 167, 170, 173, 177, 181, 185, 189, 193, 197, 201, 205, 209, 213, 217, 221, 225, 229, 234, 239, 245, 249, 254, 259, 264, 269, 274, 279, 284],
+          oa = null,
+          He = [[173, 148, 140, 0], [176, 155, 140, 135, 0], [180, 157, 141, 134, 130, 0], [254, 254, 243, 230, 196, 177, 153, 140, 133, 130, 129, 0]],
+          Ie = [0, 1, 4, 8, 5, 2, 3, 6, 9, 12, 13, 10, 7, 11, 14, 15],
+          Mc = [-0, 1, -1, 2, -2, 3, 4, 6, -3, 5, -4, -5, -6, 7, -7, 8, -8, -9],
+          Fe = [[[[128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128], [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128], [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128]], [[253, 136, 254, 255, 228, 219, 128, 128, 128, 128, 128], [189, 129, 242, 255, 227, 213, 255, 219, 128, 128, 128], [106, 126, 227, 252, 214, 209, 255, 255, 128, 128, 128]], [[1, 98, 248, 255, 236, 226, 255, 255, 128, 128, 128], [181, 133, 238, 254, 221, 234, 255, 154, 128, 128, 128], [78, 134, 202, 247, 198, 180, 255, 219, 128, 128, 128]], [[1, 185, 249, 255, 243, 255, 128, 128, 128, 128, 128], [184, 150, 247, 255, 236, 224, 128, 128, 128, 128, 128], [77, 110, 216, 255, 236, 230, 128, 128, 128, 128, 128]], [[1, 101, 251, 255, 241, 255, 128, 128, 128, 128, 128], [170, 139, 241, 252, 236, 209, 255, 255, 128, 128, 128], [37, 116, 196, 243, 228, 255, 255, 255, 128, 128, 128]], [[1, 204, 254, 255, 245, 255, 128, 128, 128, 128, 128], [207, 160, 250, 255, 238, 128, 128, 128, 128, 128, 128], [102, 103, 231, 255, 211, 171, 128, 128, 128, 128, 128]], [[1, 152, 252, 255, 240, 255, 128, 128, 128, 128, 128], [177, 135, 243, 255, 234, 225, 128, 128, 128, 128, 128], [80, 129, 211, 255, 194, 224, 128, 128, 128, 128, 128]], [[1, 1, 255, 128, 128, 128, 128, 128, 128, 128, 128], [246, 1, 255, 128, 128, 128, 128, 128, 128, 128, 128], [255, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128]]], [[[198, 35, 237, 223, 193, 187, 162, 160, 145, 155, 62], [131, 45, 198, 221, 172, 176, 220, 157, 252, 221, 1], [68, 47, 146, 208, 149, 167, 221, 162, 255, 223, 128]], [[1, 149, 241, 255, 221, 224, 255, 255, 128, 128, 128], [184, 141, 234, 253, 222, 220, 255, 199, 128, 128, 128], [81, 99, 181, 242, 176, 190, 249, 202, 255, 255, 128]], [[1, 129, 232, 253, 214, 197, 242, 196, 255, 255, 128], [99, 121, 210, 250, 201, 198, 255, 202, 128, 128, 128], [23, 91, 163, 242, 170, 187, 247, 210, 255, 255, 128]], [[1, 200, 246, 255, 234, 255, 128, 128, 128, 128, 128], [109, 178, 241, 255, 231, 245, 255, 255, 128, 128, 128], [44, 130, 201, 253, 205, 192, 255, 255, 128, 128, 128]], [[1, 132, 239, 251, 219, 209, 255, 165, 128, 128, 128], [94, 136, 225, 251, 218, 190, 255, 255, 128, 128, 128], [22, 100, 174, 245, 186, 161, 255, 199, 128, 128, 128]], [[1, 182, 249, 255, 232, 235, 128, 128, 128, 128, 128], [124, 143, 241, 255, 227, 234, 128, 128, 128, 128, 128], [35, 77, 181, 251, 193, 211, 255, 205, 128, 128, 128]], [[1, 157, 247, 255, 236, 231, 255, 255, 128, 128, 128], [121, 141, 235, 255, 225, 227, 255, 255, 128, 128, 128], [45, 99, 188, 251, 195, 217, 255, 224, 128, 128, 128]], [[1, 1, 251, 255, 213, 255, 128, 128, 128, 128, 128], [203, 1, 248, 255, 255, 128, 128, 128, 128, 128, 128], [137, 1, 177, 255, 224, 255, 128, 128, 128, 128, 128]]], [[[253, 9, 248, 251, 207, 208, 255, 192, 128, 128, 128], [175, 13, 224, 243, 193, 185, 249, 198, 255, 255, 128], [73, 17, 171, 221, 161, 179, 236, 167, 255, 234, 128]], [[1, 95, 247, 253, 212, 183, 255, 255, 128, 128, 128], [239, 90, 244, 250, 211, 209, 255, 255, 128, 128, 128], [155, 77, 195, 248, 188, 195, 255, 255, 128, 128, 128]], [[1, 24, 239, 251, 218, 219, 255, 205, 128, 128, 128], [201, 51, 219, 255, 196, 186, 128, 128, 128, 128, 128], [69, 46, 190, 239, 201, 218, 255, 228, 128, 128, 128]], [[1, 191, 251, 255, 255, 128, 128, 128, 128, 128, 128], [223, 165, 249, 255, 213, 255, 128, 128, 128, 128, 128], [141, 124, 248, 255, 255, 128, 128, 128, 128, 128, 128]], [[1, 16, 248, 255, 255, 128, 128, 128, 128, 128, 128], [190, 36, 230, 255, 236, 255, 128, 128, 128, 128, 128], [149, 1, 255, 128, 128, 128, 128, 128, 128, 128, 128]], [[1, 226, 255, 128, 128, 128, 128, 128, 128, 128, 128], [247, 192, 255, 128, 128, 128, 128, 128, 128, 128, 128], [240, 128, 255, 128, 128, 128, 128, 128, 128, 128, 128]], [[1, 134, 252, 255, 255, 128, 128, 128, 128, 128, 128], [213, 62, 250, 255, 255, 128, 128, 128, 128, 128, 128], [55, 93, 255, 128, 128, 128, 128, 128, 128, 128, 128]], [[128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128], [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128], [128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128]]], [[[202, 24, 213, 235, 186, 191, 220, 160, 240, 175, 255], [126, 38, 182, 232, 169, 184, 228, 174, 255, 187, 128], [61, 46, 138, 219, 151, 178, 240, 170, 255, 216, 128]], [[1, 112, 230, 250, 199, 191, 247, 159, 255, 255, 128], [166, 109, 228, 252, 211, 215, 255, 174, 128, 128, 128], [39, 77, 162, 232, 172, 180, 245, 178, 255, 255, 128]], [[1, 52, 220, 246, 198, 199, 249, 220, 255, 255, 128], [124, 74, 191, 243, 183, 193, 250, 221, 255, 255, 128], [24, 71, 130, 219, 154, 170, 243, 182, 255, 255, 128]], [[1, 182, 225, 249, 219, 240, 255, 224, 128, 128, 128], [149, 150, 226, 252, 216, 205, 255, 171, 128, 128, 128], [28, 108, 170, 242, 183, 194, 254, 223, 255, 255, 128]], [[1, 81, 230, 252, 204, 203, 255, 192, 128, 128, 128], [123, 102, 209, 247, 188, 196, 255, 233, 128, 128, 128], [20, 95, 153, 243, 164, 173, 255, 203, 128, 128, 128]], [[1, 222, 248, 255, 216, 213, 128, 128, 128, 128, 128], [168, 175, 246, 252, 235, 205, 255, 255, 128, 128, 128], [47, 116, 215, 255, 211, 212, 255, 255, 128, 128, 128]], [[1, 121, 236, 253, 212, 214, 255, 255, 128, 128, 128], [141, 84, 213, 252, 201, 202, 255, 219, 128, 128, 128], [42, 80, 160, 240, 162, 185, 255, 205, 128, 128, 128]], [[1, 1, 255, 128, 128, 128, 128, 128, 128, 128, 128], [244, 1, 255, 128, 128, 128, 128, 128, 128, 128, 128], [238, 1, 255, 128, 128, 128, 128, 128, 128, 128, 128]]]],
+          Ke = [[[231, 120, 48, 89, 115, 113, 120, 152, 112], [152, 179, 64, 126, 170, 118, 46, 70, 95], [175, 69, 143, 80, 85, 82, 72, 155, 103], [56, 58, 10, 171, 218, 189, 17, 13, 152], [114, 26, 17, 163, 44, 195, 21, 10, 173], [121, 24, 80, 195, 26, 62, 44, 64, 85], [144, 71, 10, 38, 171, 213, 144, 34, 26], [170, 46, 55, 19, 136, 160, 33, 206, 71], [63, 20, 8, 114, 114, 208, 12, 9, 226], [81, 40, 11, 96, 182, 84, 29, 16, 36]], [[134, 183, 89, 137, 98, 101, 106, 165, 148], [72, 187, 100, 130, 157, 111, 32, 75, 80], [66, 102, 167, 99, 74, 62, 40, 234, 128], [41, 53, 9, 178, 241, 141, 26, 8, 107], [74, 43, 26, 146, 73, 166, 49, 23, 157], [65, 38, 105, 160, 51, 52, 31, 115, 128], [104, 79, 12, 27, 217, 255, 87, 17, 7], [87, 68, 71, 44, 114, 51, 15, 186, 23], [47, 41, 14, 110, 182, 183, 21, 17, 194], [66, 45, 25, 102, 197, 189, 23, 18, 22]], [[88, 88, 147, 150, 42, 46, 45, 196, 205], [43, 97, 183, 117, 85, 38, 35, 179, 61], [39, 53, 200, 87, 26, 21, 43, 232, 171], [56, 34, 51, 104, 114, 102, 29, 93, 77], [39, 28, 85, 171, 58, 165, 90, 98, 64], [34, 22, 116, 206, 23, 34, 43, 166, 73], [107, 54, 32, 26, 51, 1, 81, 43, 31], [68, 25, 106, 22, 64, 171, 36, 225, 114], [34, 19, 21, 102, 132, 188, 16, 76, 124], [62, 18, 78, 95, 85, 57, 50, 48, 51]], [[193, 101, 35, 159, 215, 111, 89, 46, 111], [60, 148, 31, 172, 219, 228, 21, 18, 111], [112, 113, 77, 85, 179, 255, 38, 120, 114], [40, 42, 1, 196, 245, 209, 10, 25, 109], [88, 43, 29, 140, 166, 213, 37, 43, 154], [61, 63, 30, 155, 67, 45, 68, 1, 209], [100, 80, 8, 43, 154, 1, 51, 26, 71], [142, 78, 78, 16, 255, 128, 34, 197, 171], [41, 40, 5, 102, 211, 183, 4, 1, 221], [51, 50, 17, 168, 209, 192, 23, 25, 82]], [[138, 31, 36, 171, 27, 166, 38, 44, 229], [67, 87, 58, 169, 82, 115, 26, 59, 179], [63, 59, 90, 180, 59, 166, 93, 73, 154], [40, 40, 21, 116, 143, 209, 34, 39, 175], [47, 15, 16, 183, 34, 223, 49, 45, 183], [46, 17, 33, 183, 6, 98, 15, 32, 183], [57, 46, 22, 24, 128, 1, 54, 17, 37], [65, 32, 73, 115, 28, 128, 23, 128, 205], [40, 3, 9, 115, 51, 192, 18, 6, 223], [87, 37, 9, 115, 59, 77, 64, 21, 47]], [[104, 55, 44, 218, 9, 54, 53, 130, 226], [64, 90, 70, 205, 40, 41, 23, 26, 57], [54, 57, 112, 184, 5, 41, 38, 166, 213], [30, 34, 26, 133, 152, 116, 10, 32, 134], [39, 19, 53, 221, 26, 114, 32, 73, 255], [31, 9, 65, 234, 2, 15, 1, 118, 73], [75, 32, 12, 51, 192, 255, 160, 43, 51], [88, 31, 35, 67, 102, 85, 55, 186, 85], [56, 21, 23, 111, 59, 205, 45, 37, 192], [55, 38, 70, 124, 73, 102, 1, 34, 98]], [[125, 98, 42, 88, 104, 85, 117, 175, 82], [95, 84, 53, 89, 128, 100, 113, 101, 45], [75, 79, 123, 47, 51, 128, 81, 171, 1], [57, 17, 5, 71, 102, 57, 53, 41, 49], [38, 33, 13, 121, 57, 73, 26, 1, 85], [41, 10, 67, 138, 77, 110, 90, 47, 114], [115, 21, 2, 10, 102, 255, 166, 23, 6], [101, 29, 16, 10, 85, 128, 101, 196, 26], [57, 18, 10, 102, 102, 213, 34, 20, 43], [117, 20, 15, 36, 163, 128, 68, 1, 26]], [[102, 61, 71, 37, 34, 53, 31, 243, 192], [69, 60, 71, 38, 73, 119, 28, 222, 37], [68, 45, 128, 34, 1, 47, 11, 245, 171], [62, 17, 19, 70, 146, 85, 55, 62, 70], [37, 43, 37, 154, 100, 163, 85, 160, 1], [63, 9, 92, 136, 28, 64, 32, 201, 85], [75, 15, 9, 9, 64, 255, 184, 119, 16], [86, 6, 28, 5, 64, 255, 25, 248, 1], [56, 8, 17, 132, 137, 255, 55, 116, 128], [58, 15, 20, 82, 135, 57, 26, 121, 40]], [[164, 50, 31, 137, 154, 133, 25, 35, 218], [51, 103, 44, 131, 131, 123, 31, 6, 158], [86, 40, 64, 135, 148, 224, 45, 183, 128], [22, 26, 17, 131, 240, 154, 14, 1, 209], [45, 16, 21, 91, 64, 222, 7, 1, 197], [56, 21, 39, 155, 60, 138, 23, 102, 213], [83, 12, 13, 54, 192, 255, 68, 47, 28], [85, 26, 85, 85, 128, 128, 32, 146, 171], [18, 11, 7, 63, 144, 171, 4, 4, 246], [35, 27, 10, 146, 174, 171, 12, 26, 128]], [[190, 80, 35, 99, 180, 80, 126, 54, 45], [85, 126, 47, 87, 176, 51, 41, 20, 32], [101, 75, 128, 139, 118, 146, 116, 128, 85], [56, 41, 15, 176, 236, 85, 37, 9, 62], [71, 30, 17, 119, 118, 255, 17, 18, 138], [101, 38, 60, 138, 55, 70, 43, 26, 142], [146, 36, 19, 30, 171, 255, 97, 27, 20], [138, 45, 61, 62, 219, 1, 81, 188, 64], [32, 41, 20, 117, 151, 142, 20, 21, 163], [112, 19, 12, 61, 195, 128, 48, 4, 24]]],
+          Ee = [[[[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[176, 246, 255, 255, 255, 255, 255, 255, 255, 255, 255], [223, 241, 252, 255, 255, 255, 255, 255, 255, 255, 255], [249, 253, 253, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 244, 252, 255, 255, 255, 255, 255, 255, 255, 255], [234, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255], [253, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 246, 254, 255, 255, 255, 255, 255, 255, 255, 255], [239, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255], [254, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 248, 254, 255, 255, 255, 255, 255, 255, 255, 255], [251, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255], [251, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255], [254, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 254, 253, 255, 254, 255, 255, 255, 255, 255, 255], [250, 255, 254, 255, 254, 255, 255, 255, 255, 255, 255], [254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]]], [[[217, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [225, 252, 241, 253, 255, 255, 254, 255, 255, 255, 255], [234, 250, 241, 250, 253, 255, 253, 254, 255, 255, 255]], [[255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255], [223, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255], [238, 253, 254, 254, 255, 255, 255, 255, 255, 255, 255]], [[255, 248, 254, 255, 255, 255, 255, 255, 255, 255, 255], [249, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 253, 255, 255, 255, 255, 255, 255, 255, 255, 255], [247, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255], [252, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255], [253, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 254, 253, 255, 255, 255, 255, 255, 255, 255, 255], [250, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]]], [[[186, 251, 250, 255, 255, 255, 255, 255, 255, 255, 255], [234, 251, 244, 254, 255, 255, 255, 255, 255, 255, 255], [251, 251, 243, 253, 254, 255, 254, 255, 255, 255, 255]], [[255, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255], [236, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255], [251, 253, 253, 254, 254, 255, 255, 255, 255, 255, 255]], [[255, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255], [254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255], [254, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255], [254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]]], [[[248, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [250, 254, 252, 254, 255, 255, 255, 255, 255, 255, 255], [248, 254, 249, 253, 255, 255, 255, 255, 255, 255, 255]], [[255, 253, 253, 255, 255, 255, 255, 255, 255, 255, 255], [246, 253, 253, 255, 255, 255, 255, 255, 255, 255, 255], [252, 254, 251, 254, 254, 255, 255, 255, 255, 255, 255]], [[255, 254, 252, 255, 255, 255, 255, 255, 255, 255, 255], [248, 254, 253, 255, 255, 255, 255, 255, 255, 255, 255], [253, 255, 254, 254, 255, 255, 255, 255, 255, 255, 255]], [[255, 251, 254, 255, 255, 255, 255, 255, 255, 255, 255], [245, 251, 254, 255, 255, 255, 255, 255, 255, 255, 255], [253, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 251, 253, 255, 255, 255, 255, 255, 255, 255, 255], [252, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255], [255, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 252, 255, 255, 255, 255, 255, 255, 255, 255, 255], [249, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 254, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 253, 255, 255, 255, 255, 255, 255, 255, 255], [250, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]], [[255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255], [255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]]]],
+          Ge = [0, 1, 2, 3, 6, 4, 5, 6, 6, 6, 6, 6, 6, 6, 6, 7, 0],
+          Nc,
+          Y = [],
+          W = [],
+          ka = [],
+          Za,
+          fd,
+          Nb,
+          pa,
+          Ob,
+          Xc,
+          Tc,
+          Yc,
+          Uc,
+          Zc,
+          Vc,
+          $c,
+          Wc,
+          Rc,
+          Pc,
+          Sc,
+          Qc,
+          re = 1,
+          Cc = 2,
+          ia = [],
+          za,
+          vc,
+          fc,
+          Fc,
+          P = [];
+      va("UpsampleRgbLinePair", Ga, 3);
+      va("UpsampleBgrLinePair", Tb, 3);
+      va("UpsampleRgbaLinePair", wd, 4);
+      va("UpsampleBgraLinePair", vd, 4);
+      va("UpsampleArgbLinePair", ud, 4);
+      va("UpsampleRgba4444LinePair", td, 2);
+      va("UpsampleRgb565LinePair", sd, 2);
+      var Mf = UpsampleRgbLinePair,
+          Nf = UpsampleBgrLinePair,
+          nd = UpsampleRgbaLinePair,
+          od = UpsampleBgraLinePair,
+          pd = UpsampleArgbLinePair,
+          qd = UpsampleRgba4444LinePair,
+          Of = UpsampleRgb565LinePair,
+          Wa = 16,
+          Ba = 1 << Wa - 1,
+          ta = -227,
+          Eb = 482,
+          rd = 6,
+          Pf = (256 << rd) - 1,
+          jc = 0,
+          Yd = V(256),
+          ae = V(256),
+          $d = V(256),
+          Zd = V(256),
+          be = V(Eb - ta),
+          ce = V(Eb - ta);
+      la("YuvToRgbRow", Ga, 3);
+      la("YuvToBgrRow", Tb, 3);
+      la("YuvToRgbaRow", wd, 4);
+      la("YuvToBgraRow", vd, 4);
+      la("YuvToArgbRow", ud, 4);
+      la("YuvToRgba4444Row", td, 2);
+      la("YuvToRgb565Row", sd, 2);
+      var zd = [0, 4, 8, 12, 128, 132, 136, 140, 256, 260, 264, 268, 384, 388, 392, 396],
+          Ya = [0, 2, 8],
+          Qf = [8, 7, 6, 4, 4, 2, 2, 2, 1, 1, 1, 1],
+          Ne = 1;
+
+      this.WebPDecodeRGBA = function (a, b, c, d, e) {
+        var f = Ua;
+        var g = new Cf(),
+            h = new Cb();
+        g.ba = h;
+        h.S = f;
+        h.width = [h.width];
+        h.height = [h.height];
+        var k = h.width;
+        var l = h.height,
+            m = new Td();
+        if (null == m || null == a) { var n = 2; }else { x(null != m), n = Ad(a, b, c, m.width, m.height, m.Pd, m.Qd, m.format, null); }
+        0 != n ? k = 0 : (null != k && (k[0] = m.width[0]), null != l && (l[0] = m.height[0]), k = 1);
+
+        if (k) {
+          h.width = h.width[0];
+          h.height = h.height[0];
+          null != d && (d[0] = h.width);
+          null != e && (e[0] = h.height);
+
+          b: {
+            d = new Oa();
+            e = new md();
+            e.data = a;
+            e.w = b;
+            e.ha = c;
+            e.kd = 1;
+            b = [0];
+            x(null != e);
+            a = Ad(e.data, e.w, e.ha, null, null, null, b, null, e);
+            (0 == a || 7 == a) && b[0] && (a = 4);
+            b = a;
+
+            if (0 == b) {
+              x(null != g);
+              d.data = e.data;
+              d.w = e.w + e.offset;
+              d.ha = e.ha - e.offset;
+              d.put = kc;
+              d.ac = gc;
+              d.bc = lc;
+              d.ma = g;
+
+              if (e.xa) {
+                a = Bc();
+
+                if (null == a) {
+                  g = 1;
+                  break b;
+                }
+
+                if (te(a, d)) {
+                  b = Cd(d.width, d.height, g.Oa, g.ba);
+
+                  if (d = 0 == b) {
+                    c: {
+                      d = a;
+
+                      d: for (;;) {
+                        if (null == d) {
+                          d = 0;
+                          break c;
+                        }
+
+                        x(null != d.s.yc);
+                        x(null != d.s.Ya);
+                        x(0 < d.s.Wb);
+                        c = d.l;
+                        x(null != c);
+                        e = c.ma;
+                        x(null != e);
+
+                        if (0 != d.xb) {
+                          d.ca = e.ba;
+                          d.tb = e.tb;
+                          x(null != d.ca);
+
+                          if (!hc(e.Oa, c, Va)) {
+                            d.a = 2;
+                            break d;
+                          }
+
+                          if (!Ec(d, c.width)) { break d; }
+                          if (c.da) { break d; }
+                          (c.da || hb(d.ca.S)) && Aa();
+                          11 > d.ca.S || (alert("todo:WebPInitConvertARGBToYUV"), null != d.ca.f.kb.F && Aa());
+
+                          if (d.Pb && 0 < d.s.ua && null == d.s.vb.X && !Zb(d.s.vb, d.s.Wa.Xa)) {
+                            d.a = 1;
+                            break d;
+                          }
+
+                          d.xb = 0;
+                        }
+
+                        if (!Jb(d, d.V, d.Ba, d.c, d.i, c.o, ge)) { break d; }
+                        e.Dc = d.Ma;
+                        d = 1;
+                        break c;
+                      }
+
+                      x(0 != d.a);
+                      d = 0;
+                    }
+
+                    d = !d;
+                  }
+
+                  d && (b = a.a);
+                } else { b = a.a; }
+              } else {
+                a = new Ce();
+
+                if (null == a) {
+                  g = 1;
+                  break b;
+                }
+
+                a.Fa = e.na;
+                a.P = e.P;
+                a.qc = e.Sa;
+
+                if (Kc(a, d)) {
+                  if (b = Cd(d.width, d.height, g.Oa, g.ba), 0 == b) {
+                    a.Aa = 0;
+                    c = g.Oa;
+                    e = a;
+                    x(null != e);
+
+                    if (null != c) {
+                      k = c.Md;
+                      k = 0 > k ? 0 : 100 < k ? 255 : 255 * k / 100;
+
+                      if (0 < k) {
+                        for (l = m = 0; 4 > l; ++l) {
+                          n = e.pb[l], 12 > n.lc && (n.ia = k * Qf[0 > n.lc ? 0 : n.lc] >> 3), m |= n.ia;
+                        }
+
+                        m && (alert("todo:VP8InitRandom"), e.ia = 1);
+                      }
+
+                      e.Ga = c.Id;
+                      100 < e.Ga ? e.Ga = 100 : 0 > e.Ga && (e.Ga = 0);
+                    }
+
+                    Me(a, d) || (b = a.a);
+                  }
+                } else { b = a.a; }
+              }
+
+              0 == b && null != g.Oa && g.Oa.fd && (b = Bd(g.ba));
+            }
+
+            g = b;
+          }
+
+          f = 0 != g ? null : 11 > f ? h.f.RGBA.eb : h.f.kb.y;
+        } else { f = null; }
+
+        return f;
+      };
+
+      var Dd = [3, 4, 3, 4, 4, 2, 2, 4, 4, 4, 2, 1, 1];
+    };
+
+    new WebPDecoder();
+    /*Copyright (c) 2017 Dominik Homberger
+    
+    
+    
+    https://webpjs.appspot.com
+    WebPRiffParser dominikhlbg@gmail.com
+    */
+
+    function memcmp(data, data_off, str, size) {
+      for (var i = 0; i < size; i++) {
+        if (data[data_off + i] != str.charCodeAt(i)) { return true; }
+      }
+
+      return false;
+    }
+
+    function GetTag(data, data_off) {
+      var str = '';
+
+      for (var i = 0; i < 4; i++) {
+        str += String.fromCharCode(data[data_off++]);
+      }
+
+      return str;
+    }
+
+    function GetLE16(data, data_off) {
+      return data[data_off + 0] << 0 | data[data_off + 1] << 8;
+    }
+
+    function GetLE24(data, data_off) {
+      return (data[data_off + 0] << 0 | data[data_off + 1] << 8 | data[data_off + 2] << 16) >>> 0;
+    }
+
+    function GetLE32(data, data_off) {
+      return (data[data_off + 0] << 0 | data[data_off + 1] << 8 | data[data_off + 2] << 16 | data[data_off + 3] << 24) >>> 0;
+    }
+
+    function WebPRiffParser(src, src_off) {
+      var imagearray = {};
+      var i = 0;
+      var alpha_chunk = false;
+      var alpha_size = 0;
+      var alpha_offset = 0;
+      imagearray['frames'] = [];
+      if (memcmp(src, src_off, 'RIFF', 4)) { return; }
+      src_off += 4;
+      var riff_size = GetLE32(src, src_off) + 8;
+      src_off += 8;
+
+      while (src_off < src.length) {
+        var fourcc = GetTag(src, src_off);
+        src_off += 4;
+        var payload_size = GetLE32(src, src_off);
+        src_off += 4;
+        var payload_size_padded = payload_size + (payload_size & 1);
+
+        switch (fourcc) {
+          case "VP8 ":
+          case "VP8L":
+            if (typeof imagearray['frames'][i] === 'undefined') { imagearray['frames'][i] = {}; }
+            var obj = imagearray['frames'][i];
+            var height = [0];
+            var width = [0];
+            obj['src_off'] = alpha_chunk ? alpha_offset : src_off - 8;
+            obj['src_size'] = alpha_size + payload_size + 8; //var rgba = webpdecoder.WebPDecodeRGBA(src,(alpha_chunk?alpha_offset:src_off-8),alpha_size+payload_size+8,width,height);
+            //imagearray[i]={'rgba':rgba,'width':width[0],'height':height[0]};
+
+            i++;
+
+            if (alpha_chunk) {
+              alpha_chunk = false;
+              alpha_size = 0;
+              alpha_offset = 0;
+            }
+
+            break;
+
+          case "VP8X":
+            var obj = imagearray['header'] = {};
+            var feature_flags = obj['feature_flags'] = src[src_off];
+            var src_off_ = src_off + 4;
+            var canvas_width = obj['canvas_width'] = 1 + GetLE24(src, src_off_);
+            src_off_ += 3;
+            var canvas_height = obj['canvas_height'] = 1 + GetLE24(src, src_off_);
+            src_off_ += 3;
+            break;
+
+          case "ALPH":
+            alpha_chunk = true;
+            alpha_size = payload_size_padded + 8;
+            alpha_offset = src_off - 8;
+            break;
+
+          case "ANIM":
+            var obj = imagearray['header'];
+            var bgcolor = obj['bgcolor'] = GetLE32(src, src_off);
+            src_off_ = src_off + 4;
+            var loop_count = obj['loop_count'] = GetLE16(src, src_off_);
+            src_off_ += 2;
+            break;
+
+          case "ANMF":
+            var offset_x = 0,
+                offset_y = 0,
+                width = 0,
+                height = 0,
+                duration = 0,
+                blend = 0,
+                dispose = 0,
+                temp = 0;
+            var obj = imagearray['frames'][i] = {};
+            obj['offset_x'] = offset_x = 2 * GetLE24(src, src_off);
+            src_off += 3;
+            obj['offset_y'] = offset_y = 2 * GetLE24(src, src_off);
+            src_off += 3;
+            obj['width'] = width = 1 + GetLE24(src, src_off);
+            src_off += 3;
+            obj['height'] = height = 1 + GetLE24(src, src_off);
+            src_off += 3;
+            obj['duration'] = duration = GetLE24(src, src_off);
+            src_off += 3;
+            temp = src[src_off++];
+            obj['dispose'] = dispose = temp & 1;
+            obj['blend'] = blend = temp >> 1 & 1;
+            break;
+
+          default:
+        }
+
+        if (fourcc != "ANMF") { src_off += payload_size_padded; }
+      }
+
+      return imagearray;
+    }
+
+    var height = [0];
+    var width = [0];
+    var pixels = [];
+    var webpdecoder = new WebPDecoder();
+    var response = imageData;
+    var imagearray = WebPRiffParser(response, 0);
+    imagearray['response'] = response;
+    imagearray['rgbaoutput'] = true;
+    imagearray['dataurl'] = false;
+    var header = imagearray['header'] ? imagearray['header'] : null;
+    var frames = imagearray['frames'] ? imagearray['frames'] : null;
+
+    if (header) {
+      header['loop_counter'] = header['loop_count'];
+      height = header['canvas_height'];
+      width = header['canvas_width'];
+
+      for (var f = 0; f < frames.length; f++) {
+        if (frames[f]['blend'] == 0) {
+          break;
+        }
+      }
+    }
+
+    var frame = frames[0];
+    var rgba = webpdecoder.WebPDecodeRGBA(response, frame['src_off'], frame['src_size'], width, height);
+    frame['rgba'] = rgba;
+    frame['imgwidth'] = width[0];
+    frame['imgheight'] = height[0];
+
+    for (var i = 0; i < width[0] * height[0] * 4; i++) {
+      pixels[i] = rgba[i];
+    }
+
+    this.width = width;
+    this.height = height;
+    this.data = pixels;
+    return this;
+  }
+
+  WebPDecoder.prototype.getData = function () {
+    return this.data;
+  };
+
+  try {
+    exports.WebPDecoder = WebPDecoder;
+  } catch (e) {} // CommonJS.
 
   /**
    * A class to parse color values
@@ -22514,9 +20404,9 @@
         var r = this.r.toString(16);
         var g = this.g.toString(16);
         var b = this.b.toString(16);
-        if (r.length == 1) r = '0' + r;
-        if (g.length == 1) g = '0' + g;
-        if (b.length == 1) b = '0' + b;
+        if (r.length == 1) { r = '0' + r; }
+        if (g.length == 1) { g = '0' + g; }
+        if (b.length == 1) { b = '0' + b; }
         return '#' + r + g + b;
       };
     }
@@ -22609,15 +20499,15 @@
 
     var decode = function decode(elt) {
       var code = elt.charCodeAt(0);
-      if (code === PLUS || code === PLUS_URL_SAFE) return 62; // '+'
+      if (code === PLUS || code === PLUS_URL_SAFE) { return 62; } // '+'
 
-      if (code === SLASH || code === SLASH_URL_SAFE) return 63; // '/'
+      if (code === SLASH || code === SLASH_URL_SAFE) { return 63; } // '/'
 
-      if (code < NUMBER) return -1; //no match
+      if (code < NUMBER) { return -1; } //no match
 
-      if (code < NUMBER + 10) return code - NUMBER + 26 + 26;
-      if (code < UPPER + 26) return code - UPPER;
-      if (code < LOWER + 26) return code - LOWER + 26;
+      if (code < NUMBER + 10) { return code - NUMBER + 26 + 26; }
+      if (code < UPPER + 26) { return code - UPPER; }
+      if (code < LOWER + 26) { return code - LOWER + 26; }
     };
 
     jsPDF.API.TTFFont = function () {
@@ -23132,7 +21022,7 @@
         __hasProp = {}.hasOwnProperty,
         __extends = function __extends(child, parent) {
       for (var key in parent) {
-        if (__hasProp.call(parent, key)) child[key] = parent[key];
+        if (__hasProp.call(parent, key)) { child[key] = parent[key]; }
       }
 
       function ctor() {
@@ -24682,601 +22572,6 @@
     }();
   })(jsPDF);
 
-  // Generated by CoffeeScript 1.4.0
-
-  /*
-  # PNG.js
-  # Copyright (c) 2011 Devon Govett
-  # MIT LICENSE
-  # 
-  # 
-  */
-  (function (global) {
-    var PNG;
-
-    PNG = function () {
-      var APNG_BLEND_OP_SOURCE, APNG_DISPOSE_OP_BACKGROUND, APNG_DISPOSE_OP_PREVIOUS, makeImage, scratchCanvas, scratchCtx;
-
-      PNG.load = function (url, canvas, callback) {
-        var xhr;
-
-        if (typeof canvas === 'function') {
-          callback = canvas;
-        }
-
-        xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        xhr.responseType = "arraybuffer";
-
-        xhr.onload = function () {
-          var data, png;
-          data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
-          png = new PNG(data);
-
-          if (typeof (canvas != null ? canvas.getContext : void 0) === 'function') {
-            png.render(canvas);
-          }
-
-          return typeof callback === "function" ? callback(png) : void 0;
-        };
-
-        return xhr.send(null);
-      };
-      APNG_DISPOSE_OP_BACKGROUND = 1;
-      APNG_DISPOSE_OP_PREVIOUS = 2;
-      APNG_BLEND_OP_SOURCE = 0;
-
-      function PNG(data) {
-        var chunkSize, colors, palLen, delayDen, delayNum, frame, i, index, key, section, palShort, text, _i, _j, _ref;
-
-        this.data = data;
-        this.pos = 8;
-        this.palette = [];
-        this.imgData = [];
-        this.transparency = {};
-        this.animation = null;
-        this.text = {};
-        frame = null;
-
-        while (true) {
-          chunkSize = this.readUInt32();
-
-          section = function () {
-            var _i, _results;
-
-            _results = [];
-
-            for (i = _i = 0; _i < 4; i = ++_i) {
-              _results.push(String.fromCharCode(this.data[this.pos++]));
-            }
-
-            return _results;
-          }.call(this).join('');
-
-          switch (section) {
-            case 'IHDR':
-              this.width = this.readUInt32();
-              this.height = this.readUInt32();
-              this.bits = this.data[this.pos++];
-              this.colorType = this.data[this.pos++];
-              this.compressionMethod = this.data[this.pos++];
-              this.filterMethod = this.data[this.pos++];
-              this.interlaceMethod = this.data[this.pos++];
-              break;
-
-            case 'acTL':
-              this.animation = {
-                numFrames: this.readUInt32(),
-                numPlays: this.readUInt32() || Infinity,
-                frames: []
-              };
-              break;
-
-            case 'PLTE':
-              this.palette = this.read(chunkSize);
-              break;
-
-            case 'fcTL':
-              if (frame) {
-                this.animation.frames.push(frame);
-              }
-
-              this.pos += 4;
-              frame = {
-                width: this.readUInt32(),
-                height: this.readUInt32(),
-                xOffset: this.readUInt32(),
-                yOffset: this.readUInt32()
-              };
-              delayNum = this.readUInt16();
-              delayDen = this.readUInt16() || 100;
-              frame.delay = 1000 * delayNum / delayDen;
-              frame.disposeOp = this.data[this.pos++];
-              frame.blendOp = this.data[this.pos++];
-              frame.data = [];
-              break;
-
-            case 'IDAT':
-            case 'fdAT':
-              if (section === 'fdAT') {
-                this.pos += 4;
-                chunkSize -= 4;
-              }
-
-              data = (frame != null ? frame.data : void 0) || this.imgData;
-
-              for (i = _i = 0; 0 <= chunkSize ? _i < chunkSize : _i > chunkSize; i = 0 <= chunkSize ? ++_i : --_i) {
-                data.push(this.data[this.pos++]);
-              }
-
-              break;
-
-            case 'tRNS':
-              this.transparency = {};
-
-              switch (this.colorType) {
-                case 3:
-                  palLen = this.palette.length / 3;
-                  this.transparency.indexed = this.read(chunkSize);
-                  if (this.transparency.indexed.length > palLen) throw new Error('More transparent colors than palette size');
-                  /*
-                   * According to the PNG spec trns should be increased to the same size as palette if shorter
-                   */
-                  //palShort = 255 - this.transparency.indexed.length;
-
-                  palShort = palLen - this.transparency.indexed.length;
-
-                  if (palShort > 0) {
-                    for (i = _j = 0; 0 <= palShort ? _j < palShort : _j > palShort; i = 0 <= palShort ? ++_j : --_j) {
-                      this.transparency.indexed.push(255);
-                    }
-                  }
-
-                  break;
-
-                case 0:
-                  this.transparency.grayscale = this.read(chunkSize)[0];
-                  break;
-
-                case 2:
-                  this.transparency.rgb = this.read(chunkSize);
-              }
-
-              break;
-
-            case 'tEXt':
-              text = this.read(chunkSize);
-              index = text.indexOf(0);
-              key = String.fromCharCode.apply(String, text.slice(0, index));
-              this.text[key] = String.fromCharCode.apply(String, text.slice(index + 1));
-              break;
-
-            case 'IEND':
-              if (frame) {
-                this.animation.frames.push(frame);
-              }
-
-              this.colors = function () {
-                switch (this.colorType) {
-                  case 0:
-                  case 3:
-                  case 4:
-                    return 1;
-
-                  case 2:
-                  case 6:
-                    return 3;
-                }
-              }.call(this);
-
-              this.hasAlphaChannel = (_ref = this.colorType) === 4 || _ref === 6;
-              colors = this.colors + (this.hasAlphaChannel ? 1 : 0);
-              this.pixelBitlength = this.bits * colors;
-
-              this.colorSpace = function () {
-                switch (this.colors) {
-                  case 1:
-                    return 'DeviceGray';
-
-                  case 3:
-                    return 'DeviceRGB';
-                }
-              }.call(this);
-
-              this.imgData = new Uint8Array(this.imgData);
-              return;
-
-            default:
-              this.pos += chunkSize;
-          }
-
-          this.pos += 4;
-
-          if (this.pos > this.data.length) {
-            throw new Error("Incomplete or corrupt PNG file");
-          }
-        }
-
-        return;
-      }
-
-      PNG.prototype.read = function (bytes) {
-        var i, _i, _results;
-
-        _results = [];
-
-        for (i = _i = 0; 0 <= bytes ? _i < bytes : _i > bytes; i = 0 <= bytes ? ++_i : --_i) {
-          _results.push(this.data[this.pos++]);
-        }
-
-        return _results;
-      };
-
-      PNG.prototype.readUInt32 = function () {
-        var b1, b2, b3, b4;
-        b1 = this.data[this.pos++] << 24;
-        b2 = this.data[this.pos++] << 16;
-        b3 = this.data[this.pos++] << 8;
-        b4 = this.data[this.pos++];
-        return b1 | b2 | b3 | b4;
-      };
-
-      PNG.prototype.readUInt16 = function () {
-        var b1, b2;
-        b1 = this.data[this.pos++] << 8;
-        b2 = this.data[this.pos++];
-        return b1 | b2;
-      };
-
-      PNG.prototype.decodePixels = function (data) {
-        var pixelBytes = this.pixelBitlength / 8;
-        var fullPixels = new Uint8Array(this.width * this.height * pixelBytes);
-        var pos = 0;
-
-        var _this = this;
-
-        if (data == null) {
-          data = this.imgData;
-        }
-
-        if (data.length === 0) {
-          return new Uint8Array(0);
-        }
-
-        data = new FlateStream(data);
-        data = data.getBytes();
-
-        function pass(x0, y0, dx, dy) {
-          var abyte, c, col, i, left, length, p, pa, paeth, pb, pc, pixels, row, scanlineLength, upper, upperLeft, _i, _j, _k, _l, _m;
-
-          var w = Math.ceil((_this.width - x0) / dx),
-              h = Math.ceil((_this.height - y0) / dy);
-          var isFull = _this.width == w && _this.height == h;
-          scanlineLength = pixelBytes * w;
-          pixels = isFull ? fullPixels : new Uint8Array(scanlineLength * h);
-          length = data.length;
-          row = 0;
-          c = 0;
-
-          while (row < h && pos < length) {
-            switch (data[pos++]) {
-              case 0:
-                for (i = _i = 0; _i < scanlineLength; i = _i += 1) {
-                  pixels[c++] = data[pos++];
-                }
-
-                break;
-
-              case 1:
-                for (i = _j = 0; _j < scanlineLength; i = _j += 1) {
-                  abyte = data[pos++];
-                  left = i < pixelBytes ? 0 : pixels[c - pixelBytes];
-                  pixels[c++] = (abyte + left) % 256;
-                }
-
-                break;
-
-              case 2:
-                for (i = _k = 0; _k < scanlineLength; i = _k += 1) {
-                  abyte = data[pos++];
-                  col = (i - i % pixelBytes) / pixelBytes;
-                  upper = row && pixels[(row - 1) * scanlineLength + col * pixelBytes + i % pixelBytes];
-                  pixels[c++] = (upper + abyte) % 256;
-                }
-
-                break;
-
-              case 3:
-                for (i = _l = 0; _l < scanlineLength; i = _l += 1) {
-                  abyte = data[pos++];
-                  col = (i - i % pixelBytes) / pixelBytes;
-                  left = i < pixelBytes ? 0 : pixels[c - pixelBytes];
-                  upper = row && pixels[(row - 1) * scanlineLength + col * pixelBytes + i % pixelBytes];
-                  pixels[c++] = (abyte + Math.floor((left + upper) / 2)) % 256;
-                }
-
-                break;
-
-              case 4:
-                for (i = _m = 0; _m < scanlineLength; i = _m += 1) {
-                  abyte = data[pos++];
-                  col = (i - i % pixelBytes) / pixelBytes;
-                  left = i < pixelBytes ? 0 : pixels[c - pixelBytes];
-
-                  if (row === 0) {
-                    upper = upperLeft = 0;
-                  } else {
-                    upper = pixels[(row - 1) * scanlineLength + col * pixelBytes + i % pixelBytes];
-                    upperLeft = col && pixels[(row - 1) * scanlineLength + (col - 1) * pixelBytes + i % pixelBytes];
-                  }
-
-                  p = left + upper - upperLeft;
-                  pa = Math.abs(p - left);
-                  pb = Math.abs(p - upper);
-                  pc = Math.abs(p - upperLeft);
-
-                  if (pa <= pb && pa <= pc) {
-                    paeth = left;
-                  } else if (pb <= pc) {
-                    paeth = upper;
-                  } else {
-                    paeth = upperLeft;
-                  }
-
-                  pixels[c++] = (abyte + paeth) % 256;
-                }
-
-                break;
-
-              default:
-                throw new Error("Invalid filter algorithm: " + data[pos - 1]);
-            }
-
-            if (!isFull) {
-              var fullPos = ((y0 + row * dy) * _this.width + x0) * pixelBytes;
-              var partPos = row * scanlineLength;
-
-              for (i = 0; i < w; i += 1) {
-                for (var j = 0; j < pixelBytes; j += 1) {
-                  fullPixels[fullPos++] = pixels[partPos++];
-                }
-
-                fullPos += (dx - 1) * pixelBytes;
-              }
-            }
-
-            row++;
-          }
-        }
-
-        if (_this.interlaceMethod == 1) {
-          /*
-            1 6 4 6 2 6 4 6
-            7 7 7 7 7 7 7 7
-            5 6 5 6 5 6 5 6
-            7 7 7 7 7 7 7 7
-            3 6 4 6 3 6 4 6
-            7 7 7 7 7 7 7 7
-            5 6 5 6 5 6 5 6
-            7 7 7 7 7 7 7 7
-          */
-          pass(0, 0, 8, 8); // 1
-
-          /* NOTE these seem to follow the pattern:
-           * pass(x, 0, 2*x, 2*x);
-           * pass(0, x,   x, 2*x);
-           * with x being 4, 2, 1.
-           */
-
-          pass(4, 0, 8, 8); // 2
-
-          pass(0, 4, 4, 8); // 3
-
-          pass(2, 0, 4, 4); // 4
-
-          pass(0, 2, 2, 4); // 5
-
-          pass(1, 0, 2, 2); // 6
-
-          pass(0, 1, 1, 2); // 7
-        } else {
-          pass(0, 0, 1, 1);
-        }
-
-        return fullPixels;
-      };
-
-      PNG.prototype.decodePalette = function () {
-        var c, i, length, palette, pos, ret, transparency, _i, _ref, _ref1;
-
-        palette = this.palette;
-        transparency = this.transparency.indexed || [];
-        ret = new Uint8Array((transparency.length || 0) + palette.length);
-        pos = 0;
-        length = palette.length;
-        c = 0;
-
-        for (i = _i = 0, _ref = palette.length; _i < _ref; i = _i += 3) {
-          ret[pos++] = palette[i];
-          ret[pos++] = palette[i + 1];
-          ret[pos++] = palette[i + 2];
-          ret[pos++] = (_ref1 = transparency[c++]) != null ? _ref1 : 255;
-        }
-
-        return ret;
-      };
-
-      PNG.prototype.copyToImageData = function (imageData, pixels) {
-        var alpha, colors, data, i, input, j, k, length, palette, v, _ref;
-
-        colors = this.colors;
-        palette = null;
-        alpha = this.hasAlphaChannel;
-
-        if (this.palette.length) {
-          palette = (_ref = this._decodedPalette) != null ? _ref : this._decodedPalette = this.decodePalette();
-          colors = 4;
-          alpha = true;
-        }
-
-        data = imageData.data || imageData;
-        length = data.length;
-        input = palette || pixels;
-        i = j = 0;
-
-        if (colors === 1) {
-          while (i < length) {
-            k = palette ? pixels[i / 4] * 4 : j;
-            v = input[k++];
-            data[i++] = v;
-            data[i++] = v;
-            data[i++] = v;
-            data[i++] = alpha ? input[k++] : 255;
-            j = k;
-          }
-        } else {
-          while (i < length) {
-            k = palette ? pixels[i / 4] * 4 : j;
-            data[i++] = input[k++];
-            data[i++] = input[k++];
-            data[i++] = input[k++];
-            data[i++] = alpha ? input[k++] : 255;
-            j = k;
-          }
-        }
-      };
-
-      PNG.prototype.decode = function () {
-        var ret;
-        ret = new Uint8Array(this.width * this.height * 4);
-        this.copyToImageData(ret, this.decodePixels());
-        return ret;
-      };
-
-      try {
-        scratchCanvas = global.document.createElement('canvas');
-        scratchCtx = scratchCanvas.getContext('2d');
-      } catch (e) {
-        return -1;
-      }
-
-      makeImage = function makeImage(imageData) {
-        var img;
-        scratchCtx.width = imageData.width;
-        scratchCtx.height = imageData.height;
-        scratchCtx.clearRect(0, 0, imageData.width, imageData.height);
-        scratchCtx.putImageData(imageData, 0, 0);
-        img = new Image();
-        img.src = scratchCanvas.toDataURL();
-        return img;
-      };
-
-      PNG.prototype.decodeFrames = function (ctx) {
-        var frame, i, imageData, pixels, _i, _len, _ref, _results;
-
-        if (!this.animation) {
-          return;
-        }
-
-        _ref = this.animation.frames;
-        _results = [];
-
-        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
-          frame = _ref[i];
-          imageData = ctx.createImageData(frame.width, frame.height);
-          pixels = this.decodePixels(new Uint8Array(frame.data));
-          this.copyToImageData(imageData, pixels);
-          frame.imageData = imageData;
-
-          _results.push(frame.image = makeImage(imageData));
-        }
-
-        return _results;
-      };
-
-      PNG.prototype.renderFrame = function (ctx, number) {
-        var frame, frames, prev;
-        frames = this.animation.frames;
-        frame = frames[number];
-        prev = frames[number - 1];
-
-        if (number === 0) {
-          ctx.clearRect(0, 0, this.width, this.height);
-        }
-
-        if ((prev != null ? prev.disposeOp : void 0) === APNG_DISPOSE_OP_BACKGROUND) {
-          ctx.clearRect(prev.xOffset, prev.yOffset, prev.width, prev.height);
-        } else if ((prev != null ? prev.disposeOp : void 0) === APNG_DISPOSE_OP_PREVIOUS) {
-          ctx.putImageData(prev.imageData, prev.xOffset, prev.yOffset);
-        }
-
-        if (frame.blendOp === APNG_BLEND_OP_SOURCE) {
-          ctx.clearRect(frame.xOffset, frame.yOffset, frame.width, frame.height);
-        }
-
-        return ctx.drawImage(frame.image, frame.xOffset, frame.yOffset);
-      };
-
-      PNG.prototype.animate = function (ctx) {
-        var _doFrame,
-            frameNumber,
-            frames,
-            numFrames,
-            numPlays,
-            _ref,
-            _this = this;
-
-        frameNumber = 0;
-        _ref = this.animation, numFrames = _ref.numFrames, frames = _ref.frames, numPlays = _ref.numPlays;
-        return (_doFrame = function doFrame() {
-          var f, frame;
-          f = frameNumber++ % numFrames;
-          frame = frames[f];
-
-          _this.renderFrame(ctx, f);
-
-          if (numFrames > 1 && frameNumber / numFrames < numPlays) {
-            return _this.animation._timeout = setTimeout(_doFrame, frame.delay);
-          }
-        })();
-      };
-
-      PNG.prototype.stopAnimation = function () {
-        var _ref;
-
-        return clearTimeout((_ref = this.animation) != null ? _ref._timeout : void 0);
-      };
-
-      PNG.prototype.render = function (canvas) {
-        var ctx, data;
-
-        if (canvas._png) {
-          canvas._png.stopAnimation();
-        }
-
-        canvas._png = this;
-        canvas.width = this.width;
-        canvas.height = this.height;
-        ctx = canvas.getContext("2d");
-
-        if (this.animation) {
-          this.decodeFrames(ctx);
-          return this.animate(ctx);
-        } else {
-          data = ctx.createImageData(this.width, this.height);
-          this.copyToImageData(data, this.decodePixels());
-          return ctx.putImageData(data, 0, 0);
-        }
-      };
-
-      return PNG;
-    }();
-
-    global.PNG = PNG;
-  })(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function('return typeof this === "object" && this.content')() || Function('return this')()); // `self` is undefined in Firefox for Android content script context
-  // while `this` is nsIContentFrameMessageManager
-  // with an attribute `content` that corresponds to the window
-
   /*
    * Extracted from pdf.js
    * https://github.com/andreasgal/pdf.js
@@ -25304,7 +22599,7 @@
       ensureBuffer: function decodestream_ensureBuffer(requested) {
         var buffer = this.buffer;
         var current = buffer ? buffer.byteLength : 0;
-        if (requested < current) return buffer;
+        if (requested < current) { return buffer; }
         var size = 512;
 
         while (size < requested) {
@@ -25323,7 +22618,7 @@
         var pos = this.pos;
 
         while (this.bufferLength <= pos) {
-          if (this.eof) return null;
+          if (this.eof) { return null; }
           this.readBlock();
         }
 
@@ -25341,7 +22636,7 @@
           }
 
           var bufEnd = this.bufferLength;
-          if (end > bufEnd) end = bufEnd;
+          if (end > bufEnd) { end = bufEnd; }
         } else {
           while (!this.eof) {
             this.readBlock();
@@ -25357,7 +22652,7 @@
         var pos = this.pos;
 
         while (this.bufferLength <= pos) {
-          if (this.eof) return null;
+          if (this.eof) { return null; }
           this.readBlock();
         }
 
@@ -25367,7 +22662,7 @@
         var pos = this.pos;
 
         while (this.bufferLength <= pos) {
-          if (this.eof) return null;
+          if (this.eof) { return null; }
           this.readBlock();
         }
 
@@ -25383,7 +22678,7 @@
         return new Stream(this.buffer, start, length, dict);
       },
       skip: function decodestream_skip(n) {
-        if (!n) n = 1;
+        if (!n) { n = 1; }
         this.pos += n;
       },
       reset: function decodestream_reset() {
@@ -25413,10 +22708,10 @@
       var bytesPos = 0;
       var cmf = bytes[bytesPos++];
       var flg = bytes[bytesPos++];
-      if (cmf == -1 || flg == -1) error('Invalid header in flate stream');
-      if ((cmf & 0x0f) != 0x08) error('Unknown compression method in flate stream');
-      if (((cmf << 8) + flg) % 31 != 0) error('Bad FCHECK in flate stream');
-      if (flg & 0x20) error('FDICT bit set in flate stream');
+      if (cmf == -1 || flg == -1) { error('Invalid header in flate stream'); }
+      if ((cmf & 0x0f) != 0x08) { error('Unknown compression method in flate stream'); }
+      if (((cmf << 8) + flg) % 31 != 0) { error('Bad FCHECK in flate stream'); }
+      if (flg & 0x20) { error('FDICT bit set in flate stream'); }
       this.bytes = bytes;
       this.bytesPos = bytesPos;
       this.codeSize = 0;
@@ -25434,7 +22729,7 @@
       var b;
 
       while (codeSize < bits) {
-        if (typeof (b = bytes[bytesPos++]) == 'undefined') error('Bad encoding in flate stream');
+        if (typeof (b = bytes[bytesPos++]) == 'undefined') { error('Bad encoding in flate stream'); }
         codeBuf |= b << codeSize;
         codeSize += 8;
       }
@@ -25456,7 +22751,7 @@
 
       while (codeSize < maxLen) {
         var b;
-        if (typeof (b = bytes[bytesPos++]) == 'undefined') error('Bad encoding in flate stream');
+        if (typeof (b = bytes[bytesPos++]) == 'undefined') { error('Bad encoding in flate stream'); }
         codeBuf |= b << codeSize;
         codeSize += 8;
       }
@@ -25464,7 +22759,7 @@
       var code = codes[codeBuf & (1 << maxLen) - 1];
       var codeLen = code >> 16;
       var codeVal = code & 0xffff;
-      if (codeSize == 0 || codeSize < codeLen || codeLen == 0) error('Bad encoding in flate stream');
+      if (codeSize == 0 || codeSize < codeLen || codeLen == 0) { error('Bad encoding in flate stream'); }
       this.codeBuf = codeBuf >> codeLen;
       this.codeSize = codeSize - codeLen;
       this.bytesPos = bytesPos;
@@ -25477,7 +22772,7 @@
       var maxLen = 0;
 
       for (var i = 0; i < n; ++i) {
-        if (lengths[i] > maxLen) maxLen = lengths[i];
+        if (lengths[i] > maxLen) { maxLen = lengths[i]; }
       } // build the table
 
 
@@ -25520,7 +22815,7 @@
 
 
       var hdr = this.getBits(3);
-      if (hdr & 1) this.eof = true;
+      if (hdr & 1) { this.eof = true; }
       hdr >>= 1;
 
       if (hdr == 0) {
@@ -25528,15 +22823,15 @@
         var bytes = this.bytes;
         var bytesPos = this.bytesPos;
         var b;
-        if (typeof (b = bytes[bytesPos++]) == 'undefined') error('Bad block header in flate stream');
+        if (typeof (b = bytes[bytesPos++]) == 'undefined') { error('Bad block header in flate stream'); }
         var blockLen = b;
-        if (typeof (b = bytes[bytesPos++]) == 'undefined') error('Bad block header in flate stream');
+        if (typeof (b = bytes[bytesPos++]) == 'undefined') { error('Bad block header in flate stream'); }
         blockLen |= b << 8;
-        if (typeof (b = bytes[bytesPos++]) == 'undefined') error('Bad block header in flate stream');
+        if (typeof (b = bytes[bytesPos++]) == 'undefined') { error('Bad block header in flate stream'); }
         var check = b;
-        if (typeof (b = bytes[bytesPos++]) == 'undefined') error('Bad block header in flate stream');
+        if (typeof (b = bytes[bytesPos++]) == 'undefined') { error('Bad block header in flate stream'); }
         check |= b << 8;
-        if (check != (~blockLen & 0xffff)) error('Bad uncompressed block length in flate stream');
+        if (check != (~blockLen & 0xffff)) { error('Bad uncompressed block length in flate stream'); }
         this.codeBuf = 0;
         this.codeSize = 0;
         var bufferLength = this.bufferLength;
@@ -25629,12 +22924,12 @@
         code1 -= 257;
         code1 = lengthDecode[code1];
         var code2 = code1 >> 16;
-        if (code2 > 0) code2 = this.getBits(code2);
+        if (code2 > 0) { code2 = this.getBits(code2); }
         var len = (code1 & 0xffff) + code2;
         code1 = this.getCode(distCodeTable);
         code1 = distDecode[code1];
         code2 = code1 >> 16;
-        if (code2 > 0) code2 = this.getBits(code2);
+        if (code2 > 0) { code2 = this.getBits(code2); }
         var dist = (code1 & 0xffff) + code2;
 
         if (pos + len >= limit) {
@@ -25655,6 +22950,8 @@
 
   window.tmp = FlateStream;
   /*rollup-keeper-end*/
+
+  // import './src/libs/FileSaver.js';
 
 }));
 
