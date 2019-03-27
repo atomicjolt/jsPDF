@@ -67,7 +67,7 @@ function bundle(options) {
 
     console.log('Finish Bundling ' + options.distFolder + '/' + options.filename + '.debug.js');
     if (options.minify === true) {
-        
+
     console.log('Minifiying ' + options.distFolder + '/' + options.filename + '.debug.js to ' + options.filename + '.min.js');
         var minified = uglify.minify(code, {
           output: {
