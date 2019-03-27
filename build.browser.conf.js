@@ -1,6 +1,6 @@
-import './src/license.js';
+// import './src/license.js';
 // import './src/libs/polyfill.js';
-import './src/jspdf.js';
+import './src/jspdf_worker.js';
 
 // import './src/modules/acroform';
 // import './src/modules/addimage';
