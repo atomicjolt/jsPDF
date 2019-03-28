@@ -2,8 +2,8 @@
 
 /** @license
  * jsPDF - PDF Document creation from JavaScript
- * Version 1.5.4 Built on 2019-03-28T02:16:51.551Z
- *                      CommitID 828415e10b
+ * Version 1.5.5 Built on 2019-03-28T18:14:10.528Z
+ *                      CommitID e8ef9d4ff9
  *
  * Copyright (c) 2010-2018 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
  *               2015-2018 yWorks GmbH, http://www.yworks.com
@@ -5054,7 +5054,7 @@ var jsPDF = function (global) {
    * @memberof jsPDF#
    */
 
-  jsPDF.version = '1.5.4';
+  jsPDF.version = '1.5.5';
 
   if (typeof define === 'function' && define.amd) {
     define('jsPDF', function () {
@@ -25092,7 +25092,7 @@ try {
   }
 
   global.RGBColor = RGBColor;
-})(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function('return typeof this === "object" && this.content')() || Function('return this')()); // `self` is undefined in Firefox for Android content script context
+})(typeof self !== "undefined" && self || typeof global !== "undefined" && global || {}); // `self` is undefined in Firefox for Android content script context
 // while `this` is nsIContentFrameMessageManager
 // with an attribute `content` that corresponds to the window
 
