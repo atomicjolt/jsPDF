@@ -3,38 +3,6 @@
   factory();
 }(function () { 'use strict';
 
-  /** @license
-   * jsPDF - PDF Document creation from JavaScript
-   * Version 1.5.3 Built on 2019-03-27T21:22:25.758Z
-   *                      CommitID d9c0c0eb91
-   *
-   * Copyright (c) 2010-2018 James Hall <james@parall.ax>, https://github.com/MrRio/jsPDF
-   *               2015-2018 yWorks GmbH, http://www.yworks.com
-   *               2015-2018 Lukas Holländer <lukas.hollaender@yworks.com>, https://github.com/HackbrettXXX
-   *               2016-2018 Aras Abbasi <aras.abbasi@gmail.com>
-   *               2010 Aaron Spike, https://github.com/acspike
-   *               2012 Willow Systems Corporation, willow-systems.com
-   *               2012 Pablo Hess, https://github.com/pablohess
-   *               2012 Florian Jenett, https://github.com/fjenett
-   *               2013 Warren Weckesser, https://github.com/warrenweckesser
-   *               2013 Youssef Beddad, https://github.com/lifof
-   *               2013 Lee Driscoll, https://github.com/lsdriscoll
-   *               2013 Stefan Slonevskiy, https://github.com/stefslon
-   *               2013 Jeremy Morel, https://github.com/jmorel
-   *               2013 Christoph Hartmann, https://github.com/chris-rock
-   *               2014 Juan Pablo Gaviria, https://github.com/juanpgaviria
-   *               2014 James Makes, https://github.com/dollaruw
-   *               2014 Diego Casorran, https://github.com/diegocr
-   *               2014 Steven Spungin, https://github.com/Flamenco
-   *               2014 Kenneth Glassey, https://github.com/Gavvers
-   *
-   * Licensed under the MIT License
-   *
-   * Contributor(s):
-   *    siefkenj, ahwolf, rickygu, Midnith, saintclair, eaparango,
-   *    kim3er, mfo, alnorth, Flamenco
-   */
-
   function _typeof(obj) {
     if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") {
       _typeof = function (obj) {
@@ -603,7 +571,7 @@
        *
        * @name setDisplayMode
        * @memberof jsPDF#
-       * @function 
+       * @function
        * @instance
        * @param {integer|String} zoom   You can pass an integer or percentage as
        * a string. 2 will scale the document up 2x, '200%' will scale up by the
@@ -945,7 +913,7 @@
       };
       /**
       * Multiply the matrix with given Matrix
-      * 
+      *
       * @function join
       * @param {string} separator Specifies a string to separate each pair of adjacent elements of the array. The separator is converted to a string if necessary. If omitted, the array elements are separated with a comma (","). If separator is an empty string, all elements are joined without any characters in between them.
       * @returns {string} A string with all array elements joined.
@@ -958,7 +926,7 @@
       };
       /**
       * Multiply the matrix with given Matrix
-      * 
+      *
       * @function multiply
       * @param matrix
       * @returns {Matrix}
@@ -2601,8 +2569,8 @@
       /**
        * @name insertPage
        * @memberof jsPDF#
-       * 
-       * @function 
+       *
+       * @function
        * @instance
        * @param {Object} beforePage
        * @returns {jsPDF}
@@ -3010,7 +2978,7 @@
             break;
         }
 
-        var usedRenderingMode = typeof pageContext.usedRenderingMode !== 'undefined' ? pageContext.usedRenderingMode : -1; //if the coder wrote it explicitly to use a specific 
+        var usedRenderingMode = typeof pageContext.usedRenderingMode !== 'undefined' ? pageContext.usedRenderingMode : -1; //if the coder wrote it explicitly to use a specific
         //renderingMode, then use it
 
         if (tmpRenderingMode !== -1) {
@@ -3148,7 +3116,7 @@
         };
         events.publish('postProcessText', payload);
         text = payload.text;
-        isHex = payload.mutex.isHex || false; //Escaping 
+        isHex = payload.mutex.isHex || false; //Escaping
 
         var activeFontEncoding = fonts[activeFontKey].encoding;
 
@@ -3266,11 +3234,11 @@
       // method.
 
       /**
-       * 
+       *
        * @name clip
        * @function
        * @instance
-       * @param {string} rule 
+       * @param {string} rule
        * @returns {jsPDF}
        * @memberof jsPDF#
        * @description All .clip() after calling drawing ops with a style argument of null.
@@ -3569,7 +3537,7 @@
        * Draw a line on the current page.
        *
        * @name line
-       * @function 
+       * @function
        * @instance
        * @param {number} x1
        * @param {number} y1
@@ -3996,7 +3964,7 @@
       };
       /**
        * Sets the dash pattern for upcoming lines.
-       * 
+       *
        * To reset the settings simply call the method without any parameters.
        * @param {Array<number>} dashArray An array containing 0-2 numbers. The first number sets the length of the
        * dashes, the second number the length of the gaps. If the second number is missing, the gaps are considered
@@ -4783,7 +4751,7 @@
         return this;
       };
       /**
-       * Completes and saves the form object. 
+       * Completes and saves the form object.
        * @param {String} key The key by which this form object can be referenced.
        * @function
        * @returns {jsPDF}
@@ -5057,7 +5025,7 @@
      * @memberof jsPDF#
      */
 
-    jsPDF.version = '1.5.3';
+    jsPDF.version = '1.5.4';
 
     if (typeof define === 'function' && define.amd) {
       define('jsPDF', function () {
@@ -5071,16 +5039,11 @@
     }
 
     return jsPDF;
-  }(typeof self !== "undefined" && self || typeof window !== "undefined" && window || typeof global !== "undefined" && global || Function('return typeof this === "object" && this.content')() || Function('return this')()); // `self` is undefined in Firefox for Android content script context
+  }(typeof self !== "undefined" && self || typeof global !== "undefined" && global || {}); // `self` is undefined in Firefox for Android content script context
   // while `this` is nsIContentFrameMessageManager
   // with an attribute `content` that corresponds to the window
 
-  /*rollup-keeper-start*/
-
-
-  window.tmp = jsPDF;
-  /*rollup-keeper-end*/
-
+  // import './src/license.js';
   // import './src/modules/addimage';
   // import './src/modules/annotations';
   // import './src/modules/arabic';

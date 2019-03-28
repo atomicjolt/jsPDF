@@ -4910,7 +4910,7 @@ var jsPDF = (function (global) {
     global.jsPDF = jsPDF;
   }
   return jsPDF;
-}(typeof self !== "undefined" && self || typeof global !== "undefined" && global || {});
+}(typeof self !== "undefined" && self || typeof global !== "undefined" && global || {}));
 // `self` is undefined in Firefox for Android content script context
 // while `this` is nsIContentFrameMessageManager
 // with an attribute `content` that corresponds to the window
